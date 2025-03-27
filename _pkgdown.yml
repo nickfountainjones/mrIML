@@ -1,4 +1,4 @@
-url: https://github.com/nfj1380/mrIML
+url: https://github.com/nickfountainjones/mrIML
 
 home:
   title: mrIML
@@ -27,7 +27,7 @@ navbar:
     - news
   right:
     - icon: fa-github
-      href: https://github.com/nfj1380/mrIML
+      href: https://github.com/nickfountainjones/mrIML
   components:
     home:
       icon: fas fa-home fa-lg
