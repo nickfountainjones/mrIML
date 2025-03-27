@@ -14,8 +14,8 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Landscape genetics">
 </head>
 <body>
@@ -51,7 +51,7 @@
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
       </ul>
 <ul class="navbar-nav">
-<li class="nav-item"><a class="nav-link" href="https://github.com/nfj1380/mrIML"><span class="fa fa-github"></span></a></li>
+<li class="nav-item"><a class="nav-link" href="https://github.com/nickfountainjones/mrIML"><span class="fa fa-github"></span></a></li>
       </ul>
 </div>
 
@@ -67,7 +67,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Landscape genetics</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/nfj1380/mrIML/blob/master/vignettes/Landscape%20genetics.Rmd"><code>vignettes/Landscape genetics.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/nfj1380/mrIML/blob/master/vignettes/Landscape%20genetics.Rmd" class="external-link"><code>vignettes/Landscape genetics.Rmd</code></a></small>
       <div class="d-none name"><code>Landscape genetics.Rmd</code></div>
     </div>
 
@@ -189,46 +189,46 @@ common that SNP was in the population sampled.</p>
 <span></span>
 <span><span class="va">ModelPerf_rf</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="co">#predictive performance for individual responses </span></span>
 <span><span class="co">#&gt;    response  model_name            roc_AUC                mcc       sensitivity</span></span>
-<span><span class="co">#&gt; 1   env_131 rand_forest  0.642857142857143  0.327326835353989 0.285714285714286</span></span>
-<span><span class="co">#&gt; 2   env_163 rand_forest  0.238095238095238 -0.327326835353989                 0</span></span>
-<span><span class="co">#&gt; 3   env_164 rand_forest  0.895833333333333  0.534522483824849               0.5</span></span>
-<span><span class="co">#&gt; 4   env_167 rand_forest  0.833333333333333               &lt;NA&gt;                 1</span></span>
-<span><span class="co">#&gt; 5   env_169 rand_forest  0.642857142857143  0.327326835353989 0.285714285714286</span></span>
-<span><span class="co">#&gt; 6   env_212 rand_forest  0.444444444444444  0.272165526975909                 1</span></span>
-<span><span class="co">#&gt; 7    env_23 rand_forest               0.48 -0.333333333333333                 0</span></span>
-<span><span class="co">#&gt; 8    env_24 rand_forest               0.28               &lt;NA&gt;                 1</span></span>
-<span><span class="co">#&gt; 9    env_41 rand_forest  0.208333333333333 -0.408248290463863 0.333333333333333</span></span>
-<span><span class="co">#&gt; 10   env_47 rand_forest               0.86  0.816496580927726                 1</span></span>
-<span><span class="co">#&gt; 11   env_59 rand_forest  0.642857142857143  0.327326835353989 0.285714285714286</span></span>
+<span><span class="co">#&gt; 1   env_131 rand_forest  0.619047619047619  0.327326835353989 0.285714285714286</span></span>
+<span><span class="co">#&gt; 2   env_163 rand_forest  0.380952380952381 -0.534522483824849                 0</span></span>
+<span><span class="co">#&gt; 3   env_164 rand_forest  0.854166666666667  0.666666666666667 0.666666666666667</span></span>
+<span><span class="co">#&gt; 4   env_167 rand_forest  0.541666666666667               &lt;NA&gt;                 1</span></span>
+<span><span class="co">#&gt; 5   env_169 rand_forest  0.619047619047619  0.327326835353989 0.285714285714286</span></span>
+<span><span class="co">#&gt; 6   env_212 rand_forest  0.222222222222222  0.166666666666667                 1</span></span>
+<span><span class="co">#&gt; 7    env_23 rand_forest               0.36 -0.333333333333333                 0</span></span>
+<span><span class="co">#&gt; 8    env_24 rand_forest               0.52               &lt;NA&gt;                 1</span></span>
+<span><span class="co">#&gt; 9    env_41 rand_forest  0.291666666666667 -0.408248290463863 0.333333333333333</span></span>
+<span><span class="co">#&gt; 10   env_47 rand_forest               0.74                0.5                 1</span></span>
+<span><span class="co">#&gt; 11   env_59 rand_forest  0.619047619047619  0.327326835353989 0.285714285714286</span></span>
 <span><span class="co">#&gt; 12    env_8 rand_forest            0.78125               &lt;NA&gt;                 0</span></span>
-<span><span class="co">#&gt; 13   env_84 rand_forest  0.642857142857143  0.327326835353989 0.285714285714286</span></span>
-<span><span class="co">#&gt; 14   env_85 rand_forest  0.642857142857143  0.327326835353989 0.285714285714286</span></span>
-<span><span class="co">#&gt; 15   env_86 rand_forest             0.4375               &lt;NA&gt;                 1</span></span>
-<span><span class="co">#&gt; 16  pol_105 rand_forest  0.854166666666667  0.408248290463863 0.333333333333333</span></span>
-<span><span class="co">#&gt; 17  pol_108 rand_forest  0.761904761904762  0.327326835353989 0.285714285714286</span></span>
-<span><span class="co">#&gt; 18  pol_111 rand_forest  0.895833333333333  0.534522483824849               0.5</span></span>
+<span><span class="co">#&gt; 13   env_84 rand_forest  0.619047619047619  0.327326835353989 0.285714285714286</span></span>
+<span><span class="co">#&gt; 14   env_85 rand_forest  0.619047619047619  0.327326835353989 0.285714285714286</span></span>
+<span><span class="co">#&gt; 15   env_86 rand_forest  0.583333333333333               &lt;NA&gt;                 1</span></span>
+<span><span class="co">#&gt; 16  pol_105 rand_forest              0.875  0.408248290463863 0.333333333333333</span></span>
+<span><span class="co">#&gt; 17  pol_108 rand_forest  0.738095238095238  0.327326835353989 0.285714285714286</span></span>
+<span><span class="co">#&gt; 18  pol_111 rand_forest  0.854166666666667  0.666666666666667 0.666666666666667</span></span>
 <span><span class="co">#&gt; 19  pol_117 rand_forest               0.78  0.654653670707977                 1</span></span>
-<span><span class="co">#&gt; 20  pol_132 rand_forest               0.86  0.816496580927726                 1</span></span>
-<span><span class="co">#&gt; 21  pol_159 rand_forest               0.28  0.333333333333333                 1</span></span>
-<span><span class="co">#&gt; 22  pol_258 rand_forest 0.0833333333333333 -0.356348322549899               0.5</span></span>
-<span><span class="co">#&gt; 23   pol_30 rand_forest               0.86  0.816496580927726                 1</span></span>
-<span><span class="co">#&gt; 24  pol_340 rand_forest 0.0952380952380952 -0.218217890235992 0.142857142857143</span></span>
-<span><span class="co">#&gt; 25  pol_353 rand_forest             0.4375               &lt;NA&gt;                 1</span></span>
-<span><span class="co">#&gt; 26  pol_366 rand_forest  0.642857142857143  0.327326835353989 0.285714285714286</span></span>
-<span><span class="co">#&gt; 27   pol_87 rand_forest               0.86  0.816496580927726                 1</span></span>
-<span><span class="co">#&gt; 28   pol_88 rand_forest               0.86  0.816496580927726                 1</span></span>
-<span><span class="co">#&gt; 29   pol_89 rand_forest               0.86  0.816496580927726                 1</span></span>
+<span><span class="co">#&gt; 20  pol_132 rand_forest               0.74                0.5                 1</span></span>
+<span><span class="co">#&gt; 21  pol_159 rand_forest                0.2                  0               0.8</span></span>
+<span><span class="co">#&gt; 22  pol_258 rand_forest 0.0416666666666667 -0.612372435695795               0.5</span></span>
+<span><span class="co">#&gt; 23   pol_30 rand_forest               0.74                0.5                 1</span></span>
+<span><span class="co">#&gt; 24  pol_340 rand_forest                  0 -0.801783725737273 0.142857142857143</span></span>
+<span><span class="co">#&gt; 25  pol_353 rand_forest  0.583333333333333               &lt;NA&gt;                 1</span></span>
+<span><span class="co">#&gt; 26  pol_366 rand_forest  0.619047619047619  0.327326835353989 0.285714285714286</span></span>
+<span><span class="co">#&gt; 27   pol_87 rand_forest               0.74                0.5                 1</span></span>
+<span><span class="co">#&gt; 28   pol_88 rand_forest               0.74                0.5                 1</span></span>
+<span><span class="co">#&gt; 29   pol_89 rand_forest               0.74                0.5                 1</span></span>
 <span><span class="co">#&gt;                  ppv       specificity        prevalence</span></span>
 <span><span class="co">#&gt; 1                  1                 1 0.421052631578947</span></span>
-<span><span class="co">#&gt; 2  0.714285714285714                 0 0.631578947368421</span></span>
+<span><span class="co">#&gt; 2  0.428571428571429                 0 0.631578947368421</span></span>
 <span><span class="co">#&gt; 3                  1                 1 0.421052631578947</span></span>
 <span><span class="co">#&gt; 4                  0               0.4 0.421052631578947</span></span>
 <span><span class="co">#&gt; 5                  1                 1 0.421052631578947</span></span>
-<span><span class="co">#&gt; 6  0.444444444444444 0.166666666666667 0.684210526315789</span></span>
+<span><span class="co">#&gt; 6  0.222222222222222             0.125 0.684210526315789</span></span>
 <span><span class="co">#&gt; 7                0.8                 0 0.631578947368421</span></span>
 <span><span class="co">#&gt; 8                  0               0.5 0.421052631578947</span></span>
 <span><span class="co">#&gt; 9               0.25               0.4 0.473684210526316</span></span>
-<span><span class="co">#&gt; 10               0.8 0.833333333333333 0.473684210526316</span></span>
+<span><span class="co">#&gt; 10               0.4             0.625 0.473684210526316</span></span>
 <span><span class="co">#&gt; 11                 1                 1 0.421052631578947</span></span>
 <span><span class="co">#&gt; 12                 1               NaN 0.473684210526316</span></span>
 <span><span class="co">#&gt; 13                 1                 1 0.421052631578947</span></span>
@@ -238,18 +238,18 @@ common that SNP was in the population sampled.</p>
 <span><span class="co">#&gt; 17                 1                 1 0.421052631578947</span></span>
 <span><span class="co">#&gt; 18                 1                 1 0.421052631578947</span></span>
 <span><span class="co">#&gt; 19               0.6 0.714285714285714 0.473684210526316</span></span>
-<span><span class="co">#&gt; 20               0.8 0.833333333333333 0.473684210526316</span></span>
-<span><span class="co">#&gt; 21               0.2 0.555555555555556 0.473684210526316</span></span>
-<span><span class="co">#&gt; 22 0.166666666666667 0.285714285714286 0.473684210526316</span></span>
-<span><span class="co">#&gt; 23               0.8 0.833333333333333 0.473684210526316</span></span>
-<span><span class="co">#&gt; 24 0.666666666666667               0.5 0.421052631578947</span></span>
+<span><span class="co">#&gt; 20               0.4             0.625 0.473684210526316</span></span>
+<span><span class="co">#&gt; 21               0.2               0.5 0.473684210526316</span></span>
+<span><span class="co">#&gt; 22                 0              0.25 0.473684210526316</span></span>
+<span><span class="co">#&gt; 23               0.4             0.625 0.473684210526316</span></span>
+<span><span class="co">#&gt; 24                 0              0.25 0.421052631578947</span></span>
 <span><span class="co">#&gt; 25                 0               0.4 0.421052631578947</span></span>
 <span><span class="co">#&gt; 26                 1                 1 0.421052631578947</span></span>
-<span><span class="co">#&gt; 27               0.8 0.833333333333333 0.473684210526316</span></span>
-<span><span class="co">#&gt; 28               0.8 0.833333333333333 0.473684210526316</span></span>
-<span><span class="co">#&gt; 29               0.8 0.833333333333333 0.473684210526316</span></span>
+<span><span class="co">#&gt; 27               0.4             0.625 0.473684210526316</span></span>
+<span><span class="co">#&gt; 28               0.4             0.625 0.473684210526316</span></span>
+<span><span class="co">#&gt; 29               0.4             0.625 0.473684210526316</span></span>
 <span><span class="va">ModelPerf_rf</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="co">#overall predictive performance</span></span>
-<span><span class="co">#&gt; [1] 0.2856634</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.1780665</span></span></code></pre></div>
 <p>You can compare the predictive performance of random forests with any
 other technique simply by altering the following. Lets try a logistic
 regression. Note that for logistic regression you may need to
@@ -271,7 +271,10 @@ following tidymodel syntax (see the website above)</p>
 <span>                           tune_grid_size<span class="op">=</span><span class="fl">1</span>,</span>
 <span>                           seed <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample.int</a></span><span class="op">(</span><span class="fl">1e8</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>                           racing<span class="op">=</span><span class="cn">F</span> <span class="op">)</span><span class="co">#no need for a tuning grid - no paramters to tune for logistic regression</span></span>
-<span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |==                                                                    |   3%  |                                                                              |=====                                                                 |   7%  |                                                                              |=======                                                               |  10%  |                                                                              |==========                                                            |  14%  |                                                                              |============                                                          |  17%  |                                                                              |==============                                                        |  21%  |                                                                              |=================                                                     |  24%  |                                                                              |===================                                                   |  28%  |                                                                              |======================                                                |  31%  |                                                                              |========================                                              |  34%  |                                                                              |===========================                                           |  38%  |                                                                              |=============================                                         |  41%  |                                                                              |===============================                                       |  45%  |                                                                              |==================================                                    |  48%  |                                                                              |====================================                                  |  52%  |                                                                              |=======================================                               |  55%  |                                                                              |=========================================                             |  59%  |                                                                              |===========================================                           |  62%  |                                                                              |==============================================                        |  66%  |                                                                              |================================================                      |  69%  |                                                                              |===================================================                   |  72%  |                                                                              |=====================================================                 |  76%  |                                                                              |========================================================              |  79%  |                                                                              |==========================================================            |  83%  |                                                                              |============================================================          |  86%  |                                                                              |===============================================================       |  90%  |                                                                              |=================================================================     |  93%  |                                                                              |====================================================================  |  97%  |                                                                              |======================================================================| 100%</span></span>
+<span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |==                                                                    |   3%  |                                                                              |=====                                                                 |   7%  |                                                                              |=======                                                               |  10%  |                                                                              |==========                                                            |  14%  |                                                                              |============                                                          |  17%  |                                                                              |==============                                                        |  21%  |                                                                              |=================                                                     |  24%</span></span>
+<span><span class="co">#&gt;   |                                                                              |===================                                                   |  28%  |                                                                              |======================                                                |  31%  |                                                                              |========================                                              |  34%  |                                                                              |===========================                                           |  38%  |                                                                              |=============================                                         |  41%  |                                                                              |===============================                                       |  45%  |                                                                              |==================================                                    |  48%</span></span>
+<span><span class="co">#&gt;   |                                                                              |====================================                                  |  52%  |                                                                              |=======================================                               |  55%  |                                                                              |=========================================                             |  59%  |                                                                              |===========================================                           |  62%  |                                                                              |==============================================                        |  66%  |                                                                              |================================================                      |  69%  |                                                                              |===================================================                   |  72%  |                                                                              |=====================================================                 |  76%</span></span>
+<span><span class="co">#&gt;   |                                                                              |========================================================              |  79%  |                                                                              |==========================================================            |  83%  |                                                                              |============================================================          |  86%  |                                                                              |===============================================================       |  90%  |                                                                              |=================================================================     |  93%  |                                                                              |====================================================================  |  97%  |                                                                              |======================================================================| 100%</span></span>
 <span></span>
 <span><span class="co">#save(yhats, file='logreg_model')</span></span>
 <span><span class="va">ModelPerf_glm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLperformance.html">mrIMLperformance</a></span><span class="op">(</span><span class="va">yhats_glm</span>,</span>
@@ -291,20 +294,20 @@ following tidymodel syntax (see the website above)</p>
 <p><img src="Landscape%20genetics_files/figure-html/unnamed-chunk-6-2.png" width="768" style="display: block; margin: auto;"></p>
 <pre><code><span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; [[3]]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 29 × 5</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 30 × 5</span></span></span>
 <span><span class="co">#&gt;    response outlier logistic_reg rand_forest diff_mod1_2</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> env_131  <span style="color: #BB0000;">NA</span>             0.102       0.327      0.225 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> env_163  <span style="color: #BB0000;">NA</span>            -<span style="color: #BB0000;">0.408</span>      -<span style="color: #BB0000;">0.327</span>      0.080<span style="text-decoration: underline;">9</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> env_164  <span style="color: #BB0000;">NA</span>            -<span style="color: #BB0000;">0.218</span>       0.535      0.753 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> env_167  <span style="color: #BB0000;">NA</span>             0.102       0         -<span style="color: #BB0000;">0.102</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> env_169  <span style="color: #BB0000;">NA</span>             0.102       0.327      0.225 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> env_212  <span style="color: #BB0000;">NA</span>             0.509       0.272     -<span style="color: #BB0000;">0.237</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> env_23   <span style="color: #BB0000;">NA</span>             0          -<span style="color: #BB0000;">0.333</span>     -<span style="color: #BB0000;">0.333</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> env_24   <span style="color: #BB0000;">NA</span>            -<span style="color: #BB0000;">0.272</span>       0          0.272 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> env_41   <span style="color: #BB0000;">NA</span>             0          -<span style="color: #BB0000;">0.408</span>     -<span style="color: #BB0000;">0.408</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> env_47   <span style="color: #BB0000;">NA</span>             0.333       0.816      0.483 </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 19 more rows</span></span></span></code></pre>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> env_131       <span style="color: #BB0000;">NA</span>        0.102       0.327       0.225</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> env_163       <span style="color: #BB0000;">NA</span>       -<span style="color: #BB0000;">0.408</span>      -<span style="color: #BB0000;">0.535</span>      -<span style="color: #BB0000;">0.126</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> env_164       <span style="color: #BB0000;">NA</span>       -<span style="color: #BB0000;">0.218</span>       0.667       0.885</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> env_167       <span style="color: #BB0000;">NA</span>        0.102       0          -<span style="color: #BB0000;">0.102</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> env_169       <span style="color: #BB0000;">NA</span>        0.102       0.327       0.225</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> env_212       <span style="color: #BB0000;">NA</span>        0.509       0.167      -<span style="color: #BB0000;">0.343</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> env_23        <span style="color: #BB0000;">NA</span>        0          -<span style="color: #BB0000;">0.333</span>      -<span style="color: #BB0000;">0.333</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> env_24        <span style="color: #BB0000;">NA</span>       -<span style="color: #BB0000;">0.272</span>       0           0.272</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> env_41        <span style="color: #BB0000;">NA</span>        0          -<span style="color: #BB0000;">0.408</span>      -<span style="color: #BB0000;">0.408</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> env_47        <span style="color: #BB0000;">NA</span>        0.333       0.5         0.167</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 20 more rows</span></span></span></code></pre>
 <p>You can see that the random forests model outperforms the logistic
 regression in this case. Once we are happy with the underlying model we
 can then dive in to see how this model predicts the SNPs. First we can
@@ -429,7 +432,7 @@ as generalized dissimilarity models (GDMs).</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>
