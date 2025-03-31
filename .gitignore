@@ -8,6 +8,7 @@
 .Ruserdata
 .cache
 .idea
+.Rprofile
 
 # docs
 inst/doc
