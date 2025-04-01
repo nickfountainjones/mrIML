@@ -12,10 +12,10 @@ knitr::opts_chunk$set(
 # mrIML: Multivariate (multi-response) interpretable machine learning <img src="man/figures/logo.png" align="right" height="120"/></a>
 
 <!-- badges: start -->
-![GitHub R package version](https://img.shields.io/github/r-package/v/nfj1380/mrIML?logo=github&logoColor=%2300ff37&style=flat-square)
-![GitHub contributors](https://img.shields.io/github/contributors/nfj1380/mrIML?style=flat-square)
-![GitHub last commit](https://img.shields.io/github/last-commit/nfj1380/mrIML?style=flat-square)
-[![R-CMD-check](https://github.com/nfj1380/mrIML/workflows/R-CMD-check/badge.svg)](https://github.com/nfj1380/mrIML/actions)
+![GitHub R package version](https://img.shields.io/github/r-package/v/nickfountainjones/mrIML?logo=github&logoColor=%2300ff37&style=flat-square)
+![GitHub contributors](https://img.shields.io/github/contributors/nickfountainjones/mrIML?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/nickfountainjones/mrIML?style=flat-square)
+[![R-CMD-check](https://github.com/nickfountainjones/mrIML/workflows/R-CMD-check/badge.svg)](https://github.com/nickfountainjones/mrIML/actions)
 <!-- badges: end -->
 
 This package aims to enable users to build and interpret multivariate machine learning models harnessing the tidyverse (tidy model syntax in particular). This package builds off ideas from Gradient Forests [Ellis et al 2012](https://esajournals-onlinelibrary-wiley-com.prox.lib.ncsu.edu/doi/full/10.1890/11-0252.1)), ecological genomic approaches [Fitzpatrick and Keller, 2014](https://onlinelibrary.wiley.com/doi/abs/10.1111/ele.12376) and multi-response stacking algorithms [Xing et al 2019].
@@ -27,16 +27,16 @@ This package can be of use for any multi-response machine learning problem, but 
 Install the stable version of the package:
 ```{r, eval = FALSE}
 # install.packages("devtools")
-# devtools::install_github('nfj1380/mrIML')
+# devtools::install_github('nickfountainjones/mrIML')
 library(mrIML)
 ```
 ## Quick start
 
-**mrIML** is designed to be used with a single function call or to be used in an ad-hoc fashion via individual function calls. In the following section we give an overview of the simple use case. For more on using each function see the [function documentation](https://nfj1380.github.io/mrIML/reference/index.html). The core functions for both regression and classification are: [`mrIMLpredicts`](https://nfj1380.github.io/mrIML/reference/mrIMLpredicts.html),
-[`mrIMLperformance`](https://nfj1380.github.io/mrIML/reference/mrIMLperformance.html), and 
-[`mrvip`](https://nfj1380.github.io/mrIML/reference/mrvip.html), [`mrFlashlight`](https://nfj1380.github.io/mrIML/reference/mrFlashlight.html), and[`mrProfileplots`](https://nfj1380.github.io/mrIML/reference/mrProfileplots.html).
+**mrIML** is designed to be used with a single function call or to be used in an ad-hoc fashion via individual function calls. In the following section we give an overview of the simple use case. For more on using each function see the [function documentation](https://nickfountainjones.github.io/mrIML/reference/index.html). The core functions for both regression and classification are: [`mrIMLpredicts`](https://nickfountainjones.github.io/mrIML/reference/mrIMLpredicts.html),
+[`mrIMLperformance`](https://nickfountainjones.github.io/mrIML/reference/mrIMLperformance.html), and 
+[`mrvip`](https://nickfountainjones.github.io/mrIML/reference/mrvip.html), [`mrFlashlight`](https://nickfountainjones.github.io/mrIML/reference/mrFlashlight.html), and[`mrProfileplots`](https://nickfountainjones.github.io/mrIML/reference/mrProfileplots.html).
 
-We also allow users to get bootstrapped estimations of partial dependencies and variable importance using [`mrBootstrap`](https://nfj1380.github.io/mrIML/reference/mrBootstrap.html). 
+We also allow users to get bootstrapped estimations of partial dependencies and variable importance using [`mrBootstrap`](https://nickfountainjones.github.io/mrIML/reference/mrBootstrap.html). 
 
 The first step to using the package is to load it as follows.
 ```{r, message = FALSE, message = FALSE, warning = FALSE, include=FALSE}
@@ -58,7 +58,7 @@ model_rf <- rand_forest(
 ) %>% # 100 trees are set for brevity. Aim to start with 1000
   set_engine("randomForest")
 ```
-### [`mrIMLpredicts`](https://nfj1380.github.io/mrIML/reference/mrIMLpredicts.html)
+### [`mrIMLpredicts`](https://nickfountainjones.github.io/mrIML/reference/mrIMLpredicts.html)
 
 This function represents the core functionality of the package and
 includes results reporting, plotting and optional saving.  It requires a
