@@ -82,8 +82,8 @@ X <-X[1:4]
 MrIML provides uses the flexible future apply functionality to set up multi-core processing. In the example below, we set up a cluster using 4 cores. If you don't set up a cluster, the default settings will be used and the analysis will run sequentially.
 ```{r, eval = FALSE}
 # detectCores() #check how many cores you have available. We suggest keeping one core free for internet browsing etc.
-cl <- parallel::makeCluster(4)
-plan(cluster, workers=cl)
+workers <- makeClusterPSOCK(2)
+plan(cluster, workers = workers)
 ```
 ### Running the analysis
 

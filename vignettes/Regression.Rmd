@@ -64,9 +64,8 @@ MrIML provides uses the flexible future apply functionality to set up multi-core
 ```{r, eval = TRUE}
 # detectCores() #check how many cores you have available. We suggest keeping one core free for internet browsing etc.
 
-cl <- parallel::makeCluster(4)
-
-future::plan(cluster, workers=cl)
+workers <- makeClusterPSOCK(2)
+plan(cluster, workers = workers)
 ```
 ### Running the analyis
 

@@ -28,22 +28,26 @@ First, we need to load up some extra functionality and some data. The first exam
 
 ```{r pac, message = FALSE, warnings = FALSE, include=FALSE}
 library(pacman)
-pacman::p_load('MRFcov', 'tidyverse', 'future.apply','tidymodels', 'finetune', 'themis', 'vip', 'flashlight', 'iml', 'vivid', 'igraph', 'ggnetwork', 'network','gridExtra', 'xgboost', 'brulee', 'fastshap', 'tabnet', 'bonsai', 'parsnip', 'cowplot', 'progress', 'hstats', 'geosphere', 'mrIML','lme4')
+pacman::p_load('MRFcov', 'tidyverse', 'future.apply','tidymodels', 'finetune', 'themis', 'vip', 'flashlight', 'iml', 'vivid', 'igraph', 'ggnetwork', 'network','gridExtra', 'xgboost', 'brulee', 'fastshap', 'tabnet', 'bonsai', 'parsnip', 'cowplot', 'progress', 'hstats', 'geosphere', 'lme4', 'mrIML')
 ```
 
 ```{r, message = FALSE, warnings = FALSE}
-Y <- dplyr::select(Bird.parasites,
-                   -scale.prop.zos) %>% 
-    dplyr::select(sort(names(.)))#response variables eg. SNPs, pathogens, species....
-X <- dplyr::select(Bird.parasites,
-                   scale.prop.zos) # feature set
+Y <- MRFcov::Bird.parasites %>%
+  dplyr::select(
+    -scale.prop.zos
+  ) %>%
+  dplyr::select(order(everything()))#response variables eg. SNPs, pathogens, species....
 
-X1 <- Y %>%
-  dplyr::select(sort(names(.)))
+X <- MRFcov::Bird.parasites %>%
+  dplyr::select(
+    scale.prop.zos
+  )
+
+X1 <- Y
 
 X1_fact <- X1 %>%
-  mutate_all(as.factor) %>% 
-  mutate_all(~ifelse(. == 0, "absent", "present"))
+  dplyr::mutate_all(factor) %>%
+  dplyr::mutate_all(~ifelse(. == 0, "absent", "present"))
 ```
 Note that the inclusion of 'X1' converts MrIML into a JSDM by directly adding of the presence/absence patterns of the other taxa into the model (as well as environmental/host covariates). Note, the order of X1 and Y need to match. 
 
@@ -63,8 +67,8 @@ model_lm <- #model used to generate yhat
   set_engine("glm") %>%
   set_mode("classification") #just for your response
 
-cl <- parallel::makeCluster(5)
-plan(cluster, workers=cl)
+workers <- makeClusterPSOCK(2)
+plan(cluster, workers = workers)
 ```
 ## Running the models
 
