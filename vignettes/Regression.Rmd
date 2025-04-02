@@ -38,7 +38,6 @@ We focus on the adaptive SNP loci from GIGANTEA-5 (GI5) gene that has known link
 library(mrIML)
 
 #other package we need:
-library(pacman)
 pacman::p_load(
   vip, tidymodels, randomForest, gbm, tidyverse, parallel,
   doParallel, themis, viridis, janitor, hrbrthemes, vegan,
@@ -58,10 +57,19 @@ GI5 <- mrIML::gfData[,grep("GI5",colnames(mrIML::gfData))] # GIGANTEA-5 (GI5)
 Y <- GI5 #for this example we are going to focus on the adaptive SNPs in the GI5 region.
 
 ```
+
+```{r include=FALSE}
+if (Sys.getenv("NOT_CRAN") == "true") {
+  plan(multisession)  # Use parallel only if not on CRAN
+} else {
+  plan(sequential)  # Force sequential processing on CRAN
+}
+```
+
 ###Parallel processing
 
 MrIML provides uses the flexible future apply functionality to set up multi-core processing. In the example below, we set up a cluster using 4 cores. If you don't set up a cluster, the default settings will be used and the analysis will run sequentially.
-```{r, eval = TRUE}
+```{r, eval = FALSE}
 # detectCores() #check how many cores you have available. We suggest keeping one core free for internet browsing etc.
 
 workers <- makeClusterPSOCK(2)

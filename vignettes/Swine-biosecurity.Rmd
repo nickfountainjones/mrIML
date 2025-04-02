@@ -29,17 +29,28 @@ This working example is built upon a classification framework. More information 
 This is a synthesized dataset to simulate PRRSV infection, biosecurity practices and farm demographics on swine farms across the united states. 
 Please note that the data included in this package is simulated, and is not a reflection of any real farm, company or state. 
 ```{r load packages, include=FALSE, message=FALSE, results='hide'}
+library(mrIML)
+
 #other packages needed
-library(pacman)
 pacman::p_load(
-  mrIML, parsnip, tidymodels, workflows, tidyverse, flashlight,
-  devtools, DALEX, plyr, vip, ggsci, ggrepel, breakDown, future.apply, janitor, tune
+  mrIML, parsnip, tidymodels, workflows, tidyverse, flashlight, tune, future,
+  devtools, DALEX, plyr, vip, ggsci, ggrepel, breakDown, future.apply, janitor
 )
 ```
+
+```{r include=FALSE}
+if (Sys.getenv("NOT_CRAN") == "true") {
+  plan(multisession)  # Use parallel only if not on CRAN
+} else {
+  plan(sequential)  # Force sequential processing on CRAN
+}
+```
+
 ```{r load data, include=TRUE, message=FALSE, results='hide'}
 set.seed(130) #set the seed to ensure consistency
 data <- as.data.frame(mrIML::biosecurity_vignette_data)
 ```
+
 ```{r, include=FALSE}
 colnames(data)[1] <- "Class"
 data<-data%>%
@@ -47,6 +58,7 @@ data<-data%>%
                  c("Negative"="0", "Positive"="1"))) 
 data$Class<-as.numeric(as.character(data$Class))
 ```
+
 ### Defining your model engine
 This is a random forest model, as used in the classification example. However there are more models available within MrIML and can be found [here](https://www.tidymodels.org/find/). 
 ```{r define model, include=TRUE}
@@ -80,7 +92,7 @@ X <-X[1:4]
 ### Parallel processing
 
 MrIML provides uses the flexible future apply functionality to set up multi-core processing. In the example below, we set up a cluster using 4 cores. If you don't set up a cluster, the default settings will be used and the analysis will run sequentially.
-```{r, eval = FALSE}
+```{r eval = FALSE}
 # detectCores() #check how many cores you have available. We suggest keeping one core free for internet browsing etc.
 workers <- makeClusterPSOCK(2)
 plan(cluster, workers = workers)
@@ -165,6 +177,7 @@ data1 <- data
 #plot among group comparison of predicted risk
 mrBenchmark(data = "data1", Y = "Class", pred = "Predicted", group = "Group", type = "external") 
 ```
+
 ```{r, include=TRUE, warning=FALSE, message=FALSE, eval=FALSE}
 #plot within group comparison of predicted risk
 mrBenchmark(data = "data1",
