@@ -15,57 +15,119 @@
 mrIMLperformance <- function(yhats, Model, Y, mode = "regression") {
   n_response <- length(yhats)
   mod_perf <- NULL
-  bList <- yhats %>% purrr::map(pluck("last_mod_fit"))
+  bList <- yhats %>%
+    purrr::map(
+      purrr::pluck("last_mod_fit")
+    )
 
   if (mode == "classification") {
-    for (i in 1:n_response) {
-      met1 <- as.data.frame(bList[[i]]$.metrics)
-      roc <- met1$.estimate[2]
-      yd <- as.data.frame(bList[[i]]$.predictions)
-      mathews <- yardstick::mcc(yd, class, .pred_class)
-      mathews <- mathews$.estimate
-      sen <- yardstick::sens(yd, class, .pred_class)
-      sen <- sen$.estimate
-      spe <- yardstick::spec(yd, class, .pred_class)
-      ppv_e <- yardstick::ppv(yd, class, .pred_class)
-      ppv <- ppv_e$.estimate
-      spe <- spe$.estimate
-      mod_name <- class(Model)[1]
-      sp <- names(Y[i])
-      prev <- sum(Y[i]) / nrow(Y)
-      mod_perf[[i]] <- c(
-        sp, mod_name, roc, mathews, sen,
-        spe, ppv, prev
+    performance_function <- mrIMLperformance_classification
+    global_metric <- "mcc"
+  } else if (mode == "regression") {
+    performance_function <- mrIMLperformance_classification
+    global_metric <- "mcc"
+  } else {
+    stop(
+      "mrIMLperfomance() currently only available for class \"regression\" or 
+      \"classification\".",
+      call. = FALSE
+    )
+  }
+  
+  model_perf <- performance_function(
+    n_response,
+    yhats,
+    Y,
+    Model,
+    bList
+  )
+  
+  global_summary <- model_perf[[global_metric]] %>%
+    mean(na.rm = TRUE)
+  
+  return(
+    list(
+      model_performance = model_perf,
+      global_performance_summary = global_summary
+    ) 
+  )
+
+}
+
+mrIMLperformance_classification <- function(n_response,
+                                            yhats,
+                                            Y,
+                                            Model,
+                                            bList) {
+  m_perf <- lapply(
+    1:n_response,
+    function(i) {
+      tibble(
+        response = names(yhats)[i],
+        model_name = class(Model)[1],
+        roc_AUC = bList[[i]]$.metrics[[1]]$.estimate[2],
+        mcc = bList[[i]]$.predictions[[1]] %>%
+          yardstick::mcc(
+            truth = class,
+            estimate = .pred_class
+          ) %>%
+          dplyr::pull(.estimate),
+        sensitivity = bList[[i]]$.predictions[[1]] %>%
+          yardstick::sens(
+            truth = class,
+            estimate = .pred_class
+          ) %>%
+          dplyr::pull(.estimate),
+        ppv = bList[[i]]$.predictions[[1]] %>%
+          yardstick::ppv(
+            truth = class,
+            estimate = .pred_class
+          ) %>%
+          dplyr::pull(.estimate),
+        specificity = bList[[i]]$.predictions[[1]] %>%
+          yardstick::spec(
+            truth = class,
+            estimate = .pred_class
+          ) %>%
+          dplyr::pull(.estimate),
+        prevalence = sum(Y[i]) / nrow(Y)
       )
     }
-    mod1_perf <- do.call(rbind, mod_perf)
-    mod1_perf <- as.data.frame(mod1_perf)
-    colnames(mod1_perf) <- c(
-      "response", "model_name",
-      "roc_AUC", "mcc", "sensitivity", "ppv",
-      "specificity", "prevalence"
+  ) %>%
+    dplyr::bind_rows()
+  
+  # Handling for NAs in MCC
+  if (any(is.na(m_perf$mcc))) {
+    warning(
+      paste0("NAs produced when calculating MCC. This is common when there ",
+             "is a class imbalance. Substituting NA values with zero."),
+      call. = FALSE
     )
-    Global_summary <- as.numeric(as.character(unlist(mod1_perf$mcc)))
-    Global_summary[is.na(Global_summary)] <- 0
-    Global_summary <- mean(Global_summary)
+    m_perf <- m_perf %>%
+      mutate(
+        mcc = ifelse(is.na(mcc), 0, mcc)
+      )
   }
-  if (mode == "regression") {
-    for (i in 1:n_response) {
-      met1 <- as.data.frame(bList[[i]]$.metrics)
-      rmse <- met1$.estimate[1]
-      rsq <- met1$.estimate[2]
-      mod_name <- class(Model)[1]
-      sp <- names(Y[i])
-      mod_perf[[i]] <- data.frame(sp, mod_name, rmse, rsq)
+  
+  m_perf
+
+}
+
+mrIMLperformance_regression <- function(n_response,
+                                        yhats,
+                                        Y,
+                                        Model,
+                                        bList) {
+  lapply(
+    1:n_response,
+    function(i) {
+      tibble(
+        response = names(yhats)[i],
+        model_name = class(Model)[1],
+        rmse = bList[[i]]$.metrics[[1]]$.estimate[1],
+        rsquared = bList[[i]]$.metrics[[1]]$.estimate[12]
+      )
     }
-    mod1_perf <- do.call(rbind, mod_perf)
-    mod1_perf <- as.data.frame(mod1_perf)
-    colnames(mod1_perf) <- c(
-      "response", "model_name",
-      "rmse", "rsquared"
-    )
-    Global_summary <- as.numeric(as.character(unlist(mod1_perf$rmse)))
-    Global_summary <- mean(Global_summary, na.rm = TRUE)
-  }
-  return(list(mod1_perf, Global_summary))
+  ) %>%
+    dplyr::bind_rows()
 }
