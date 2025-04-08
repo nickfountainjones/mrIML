@@ -24,8 +24,8 @@ mrIMLperformance <- function(yhats, Model, Y, mode = "regression") {
     performance_function <- mrIMLperformance_classification
     global_metric <- "mcc"
   } else if (mode == "regression") {
-    performance_function <- mrIMLperformance_classification
-    global_metric <- "mcc"
+    performance_function <- mrIMLperformance_regression
+    global_metric <- "rmse"
   } else {
     stop(
       "mrIMLperfomance() currently only available for class \"regression\" or 
@@ -62,7 +62,7 @@ mrIMLperformance_classification <- function(n_response,
   m_perf <- lapply(
     1:n_response,
     function(i) {
-      tibble(
+      tibble::tibble(
         response = names(yhats)[i],
         model_name = class(Model)[1],
         roc_AUC = bList[[i]]$.metrics[[1]]$.estimate[2],
@@ -104,7 +104,7 @@ mrIMLperformance_classification <- function(n_response,
       call. = FALSE
     )
     m_perf <- m_perf %>%
-      mutate(
+      dplyr::mutate(
         mcc = ifelse(is.na(mcc), 0, mcc)
       )
   }
@@ -121,11 +121,11 @@ mrIMLperformance_regression <- function(n_response,
   lapply(
     1:n_response,
     function(i) {
-      tibble(
+      tibble::tibble(
         response = names(yhats)[i],
         model_name = class(Model)[1],
         rmse = bList[[i]]$.metrics[[1]]$.estimate[1],
-        rsquared = bList[[i]]$.metrics[[1]]$.estimate[12]
+        rsquared = bList[[i]]$.metrics[[1]]$.estimate[2]
       )
     }
   ) %>%
