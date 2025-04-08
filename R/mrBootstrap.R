@@ -55,7 +55,7 @@ mrBootstrap <- function(yhats, num_bootstrap = 10, Y = Y, downsample = FALSE, mo
 
         # Sample from each class to balance classes
         for (cls in unique(Y[[k]])) {
-          cls_indices <- sample(which(Y[[k]] == cls), size = min_class_count, replace = FALSE)
+          cls_indices <- sample(which(Y[[k]] == cls), size = min_class_count, replace = TRUE)
           bootstrap_sample <- rbind(bootstrap_sample, yhats[[k]]$data[cls_indices, ])
         }
       } else {
