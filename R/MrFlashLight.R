@@ -23,99 +23,96 @@
 #' @export 
 
 
-mrFlashlight <- function(yhats, X, X1, Y, response = "multi", index = 1, mode = "regression", predict_function = NULL) {
+mrFlashlight <- function(mrIMLobj,
+                         response = "multi",
+                         index = 1,
+                         predict_function = NULL) {
   
+  # Unpack mrIML object
+  yhats <- mrIMLobj$Fits
+  Model <- mrIMLobj$Model
+  Y <- mrIMLobj$Data$Y
+  X <- mrIMLobj$Data$X
+  X1 <- mrIMLobj$Data$X1
+  mode <- mrIMLobj$Model$mode
+  
+  # Set up functions fro mode
   if (mode == "classification") {
-    
-    # Prediction function
-    if (is.null(predict_function)) {
-      pred_fun <- function(m, dat) {
-        predict(m, dat[, colnames(X), drop = FALSE], type = "prob")[[".pred_1"]]
-      }
-    } else {
-      pred_fun <- predict_function
+    pred_fun <- function(m, dat) {
+      pred <- m %>%
+        hardhat::extract_workflow() %>%
+        predict(
+          new_data = dat,
+          type = "prob"
+        )
+      pred %>%
+        dplyr::pull(".pred")
     }
-    
-    # List of metrics
     metrics <- list(
       logloss = MetricsWeighted::logLoss,
       `ROC AUC` = MetricsWeighted::AUC,
       `% Dev Red` = MetricsWeighted::r_squared_bernoulli
     )
-    
-    # Create explainer
-    if (response == "single") {
-      mfl <- flashlight(
-        model = yhats[[index]]$mod1_k,
-        label = colnames(Y)[index],
-        data = cbind(Y[index], X),
-        y = colnames(Y)[index],
-        predict_function = pred_fun,
-        metrics = metrics
+  } else if (mode == "regression") {
+    pred_fun <- function(m, dat) {
+      pred <- m %>%
+        hardhat::extract_workflow() %>%
+        predict(
+          new_data = dat
+        )
+      pred %>%
+        dplyr::pull(".pred")
+    }
+    metrics <- list(
+      rmse = MetricsWeighted::rmse,
+      `R-squared` = MetricsWeighted::r_squared
+    )
+  } else {
+    stop(
+      paste0(
+        "mrFlashlight() is currently only available for mode \"classification\"  
+        or \"regression\"."
       )
-    } else if (response == "multi") {
-      models <- lapply(yhats, `[[`, "mod1_k")
-      fl_list <- vector("list", length(yhats))
-      for (i in seq_along(fl_list)) {
-        fl_list[[i]] <- flashlight(
-          model = yhats[[i]]$mod1_k,
+    )
+  }
+  
+  # Override pred_fun() if user has supplied one
+  if (!is.null(predict_function)) pred_fun <- predict_function
+  
+  # Run flashlight on models...
+  if (response == "single") {
+    mfl <- flashlight::flashlight(
+      model = yhats[[index]]$last_mod_fit,
+      label = colnames(Y)[index],
+      data = cbind(Y[index], X),
+      y = colnames(Y)[index],
+      predict_function = pred_fun,
+      metrics = metrics
+    )
+  } else if (response == "multi") {
+    fl_list <- lapply(
+      seq_along(yhats),
+      function(i) {
+        flashlight::flashlight(
+          model = yhats[[i]]$last_mod_fit,
           label = colnames(Y)[i],
           y = colnames(Y)[i],
           x = colnames(yhats[[i]]$data)[-1]
         )
       }
-      mfl <- multiflashlight(
-        fl_list,
-        data = cbind(Y, X),
-        predict_function = pred_fun,
-        metrics = metrics
-      )
-    }
-    
-  } else if (mode == "regression") {
-    
-    # Prediction function
-    pred_fun <- function(m, dat) {
-      predict(m, dat[, colnames(X), drop = FALSE])[[".pred"]]
-    }
-    
-    # List of metrics
-    metrics <- list(
-      rmse = MetricsWeighted::rmse,
-      `R-squared` = MetricsWeighted::r_squared
     )
-    
-    # Create explainer
-    if (response == "single") {
-      mfl <- flashlight(
-        model = yhats[[index]]$mod1_k,
-        label = colnames(Y)[index],
-        data = cbind(Y[index], X),
-        y = colnames(Y)[index],
-        predict_function = pred_fun,
-        metrics = metrics
-      )
-    } else if (response == "multi") {
-      models <- lapply(yhats, `[[`, "mod1_k")
-      fl_list <- vector("list", length(yhats))
-      for (i in seq_along(fl_list)) {
-        fl_list[[i]] <- flashlight(
-          model = yhats[[i]]$mod1_k,
-          label = colnames(Y)[i],
-          y = colnames(Y)[i]
-        )
-      }
-      mfl <- multiflashlight(
-        fl_list,
-        data = cbind(Y, X),
-        predict_function = pred_fun,
-        metrics = metrics
-      )
-    }
-    
+    mfl <- flashlight::multiflashlight(
+      fl_list,
+      data = cbind(Y, X),
+      predict_function = pred_fun,
+      metrics = metrics
+    )
   } else {
-    stop("Invalid mode selected. Please choose either 'classification' or 'regression'.")
+    stop(
+      "Response type must be either \"single\" or \"multi\".",
+      call. = FALSE
+    )
   }
   
-  return(mfl)
+  mfl
 }
