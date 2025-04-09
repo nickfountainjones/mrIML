@@ -85,7 +85,10 @@ mrvip <- function(yhats = NULL, mrBootstrap_obj = NULL,  X=X, X1=NULL, Y=Y,
       metrics=list(rmse = MetricsWeighted::rmse)
     }
     
-    models <- lapply(yhats, `[[`, "mod1_k")
+    models <- purrr::map(
+      yhats,
+      purrr::pluck("last_mod_fit")
+    )
     
     fl_list <- vector("list", length(yhats))
     
