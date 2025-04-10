@@ -303,37 +303,13 @@ mrIML_internal_fit_function <- function(i,
     deviance <- NULL
   }
 
-  moran_p <- NA # Initialize moran_p with a default value
-  moran_stat <- NA
-
-  # if (morans == TRUE) {
-  #   combined_data <- cbind(spatial_data, deviance_morans)
-  #
-  #   # Convert data to a SpatialPointsDataFrame or SpatialPolygonsDataFrame
-  #   sp::coordinates(combined_data) <- c("longitude", "latitude")
-  #
-  #   # Calculate the spatial weights matrix
-  #   spatial_weights <- spdep::dnearneigh(combined_data, d1 = 0, d2 = 1)
-  #
-  #   # create network
-  #   spatial_weights_listw <- spdep::nb2listw(spatial_weights, style = "W")
-  #
-  #   # Calculate Moran's I on residuals
-  #   moran_residuals <- spdep::moran.mc(dev, listw = spatial_weights_listw, nsim = 999)
-  #
-  #   moran_p <- data.frame(response = names(Y[i]), morans_p = moran_residuals$p.value)
-  #
-  #   moran_stat <- data.frame(response = names(Y[i]), morans_stat = moran_residuals$stat)
-  # }
-
   # The last fit; useful for some functionality.
   last_mod_fit <- final_model %>%
     tune::last_fit(data_split)
 
   # return data
-
   list(
-    mod1_k = mod1_k,
+    # mod1_k = mod1_k,
     last_mod_fit = last_mod_fit,
     tune_m = tune_m,
     data = data,
@@ -341,9 +317,7 @@ mrIML_internal_fit_function <- function(i,
     data_train = data_train,
     yhat = yhat,
     yhatT = yhatT,
-    deviance = deviance,
-    moran_p = moran_p,
-    moran_stat = moran_stat
+    deviance = deviance
   )
 }
 
