@@ -18,7 +18,11 @@ mrIMLpredicts(
 )
 }
 \arguments{
-\item{Y, X, X1}{Data frames containing the response, predictor, and the join response variables (if fitting GN model) respectively. If \code{X1} is not provided then a standard multi-response model will be fit to the data (i.e. the response values will be independent conditional on the predictors). See \strong{Details} section bellow.}
+\item{Y, X, X1}{Data frames containing the response, predictor, and the join
+response variables (if fitting GN model) respectively. If \code{X1} is not
+provided then a standard multi-response model will be fit to the data (i.e.
+the response values will be independent conditional on the predictors). See
+\strong{Details} section bellow.}
 
 \item{Model}{Any model from the \link{tidymodels} package. See examples.}
 
@@ -29,15 +33,22 @@ mrIMLpredicts(
 \item "no": leaves data as is. "no" is the default value.
 }}
 
-\item{dummy}{A logical value indicating if \code{\link[recipes:step_dummy]{recipes::step_dummy()}} should be included in the data recipe.}
+\item{dummy}{A logical value indicating if \code{\link[recipes:step_dummy]{recipes::step_dummy()}} should be
+included in the data recipe.}
 
-\item{prop}{A numeric value between 0 and 1. Defines the training-testing data proportion to be used, defaults to \code{prop = 0.5}.}
+\item{prop}{A numeric value between 0 and 1. Defines the training-testing
+data proportion to be used, defaults to \code{prop = 0.5}.}
 
-\item{tune_grid_size}{A numeric value that sets the grid size for hyperparameter tuning. Larger grid sizes increase computational time. Ignored if \code{racing = TRUE}.}
+\item{tune_grid_size}{A numeric value that sets the grid size for
+hyperparameter tuning. Larger grid sizes increase computational time. Ignored
+if \code{racing = TRUE}.}
 
-\item{k}{A numeric value. Sets the number of folds in the cross-validation. 10-fold CV is the default.}
+\item{k}{A numeric value. Sets the number of folds in the cross-validation.
+10-fold CV is the default.}
 
-\item{racing}{A logical value. If \code{TRUE}, MrIML performs the grid search using the \code{\link[finetune:tune_race_anova]{finetune::tune_race_anova()}} method. \code{racing = TRUE} is now the default method of tuning.}
+\item{racing}{A logical value. If \code{TRUE}, MrIML performs the grid search
+using the \code{\link[finetune:tune_race_anova]{finetune::tune_race_anova()}} method. \code{racing = TRUE} is now the
+default method of tuning.}
 }
 \value{
 A list object with three slots:
@@ -48,7 +59,9 @@ A list object with three slots:
 }
 }
 \description{
-This function fits separate classification/regression models, specified in the \link{tidymodels} framework, for each response variable in a data set. This is the core function of \link{mrIML}.
+This function fits separate classification/regression models, specified in
+the \link{tidymodels} framework, for each response variable in a data set. This is
+the core function of \link{mrIML}.
 }
 \details{
 Additional details about two types of model...
@@ -77,11 +90,11 @@ model_rf <- rand_forest(
   min_n = tune()
 ) \%>\%
   set_engine("randomForest")
-  
+
 model_lm <- logistic_reg()
 
 # Fitting independent multi-response mode -----------------------------------
-# Random forest 
+# Random forest
 MR_model_rf <- mrIMLpredicts(
   X = X,
   Y = Y,
@@ -97,7 +110,7 @@ MR_model_lm <- mrIMLpredicts(
   Model = model_lm,
   prop = 0.7,
   k = 5,
-  racing = FALSE # Currently there is a bug if racing = TRUE for non tuneable models!
+  racing = FALSE # Currently a bug if racing = TRUE for non-tuneable models!
 )
 
 # Fitting a graphical network model -----------------------------------------
