@@ -14,12 +14,11 @@ mrIMLpredicts(
   prop = 0.5,
   tune_grid_size = 10,
   k = 10,
-  racing = TRUE,
-  seed = sample.int(1e+08, 1)
+  racing = TRUE
 )
 }
 \arguments{
-\item{Y, X, X1}{Data frames containing the response, predictor, and the join response variables (if fitting joint SDM model) respectively. If \code{X1} is not provided then a standard multi-response model will be fit data (i.e. the response values will be independent conditional on the predictors).}
+\item{Y, X, X1}{Data frames containing the response, predictor, and the join response variables (if fitting GN model) respectively. If \code{X1} is not provided then a standard multi-response model will be fit to the data (i.e. the response values will be independent conditional on the predictors). See \strong{Details} section bellow.}
 
 \item{Model}{Any model from the \link{tidymodels} package. See examples.}
 
@@ -30,7 +29,7 @@ mrIMLpredicts(
 \item "no": leaves data as is. "no" is the default value.
 }}
 
-\item{dummy}{A logical value indicating if \code{\link[recipes:step_dummy]{recipes::step_dummy()}} should be included in the data recepe.}
+\item{dummy}{A logical value indicating if \code{\link[recipes:step_dummy]{recipes::step_dummy()}} should be included in the data recipe.}
 
 \item{prop}{A numeric value between 0 and 1. Defines the training-testing data proportion to be used, defaults to \code{prop = 0.5}.}
 
@@ -70,21 +69,35 @@ Y <- data \%>\%
 X <- data \%>\%
   select(scale.prop.zos)
 
-# Specify a random forrest tidy model
-model_rf <-rand_forest(
+# Specify a random forest tidy model
+model_rf <- rand_forest(
   trees = 100, # 100 trees are set for brevity. Aim to start with 1000
   mode = "classification",
   mtry = tune(),
   min_n = tune()
 ) \%>\%
   set_engine("randomForest")
+  
+model_lm <- logistic_reg()
 
 # Fitting independent multi-response mode -----------------------------------
-
-MR_model <- mrIMLpredicts(
+# Random forest 
+MR_model_rf <- mrIMLpredicts(
   X = X,
   Y = Y,
-  Model = model_rf
+  Model = model_rf,
+  prop = 0.7,
+  k = 5
+)
+
+# Linear model
+MR_model_lm <- mrIMLpredicts(
+  X = X,
+  Y = Y,
+  Model = model_lm,
+  prop = 0.7,
+  k = 5,
+  racing = FALSE # Currently there is a bug if racing = TRUE for non tuneable models!
 )
 
 # Fitting a graphical network model -----------------------------------------
@@ -96,6 +109,8 @@ GN_model <- mrIMLpredicts(
   X = X,
   Y = Y,
   X1 = X1,
-  Model = model_rf
+  Model = model_rf,
+  prop = 0.7,
+  k = 5
 )
 }

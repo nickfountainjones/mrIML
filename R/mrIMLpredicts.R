@@ -4,13 +4,13 @@
 #' 
 #' This function fits separate classification/regression models, specified in the [tidymodels] framework, for each response variable in a data set. This is the core function of [mrIML].
 #' 
-#' @param Y,X,X1 Data frames containing the response, predictor, and the join response variables (if fitting joint SDM model) respectively. If `X1` is not provided then a standard multi-response model will be fit data (i.e. the response values will be independent conditional on the predictors).
+#' @param Y,X,X1 Data frames containing the response, predictor, and the join response variables (if fitting GN model) respectively. If `X1` is not provided then a standard multi-response model will be fit to the data (i.e. the response values will be independent conditional on the predictors). See **Details** section bellow.
 #' @param Model Any model from the [tidymodels] package. See examples.
 #' @param balance_data A character string.
 #' * "up": up-samples the data to equal class sizes.
 #' * "down": down-samples the data to equal class sizes.
 #' * "no": leaves data as is. "no" is the default value.
-#' @param dummy A logical value indicating if [recipes::step_dummy()] should be included in the data recepe.
+#' @param dummy A logical value indicating if [recipes::step_dummy()] should be included in the data recipe.
 #' @param tune_grid_size A numeric value that sets the grid size for hyperparameter tuning. Larger grid sizes increase computational time. Ignored if `racing = TRUE`.
 #' @param racing A logical value. If `TRUE`, MrIML performs the grid search using the [finetune::tune_race_anova()] method. `racing = TRUE` is now the default method of tuning.
 #' @param k A numeric value. Sets the number of folds in the cross-validation. 10-fold CV is the default.
@@ -42,21 +42,35 @@
 #' X <- data %>%
 #'   select(scale.prop.zos)
 #'
-#' # Specify a random forrest tidy model
-#' model_rf <-rand_forest(
+#' # Specify a random forest tidy model
+#' model_rf <- rand_forest(
 #'   trees = 100, # 100 trees are set for brevity. Aim to start with 1000
 #'   mode = "classification",
 #'   mtry = tune(),
 #'   min_n = tune()
 #' ) %>%
 #'   set_engine("randomForest")
+#'   
+#' model_lm <- logistic_reg()
 #' 
 #' # Fitting independent multi-response mode -----------------------------------
-#' 
-#' MR_model <- mrIMLpredicts(
+#' # Random forest 
+#' MR_model_rf <- mrIMLpredicts(
 #'   X = X,
 #'   Y = Y,
-#'   Model = model_rf
+#'   Model = model_rf,
+#'   prop = 0.7,
+#'   k = 5
+#' )
+#' 
+#' # Linear model
+#' MR_model_lm <- mrIMLpredicts(
+#'   X = X,
+#'   Y = Y,
+#'   Model = model_lm,
+#'   prop = 0.7,
+#'   k = 5,
+#'   racing = FALSE # Currently there is a bug if racing = TRUE for non tuneable models!
 #' )
 #' 
 #' # Fitting a graphical network model -----------------------------------------
@@ -68,7 +82,9 @@
 #'   X = X,
 #'   Y = Y,
 #'   X1 = X1,
-#'   Model = model_rf
+#'   Model = model_rf,
+#'   prop = 0.7,
+#'   k = 5
 #' )
 
 
@@ -81,8 +97,7 @@ mrIMLpredicts <- function(X,
                           prop = 0.5,
                           tune_grid_size = 10,
                           k = 10,
-                          racing = TRUE,
-                          seed = sample.int(1e8, 1)) { #Setting a see within a function may cause issues!
+                          racing = TRUE) { #Setting a see within a function may cause issues!
   
   mode <- Model$mode
   
