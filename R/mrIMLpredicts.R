@@ -1,115 +1,175 @@
-#' Wrapper to generate multi-response predictive models.
-#' @param Y A \code{dataframe} is response variable data (species, OTUs, SNPs etc).
-#' @param X A \code{dataframe} represents predictor or feature data.
-#' @param X1 A \code{dataframe} extra predictor set used in each model. For the MrIML Joint species distribution model (JSDM) this is just a copy of the response data.
-#' @param balance_data A \code{character} 'up', 'down' or 'no'.
-#' @param dummy A \code{logical} 'TRUE or FALSE'.
-#' @param Model 1 A \code{list} can be any model from the tidy model package. See examples.
-#' @param tune_grid_size A \code{numeric} sets the grid size for hyperparameter tuning. Larger grid sizes increase computational time. Ignored if racing=T.
-#' @param racing \code{logical} 'TRUE or FALSE'. If 'TRUE' MrIML performs the grid search using the 'racing' ANOVA method. See https://finetune.tidymodels.org/reference/tune_race_anova.html
-#' @param k A \code{numeric} sets the number of folds in the 10-fold cross-validation. 10 is the default.
-#' @param seed A \code{numeric} as these models have a stochastic component, a seed is set to make to make the analysis reproducible. Defaults between 100 million and 1.
-#' @param mode \code{character}'classification' or 'regression' i.e., is the generative model a regression or classification?
-#' @param morans \code{logical} 'TRUE or FALSE'. If 'TRUE' global Morans I is calculated for each response
-
-#' @details This function produces yhats that used in all subsequent functions.
-#' This function fits separate classification/regression models for each response variable in a data set.  Rows in X (features) have the same id (host/site/population)
-#'  as Y. Class imbalance can be a real issue for classification analyses. Class imbalance can be addressed for each
-#' response variable using 'up' (upsampling using ROSE bootstrapping), 'down' (downsampling)
-#' or 'no' (no balancing of classes).
+#' Generates a multi-response predictive model
+#' 
+#' @description
+#' 
+#' This function fits separate classification/regression models, specified in the [tidymodels] framework, for each response variable in a data set. This is the core function of [mrIML].
+#' 
+#' @param Y,X,X1 Data frames containing the response, predictor, and the join response variables (if fitting joint SDM model) respectively. If `X1` is not provided then a standard multi-response model will be fit data (i.e. the response values will be independent conditional on the predictors).
+#' @param Model Any model from the [tidymodels] package. See examples.
+#' @param balance_data A character string.
+#' * "up": up-samples the data to equal class sizes.
+#' * "down": down-samples the data to equal class sizes.
+#' * "no": leaves data as is. "no" is the default value.
+#' @param dummy A logical value indicating if [recipes::step_dummy()] should be included in the data recepe.
+#' @param tune_grid_size A numeric value that sets the grid size for hyperparameter tuning. Larger grid sizes increase computational time. Ignored if `racing = TRUE`.
+#' @param racing A logical value. If `TRUE`, MrIML performs the grid search using the [finetune::tune_race_anova()] method. `racing = TRUE` is now the default method of tuning.
+#' @param k A numeric value. Sets the number of folds in the cross-validation. 10-fold CV is the default.
+#' @param prop A numeric value between 0 and 1. Defines the training-testing data proportion to be used, defaults to `prop = 0.5`.
+#' 
+#' @details
+#' Additional details about two types of model...
+#' 
+#' The finer details of how things such as `balance_data`...
+#' 
+#' @returns A list object with three slots:
+#' * `$Model`: The [tidymodels] object that was fit.
+#' * `$Data`: A list of the raw data.
+#' * `$Fits`: A list of the fitted models to each response variable.
+#' 
+#' @export
+#' 
 #' @examples
+#' library(tidymodels)
 #' 
-#' # Fitting a joint species distribution model
+#' data <- MRFcov::Bird.parasites
 #' 
-#' # Fitting a joint species distribution model
-#' Y <- MRFcov::Bird.parasites %>%
-#'   dplyr::select(
-#'     -scale.prop.zos
-#'   ) %>%
-#'   dplyr::select(order(everything()))
-#' X <- MRFcov::Bird.parasites %>%
-#'   dplyr::select(
-#'     scale.prop.zos
-#'   )
-#' 
-#' model_rf <- rand_forest(
-#'   trees = 100,
-#'   mode = "classification"
-#' ) %>%
-#'   set_engine(
-#'     "ranger",
-#'     importance = c("impurity", "impurity_corrected")
-#'   ) %>%
-#'   set_mode("classification")
+#' # Define the response variables of interest
+#' Y <- data %>%
+#'   select(-scale.prop.zos) %>%
+#'   select(order(everything()))
 #'
-#' yhats <- mrIMLpredicts(
+#' # Define the predictors
+#' X <- data %>%
+#'   select(scale.prop.zos)
+#'
+#' # Specify a random forrest tidy model
+#' model_rf <-rand_forest(
+#'   trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+#'   mode = "classification",
+#'   mtry = tune(),
+#'   min_n = tune()
+#' ) %>%
+#'   set_engine("randomForest")
+#' 
+#' # Fitting independent multi-response mode -----------------------------------
+#' 
+#' MR_model <- mrIMLpredicts(
 #'   X = X,
 #'   Y = Y,
-#'   X1 = Y,
-#'   Model = model_rf,
-#'   balance_data = "no",
-#'   model = "classification",
-#'   tune_grid_size = 5,
-#'   k = 10,
-#'   seed = sample.int(1e8, 1)
+#'   Model = model_rf
 #' )
-#' @export
+#' 
+#' # Fitting a graphical network model -----------------------------------------
+#' 
+#' # Define the dependent response variables (all in this case)
+#' X1 <- Y
+#'
+#' GN_model <- mrIMLpredicts(
+#'   X = X,
+#'   Y = Y,
+#'   X1 = X1,
+#'   Model = model_rf
+#' )
+
 
 mrIMLpredicts <- function(X,
                           X1 = NULL,
                           Y,
                           Model,
-                          ...) {
+                          balance_data = "no",
+                          dummy = FALSE,
+                          prop = 0.5,
+                          tune_grid_size = 10,
+                          k = 10,
+                          racing = TRUE,
+                          seed = sample.int(1e8, 1)) { #Setting a see within a function may cause issues!
+  
+  mode <- Model$mode
+  
+  # Coerce data to tibbles
+  X <- as_tibble(X)
+  Y <- as_tibble(Y)
+  if (!is.null(X1))   X1 <- as_tibble(X1)
+  
+  # Check modeling inputs
   check_equal_rows(X, X1, Y)
   check_tidymodel(Model)
 
   n_response <- length(Y)
-
   pb <- txtProgressBar(min = 0, max = n_response, style = 3)
 
-  yhats <- future_lapply(
+  yhats <- future.apply::future_lapply(
     X = seq(1, n_response),
-    FUN = mrIML_internal_fit_function,
-    .X = X,
-    .X1 = X1,
-    .Y = Y,
-    Model = Model,
-    ...,
-    pb = pb,
-    future.seed = TRUE
+    FUN = function(i, fit_fun) {
+      setTxtProgressBar(pb, i)
+      fit_fun(
+        i,
+        .X = X,
+        .X1 = X1,
+        .Y = Y,
+        Model = Model,
+        balance_data = balance_data,
+        mode = mode,
+        dummy = dummy,
+        prop = prop,
+        tune_grid_size = tune_grid_size,
+        k = k,
+        racing = racing
+      )
+    },
+    future.seed = TRUE,
+    # I think I only need to pass this function now because 
+    # the workers are looking in library() to load packages.
+    fit_fun = mrIML:::mrIML_internal_fit_function, 
+    # So that %>% can be used. Since mrIML exports %>%, once
+    # package is build I should be able to just attach mrIML
+    # and remove the previous line.
+    future.packages = c("magrittr") 
+  )
+  
+  names(yhats) <- names(Y)
+  
+  return(
+    list(
+      Model = Model,
+      Data = list(
+        X = X,
+        Y = Y,
+        X1 = X1
+      ),
+      Fits = yhats
+    )
   )
 }
 
 mrIML_internal_fit_function <- function(i,
                                         .X,
-                                        .X1 = NULL,
+                                        .X1,
                                         .Y,
                                         Model,
-                                        balance_data = "no",
-                                        mode = "regression",
-                                        dummy = FALSE,
-                                        prop = 0.5,
-                                        morans = F,
-                                        tune_grid_size = 10,
-                                        k = 10,
-                                        racing = TRUE,
-                                        seed = sample.int(1e8, 1),
-                                        pb) {
-  setTxtProgressBar(pb, i)
+                                        balance_data,
+                                        mode,
+                                        dummy,
+                                        prop,
+                                        morans,
+                                        tune_grid_size,
+                                        k,
+                                        racing,
+                                        seed) {
 
-  if (!is.null(X1)) {
-    if (!is.null(X)) {
+  if (!is.null(.X1)) {
+    if (!is.null(.X)) {
       data <- tibble::as_tibble(
-        cbind(Y[i], X, X1[-i])
+        cbind(.Y[i], .X, .X1[-i])
       )
     } else {
       data <- tibble::as_tibble(
-        cbind(Y[i], X1[-i])
+        cbind(.Y[i], .X1[-i])
       )
     }
   } else {
-    if (!is.null(X)) {
-      data <- tibble::as_tibble(cbind(Y[i], X))
+    if (!is.null(.X)) {
+      data <- tibble::as_tibble(cbind(.Y[i], .X))
     } else {
       stop("At least one of X or X1 must be specified.")
     }

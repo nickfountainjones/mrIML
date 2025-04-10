@@ -2,7 +2,7 @@
 % Please edit documentation in R/mrIMLpredicts.R
 \name{mrIMLpredicts}
 \alias{mrIMLpredicts}
-\title{Wrapper to generate multi-response predictive models.}
+\title{Generates a multi-response predictive model}
 \usage{
 mrIMLpredicts(
   X,
@@ -10,61 +10,92 @@ mrIMLpredicts(
   Y,
   Model,
   balance_data = "no",
-  mode = "regression",
   dummy = FALSE,
   prop = 0.5,
-  morans = F,
   tune_grid_size = 10,
   k = 10,
-  racing = T,
+  racing = TRUE,
   seed = sample.int(1e+08, 1)
 )
 }
 \arguments{
-\item{X}{A \code{dataframe} represents predictor or feature data.}
+\item{Y, X, X1}{Data frames containing the response, predictor, and the join response variables (if fitting joint SDM model) respectively. If \code{X1} is not provided then a standard multi-response model will be fit data (i.e. the response values will be independent conditional on the predictors).}
 
-\item{X1}{A \code{dataframe} extra predictor set used in each model. For the MrIML Joint species distribution model (JSDM) this is just a copy of the response data.}
+\item{Model}{Any model from the \link{tidymodels} package. See examples.}
 
-\item{Y}{A \code{dataframe} is response variable data (species, OTUs, SNPs etc).}
+\item{balance_data}{A character string.
+\itemize{
+\item "up": up-samples the data to equal class sizes.
+\item "down": down-samples the data to equal class sizes.
+\item "no": leaves data as is. "no" is the default value.
+}}
 
-\item{Model}{1 A \code{list} can be any model from the tidy model package. See examples.}
+\item{dummy}{A logical value indicating if \code{\link[recipes:step_dummy]{recipes::step_dummy()}} should be included in the data recepe.}
 
-\item{balance_data}{A \code{character} 'up', 'down' or 'no'.}
+\item{prop}{A numeric value between 0 and 1. Defines the training-testing data proportion to be used, defaults to \code{prop = 0.5}.}
 
-\item{mode}{\code{character}'classification' or 'regression' i.e., is the generative model a regression or classification?}
+\item{tune_grid_size}{A numeric value that sets the grid size for hyperparameter tuning. Larger grid sizes increase computational time. Ignored if \code{racing = TRUE}.}
 
-\item{dummy}{A \code{logical} 'TRUE or FALSE'.}
+\item{k}{A numeric value. Sets the number of folds in the cross-validation. 10-fold CV is the default.}
 
-\item{morans}{\code{logical} 'TRUE or FALSE'. If 'TRUE' global Morans I is calculated for each response}
-
-\item{tune_grid_size}{A \code{numeric} sets the grid size for hyperparameter tuning. Larger grid sizes increase computational time. Ignored if racing=T.}
-
-\item{k}{A \code{numeric} sets the number of folds in the 10-fold cross-validation. 10 is the default.}
-
-\item{racing}{\code{logical} 'TRUE or FALSE'. If 'TRUE' MrIML performs the grid search using the 'racing' ANOVA method. See https://finetune.tidymodels.org/reference/tune_race_anova.html}
-
-\item{seed}{A \code{numeric} as these models have a stochastic component, a seed is set to make to make the analysis reproducible. Defaults between 100 million and 1.}
+\item{racing}{A logical value. If \code{TRUE}, MrIML performs the grid search using the \code{\link[finetune:tune_race_anova]{finetune::tune_race_anova()}} method. \code{racing = TRUE} is now the default method of tuning.}
+}
+\value{
+A list object with three slots:
+\itemize{
+\item \verb{$Model}: The \link{tidymodels} object that was fit.
+\item \verb{$Data}: A list of the raw data.
+\item \verb{$Fits}: A list of the fitted models to each response variable.
+}
 }
 \description{
-Wrapper to generate multi-response predictive models.
+This function fits separate classification/regression models, specified in the \link{tidymodels} framework, for each response variable in a data set. This is the core function of \link{mrIML}.
 }
 \details{
-This function produces yhats that used in all subsequent functions.
-This function fits separate classification/regression models for each response variable in a data set.  Rows in X (features) have the same id (host/site/population)
-as Y. Class imbalance can be a real issue for classification analyses. Class imbalance can be addressed for each
-response variable using 'up' (upsampling using ROSE bootstrapping), 'down' (downsampling)
-or 'no' (no balancing of classes).
+Additional details about two types of model...
+
+The finer details of how things such as \code{balance_data}...
 }
 \examples{
-all_cores <- parallel::detectCores(logical = FALSE)
-cl <- makePSOCKcluster(all_cores)
-registerDoParallel(cl)
+library(tidymodels)
 
-model1 <- 
-rand_forest(trees = 100, mode = "classification") \%>\% #this should cope with multinomial data alreadf
-  set_engine("ranger", importance = c("impurity","impurity_corrected")) \%>\% #model is not tuned to increase computational speed
- set_mode("classification")
- 
-yhats <- mrIMLpredicts(X= enviro_variables,Y=response_data, model1=model1, balance_data='no', model='classification',  
-tune_grid_size=5, k=10, seed = sample.int(1e8, 1)))
+data <- MRFcov::Bird.parasites
+
+# Define the response variables of interest
+Y <- data \%>\%
+  select(-scale.prop.zos) \%>\%
+  select(order(everything()))
+
+# Define the predictors
+X <- data \%>\%
+  select(scale.prop.zos)
+
+# Specify a random forrest tidy model
+model_rf <-rand_forest(
+  trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+  mode = "classification",
+  mtry = tune(),
+  min_n = tune()
+) \%>\%
+  set_engine("randomForest")
+
+# Fitting independent multi-response mode -----------------------------------
+
+MR_model <- mrIMLpredicts(
+  X = X,
+  Y = Y,
+  Model = model_rf
+)
+
+# Fitting a graphical network model -----------------------------------------
+
+# Define the dependent response variables (all in this case)
+X1 <- Y
+
+GN_model <- mrIMLpredicts(
+  X = X,
+  Y = Y,
+  X1 = X1,
+  Model = model_rf
+)
 }
