@@ -181,8 +181,6 @@ mrIML_internal_fit_function <- function(i,
     data$class <- as.factor(data$class)
   }
 
-  set.seed(seed)
-
   data_split <- rsample::initial_split(data, prop = prop)
 
   # extract training and testing sets
