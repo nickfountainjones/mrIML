@@ -113,13 +113,15 @@ mrIMLpredicts <- function(X,
   mode <- Model$mode
 
   # Coerce data to tibbles
-  X <- as_tibble(X)
-  Y <- as_tibble(Y)
-  if (!is.null(X1)) X1 <- as_tibble(X1)
+  X <- tibble::as_tibble(X)
+  Y <- tibble::as_tibble(Y)
+  if (!is.null(X1)) X1 <- tibble::as_tibble(X1)
 
   # Check modeling inputs
   check_equal_rows(X, X1, Y)
-  check_tidymodel(Model)
+  if (!inherits(Model, "model_spec")) {
+    stop("The model should be a properly specified tidymodel.")
+  }
 
   n_response <- length(Y)
   pb <- txtProgressBar(min = 0, max = n_response, style = 3)
@@ -340,7 +342,7 @@ mrIML_internal_fit_function <- function(i,
     last_mod_fit = last_mod_fit,
     tune_m = tune_m,
     data = data,
-    data_testa = data_test,
+    data_test = data_test,
     data_train = data_train,
     yhat = yhat,
     yhatT = yhatT,
@@ -359,21 +361,5 @@ check_equal_rows <- function(X, X1, Y) {
 
   if (unique_nrow_vals != 1) {
     stop("All data inputs must have the same number of rows.", call. = FALSE)
-  }
-}
-
-check_tidymodel <- function(m) {
-  m_class <- class(m)[2]
-
-  if (is.null(m_class)) {
-    stop("The model should be a properly specified tidymodel.", call. = FALSE)
-  }
-
-  if (is.na(m_class)) {
-    stop("The model should be a properly specified tidymodel.", call. = FALSE)
-  }
-
-  if (m_class != "model_spec") {
-    stop("The model should be a properly specified tidymodel.", call. = FALSE)
   }
 }
