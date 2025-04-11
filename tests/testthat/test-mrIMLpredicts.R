@@ -24,6 +24,7 @@ mrIMLobj_MR <- mrIMLpredicts(
 )
 
 test_that("both types of model run without error", {
+  skip_on_cran()
   expect_no_error(
     mrIMLpredicts(
       Y = Y,
