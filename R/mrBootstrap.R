@@ -24,122 +24,168 @@
 #' # Perform bootstrap analysis
 #' bs_analysis <- mrBootstrap(yhats = yhats_rf, Y = Y, num_bootstrap = 50, mode = "classification")
 #' }
-mrBootstrap <- function(yhats, num_bootstrap = 10, Y = Y, downsample = FALSE, mode = "classification") {
-  n_response <- length(yhats)
-
-  pb <- txtProgressBar(min = 0, max = n_response, style = 3)
-  # pb <- progress::progress_bar$new(format = "[:bar] :percent ETA: :eta", total = n_response )
-
-
-  internal_fit_function <- function(k) {
-    setTxtProgressBar(pb, k) # progressbar marker
-    # pb$tick()
-
-    features <- colnames(yhats[[k]]$data)[-1]
-
-    n <- nrow(yhats[[k]]$data)
-
-    pd_raw <- vector("list", num_bootstrap) # Initialize pd_raw as a list
-
-    for (i in 1:num_bootstrap) {
-      # Initialize the bootstrap sample
-      bootstrap_sample <- NULL
-
-
-      if (downsample == TRUE) {
-        # Determine the number of samples to draw for each class
-        class_counts <- table(Y[[k]])
-        min_class_count <- min(class_counts)
-        sample_size <- min_class_count * length(class_counts)
-
-
-        # Sample from each class to balance classes
-        for (cls in unique(Y[[k]])) {
-          cls_indices <- sample(which(Y[[k]] == cls), size = min_class_count, replace = TRUE)
-          bootstrap_sample <- rbind(bootstrap_sample, yhats[[k]]$data[cls_indices, ])
-        }
-      } else {
-        # Convert the data frame to a data table
-        data_table <- data.table::as.data.table(yhats[[k]]$data)
-
-        # Generate random row indices
-        sample_indices <- sample(1:n, replace = TRUE)
-
-        # Create the bootstrap sample using data table syntax
-        bootstrap_sample <- data_table[sample_indices]
-      }
-
-      # Extract the workflow from the best fit
-      wflow <- yhats[[k]]$last_mod_fit %>% tune::extract_workflow()
-
-      # Add the bootstrap data to the workflow
-      wflow$data <- bootstrap_sample
-
-      # Fit the model using the bootstrap sample
-      model_fit <- fit(wflow, data = bootstrap_sample)
-
-      # Create explainer
-
-      var_names <- names(yhats[[k]]$data)[-1]
-
-      if (mode == "classification") {
-        # metric list for flashlight.
-        metrics <- list(
-          logloss = MetricsWeighted::logLoss,
-          `ROC AUC` = MetricsWeighted::AUC,
-          `% Dev Red` = MetricsWeighted::r_squared_bernoulli
-        )
-
-        pred_fun <- function(m, dat) {
-          predict(
-            m, dat[, colnames(bootstrap_sample)[-1], drop = FALSE],
-            type = "prob"
-          )$`.pred_1`
-        }
-      } else {
-        pred_fun <- function(m, dat) {
-          predict(m, dat[, colnames(X), drop = FALSE])[[".pred"]]
-        }
-
-        # List of metrics
-
-        metrics <- list(
-          rmse = MetricsWeighted::rmse,
-          `R-squared` = MetricsWeighted::r_squared
-        )
-      }
-
-
-      fl <- flashlight(
-        model = model_fit,
-        label = "class",
-        data = bootstrap_sample,
-        y = "class",
-        predict_function = pred_fun,
-        metrics = metrics
-      )
-
-      for (j in seq_along(var_names)) {
-        pd_ <- light_profile(fl, v = paste0(var_names[j]))
-
-        # add number of boostrap.
-        bs_rep <- data.frame(bootstrap = rep(i, nrow(pd_$data)))
-
-        # response name
-        bs_name <- data.frame(response = rep(names(Y[k]), nrow(pd_$data)))
-
-        pd_data <- data.frame(cbind(pd_$data), bs_name, bs_rep) # add bootstrap
-
-        pd_raw[[i]][[var_names[j]]] <- pd_data # Save pd_ as a list element
-      }
+mrBootstrap <- function(mrIMLobj,
+                        num_bootstrap = 10,
+                        downsample = FALSE) {
+  
+  yhats <- mrIMLobj$Fits
+  Y <- mrIMLobj$Data$Y
+  mode <- mrIMLobj$Model$mode
+  #n_response <- length(yhats)
+  
+  if (mode == "classification") {
+    # Metric list for flashlight
+    metrics <- list(
+      logloss = MetricsWeighted::logLoss,
+      `ROC AUC` = MetricsWeighted::AUC,
+      `% Dev Red` = MetricsWeighted::r_squared_bernoulli
+    )
+    # Prediction function for flashlight
+    pred_fun <- function(m, dat) {
+      predict(
+        m, dat[-1],
+        type = "prob"
+      ) %>%
+        dplyr::pull(.pred_1)
     }
-
-    gc() # clear junk
-
-    return(pd_raw) # Return pd_raw as a list
+  } else if (mode == "regression") {
+    # Metric list for flashlight
+    metrics <- list(
+      rmse = MetricsWeighted::rmse,
+      `R-squared` = MetricsWeighted::r_squared
+    )
+    # Prediction function for flashlight
+    pred_fun <- function(m, dat) {
+      predict(m, dat[-1])%>%
+        dplyr::pull(.pred_1)
+    }
+  }
+  # Determine downsampling freq
+  if (downsample) {
+    # ? stop if mode == "regression"?
+    min_class_counts <- lapply(
+      seq_along(Y),
+      function(k) {
+        Y[[k]] %>%
+          table() %>%
+          min()
+      }
+    )
+  } else {
+    min_class_counts <- lapply(
+      seq_along(Y),
+      function(k) NULL
+    )
+  }
+  # Set up model and data to pass to future_lapply
+  bootstrap_wf <- lapply(
+    yhats,
+    function(yhat) {
+      data <- yhat$data
+      wf <- yhat$last_mod_fit %>%
+        tune::extract_workflow()
+      list(
+        data = data,
+        workflow = wf
+      )
+    }
+  )
+  # Run bootstraps
+  var_ids <- rep(1:length(bootstrap_wf), each = num_bootstrap)
+  boot_ids <- rep(1:num_bootstrap, length(bootstrap_wf))
+  
+  pb <- txtProgressBar(min = 0, max = length(var_ids), style = 3)
+  
+  bootstrap_results <- future.apply::future_lapply(
+    seq_along(var_ids),
+    function(i, boot_fun) {
+      setTxtProgressBar(pb, i)
+      var_id <- var_ids[i]
+      boot_id <- boot_ids[i]
+      boot_fun(
+        bootstrap_wf[[var_id]]$workflow,
+        bootstrap_wf[[var_id]]$data,
+        metrics = metrics,
+        pred_fun = pred_fun,
+        downsample_to = min_class_counts[[var_id]], # will be NULL if downsample = FALSE
+        response_name = names(yhats)[var_id],
+        boot_id = boot_id
+      )
+    },
+    # Need to parse to workers for time being
+    boot_fun = mrIML_internal_bootstrap_fun,
+    future.seed = TRUE
+  )
+  
+  # Organise in a list
+  bstraps_pd_list <- lapply(
+    yhats,
+    function(i) vector("list", num_bootstrap)
+  )
+  for (i in seq_along(var_ids)) {
+    bstraps_pd_list[[var_ids[i]]][[boot_ids[[i]]]] <- bootstrap_results[[i]]
   }
 
-  bstraps_pd_list <- future_lapply(seq(1, n_response), internal_fit_function, future.seed = TRUE)
-
-  return(bstraps_pd_list)
+  bstraps_pd_list
 }
+
+mrIML_internal_bootstrap_fun <- function(wf,
+                                         data,
+                                         downsample,
+                                         metrics,
+                                         pred_fun,
+                                         downsample_to = NULL,
+                                         response_name,
+                                         boot_id
+                                         ) {
+  # Resample data
+  if (is.null(downsample_to)) {
+    bootstrap_sample <- data %>%
+      dplyr::slice(
+        sample(1:nrow(data), replace = TRUE)
+      )
+  } else {
+    classes <- unique(data[[1]])
+    bootstrap_sample <- lapply(
+      classes,
+      function(cls) {
+        data %>%
+          dplyr::slice(
+            sample(which(data[[1]] == cls), downsample_to, replace = TRUE)
+          )
+      }
+    ) %>%
+      dplyr::bind_rows()
+  }
+  
+  # Refit model and run flashlight
+  model_fit <- workflows::fit(wf, data = bootstrap_sample)
+  fl <- flashlight::flashlight(
+    model = model_fit,
+    label = "class",
+    data = bootstrap_sample,
+    y = "class",
+    predict_function = pred_fun,
+    metrics = metrics
+  )
+  
+  # Get light_profiles for all covariates
+  pd_list <- lapply(
+    names(bootstrap_sample)[-1],
+    function(var_name) {
+      pd_ <- flashlight::light_profile(
+        fl,
+        v = var_name
+      )
+      pd_$data %>%
+        dplyr::mutate(
+          bootstrap = boot_id,
+          response = response_name
+        )
+    }
+  )
+  names(pd_list) <- names(bootstrap_sample)[-1]
+  
+  pd_list
+}
+
