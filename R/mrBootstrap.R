@@ -33,36 +33,17 @@ mrBootstrap <- function(mrIMLobj,
   mode <- mrIMLobj$Model$mode
   #n_response <- length(yhats)
   
-  if (mode == "classification") {
-    # Metric list for flashlight
-    metrics <- list(
-      logloss = MetricsWeighted::logLoss,
-      `ROC AUC` = MetricsWeighted::AUC,
-      `% Dev Red` = MetricsWeighted::r_squared_bernoulli
-    )
-    # Prediction function for flashlight
-    pred_fun <- function(m, dat) {
-      predict(
-        m, dat[-1],
-        type = "prob"
-      ) %>%
-        dplyr::pull(.pred_1)
-    }
-  } else if (mode == "regression") {
-    # Metric list for flashlight
-    metrics <- list(
-      rmse = MetricsWeighted::rmse,
-      `R-squared` = MetricsWeighted::r_squared
-    )
-    # Prediction function for flashlight
-    pred_fun <- function(m, dat) {
-      predict(m, dat[-1])%>%
-        dplyr::pull(.pred_1)
-    }
-  }
+  # Set up flashlight functions for mode
+  flashlight_ops <- mrIML_flashlight_setup(
+    mode
+  )
+  
   # Determine downsampling freq
   if (downsample) {
-    # ? stop if mode == "regression"?
+    if (mode == "regression") {
+      stop("Downsampling is not suitable for regression models.")
+    }
+
     min_class_counts <- lapply(
       seq_along(Y),
       function(k) {
@@ -105,8 +86,8 @@ mrBootstrap <- function(mrIMLobj,
       boot_fun(
         bootstrap_wf[[var_id]]$workflow,
         bootstrap_wf[[var_id]]$data,
-        metrics = metrics,
-        pred_fun = pred_fun,
+        metrics = flashlight_ops$metrics,
+        pred_fun = flashlight_ops$pred_fun,
         downsample_to = min_class_counts[[var_id]], # will be NULL if downsample = FALSE
         response_name = names(yhats)[var_id],
         boot_id = boot_id

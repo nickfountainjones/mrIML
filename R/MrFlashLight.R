@@ -36,7 +36,51 @@ mrFlashlight <- function(mrIMLobj,
   X1 <- mrIMLobj$Data$X1
   mode <- mrIMLobj$Model$mode
   
-  # Set up functions fro mode
+  # Set up flashlight functions for mode
+  flashlight_ops <- mrIML_flashlight_setup(
+    mode,
+    predict_function
+  )
+  
+  # Run flashlight on models...
+  if (response == "single") {
+    mfl <- flashlight::flashlight(
+      model = yhats[[index]]$last_mod_fit,
+      label = colnames(Y)[index],
+      data = cbind(Y[index], X),
+      y = colnames(Y)[index],
+      predict_function = flashlight_ops$pred_fun,
+      metrics = flashlight_ops$metrics
+    )
+  } else if (response == "multi") {
+    fl_list <- lapply(
+      seq_along(yhats),
+      function(i) {
+        flashlight::flashlight(
+          model = yhats[[i]]$last_mod_fit,
+          label = colnames(Y)[i],
+          y = colnames(Y)[i],
+          x = colnames(yhats[[i]]$data)[-1]
+        )
+      }
+    )
+    mfl <- flashlight::multiflashlight(
+      fl_list,
+      data = cbind(Y, X),
+      predict_function = flashlight_ops$pred_fun,
+      metrics = flashlight_ops$metrics
+    )
+  } else {
+    stop(
+      "Response type must be either \"single\" or \"multi\".",
+      call. = FALSE
+    )
+  }
+  
+  mfl
+}
+
+mrIML_flashlight_setup <- function(mode, predict_function = NULL) {
   if (mode == "classification") {
     pred_fun <- function(m, dat) {
       pred <- m %>%
@@ -46,7 +90,7 @@ mrFlashlight <- function(mrIMLobj,
           type = "prob"
         )
       pred %>%
-        dplyr::pull(".pred")
+        dplyr::pull(".pred_1")
     }
     metrics <- list(
       logloss = MetricsWeighted::logLoss,
@@ -75,44 +119,11 @@ mrFlashlight <- function(mrIMLobj,
       )
     )
   }
-  
   # Override pred_fun() if user has supplied one
   if (!is.null(predict_function)) pred_fun <- predict_function
   
-  # Run flashlight on models...
-  if (response == "single") {
-    mfl <- flashlight::flashlight(
-      model = yhats[[index]]$last_mod_fit,
-      label = colnames(Y)[index],
-      data = cbind(Y[index], X),
-      y = colnames(Y)[index],
-      predict_function = pred_fun,
-      metrics = metrics
-    )
-  } else if (response == "multi") {
-    fl_list <- lapply(
-      seq_along(yhats),
-      function(i) {
-        flashlight::flashlight(
-          model = yhats[[i]]$last_mod_fit,
-          label = colnames(Y)[i],
-          y = colnames(Y)[i],
-          x = colnames(yhats[[i]]$data)[-1]
-        )
-      }
-    )
-    mfl <- flashlight::multiflashlight(
-      fl_list,
-      data = cbind(Y, X),
-      predict_function = pred_fun,
-      metrics = metrics
-    )
-  } else {
-    stop(
-      "Response type must be either \"single\" or \"multi\".",
-      call. = FALSE
-    )
-  }
-  
-  mfl
+  list(
+    metrics = metrics,
+    pred_fun = pred_fun
+  )
 }
