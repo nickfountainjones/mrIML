@@ -1,509 +1,350 @@
-#'Calculates and helps interpret variable importance for mrIML models.
-#' @param yhats A list of model predictions.
-#' @param mrBootstrap_obj The object containing model bootstrapping results.
-#' @param ModelPerf A list containing model performance metrics for each response variable.
-#' @param X The predictor data.
-#' @param Y The response data.
-#' @param X1 A \code{dataframe} extra predictor set used in each model. For the MrIML Joint species distribution model (JSDM) this is just a copy of the response data.
-#' @param threshold The threshold for model performance (AUC) below which variables are filtered (default: 0.1).
-#' @param global_top_var The number of top global variables to display (default: 10).
-#' @param local_top_var The number of top local variables for each response to display (default: 5).
-#' @param mode \code{character}'classification' or 'regression' i.e., is the generative model a regression or classification?
-#' @return A list containing variable importance data and a combined plot.
+#' Calculates and helps interpret variable importance for [mrIML] models.
 #'
+#' Summarizes variable importance in a [mrIML] model at both a global (accross
+#' all the response models) and local (for individual response models). This can
+#' be done for a plain [mrIML] model or bootstrap results obtained from
+#' [mrBootstrap()]. 
+#'
+#' @param mrIMLobj A list object output by [mrIMLpredict()].
+#' @param mrBootstrap_obj A list of bootstrap results output by [mrBootstrap()].
+#' @param ModelPerf A list object containing model performance metrics output by
+#' [mrIMLperformance].
+#' @param threshold The performance threshold for response models (AUC for
+#' classification and $R^2$ for regression). Only response models that meet this
+#' performance criteria are plotted.
+#' @param global_top_var The number of top global variables to display
+#' (default: 10).
+#' @param local_top_var The number of top local variables for each response to
+#' display (default: 5).
+#' 
+#' @return A list with:
+#' * `$vi_data`: Variable importance data its raw form (including bootstrap
+#' samples if `mrBootstrap_obj` was supplied).
+#' * `$vi_tbl`: Variable importance data point estimates.
+#' * `$vi_plot`: A group plot of the most important variables both globally and
+#' for the individual response models.
+#' 
 #' @examples
-#' \dontrun{
-#' # Example usage:
-#' #set up analysis
-#' Y <- dplyr::select(Bird.parasites, -scale.prop.zos)%>% 
-#' dplyr::select(sort(names(.)))#response variables eg. SNPs, pathogens, species....
-#' X <- dplyr::select(Bird.parasites, scale.prop.zos) # feature set
-#' X1 <- Y %>%
-#' dplyr::select(sort(names(.)))
-#'model_rf <- 
-#' rand_forest(trees = 100, mode = "classification", mtry = tune(), min_n = tune()) %>% #100 trees are set for brevity. Aim to start with 1000
-#' set_engine("randomForest")
-#' yhats_rf <- mrIMLpredicts(X=X, Y=Y,
-#'X1=X1,'Model=model_rf , 
-#'balance_data='no',mode='classification',
-#'tune_grid_size=5,seed = sample.int(1e8, 1),'morans=F,
-#'prop=0.7, k=5, racing=T) #
-#'ModelPerf <- mrIMLperformance(yhats_rf, Model=model_rf, Y=Y, mode='classification')
-#'
-#'bs_analysis <- mrBootstrap(yhats=yhats_rf,Y=Y, num_bootstrap = 5)
-#'bs_impVI <- mrvip(yhats=yhats_rf, mrBootstrap_obj=bs_analysis, ModelPerf=ModelPerf, 
-#'threshold=0.8,  X=X, Y=Y, X1=X1, global_top_var=10,
-#'local_top_var=5)
-#'bs_impVI[[1]] #importance data bootstrap
-#'bs_impVI[[2]] #importance data point estimate
-#'bs_impVI[[3]] #importance plot
-#'bs_impVI[[4]] #PCA
-#'bs_impVI[[5]] #outliers
-#'bs_impVI[[6]] #pc loadings
-#'bs_impVI[[7]] #PC scores
-#'}
+#' # example code
+#' 
 #' @export
 
-mrvip <- function(yhats = NULL, mrBootstrap_obj = NULL,  X=X, X1=NULL, Y=Y,
-                  mode = 'classification', threshold = 0.1, global_top_var = 10,
-                  local_top_var = 5, taxa=NULL, ModelPerf=ModelPerf, plot.pca =T) {
+mrvip <- function(mrIMLobj,
+                  mrBootstrap_obj = NULL,
+                  threshold = 0.1,
+                  global_top_var = 10,
+                  local_top_var = 5,
+                  taxa = NULL,
+                  model_perf = NULL,
+                  plot_pca = TRUE) {
+  # Deconstruct mrIMLobj
+  yhats <- mrIMLobj$Fits
+  X <- mrIMLobj$Data$X
+  Y <- mrIMLobj$Data$Y
+  X1 <- mrIMLobj$Data$X1
+  mode <- mrIMLobj$Model$mode
+  # Reset global_ and local_top_var to the total number of variables if needed
+  global_top_var <- ifelse(
+    global_top_var > ncol(cbind(X, X1)),
+    ncol(cbind(X, X1)),
+    global_top_var
+  )
+  local_top_var <- ifelse(
+    local_top_var > ncol(cbind(X, X1)),
+    ncol(cbind(X, X1)),
+    local_top_var
+  )
+  # Set local options to be restored on exit
+  #withr::local_options(list(dplyr.summarise.inform = FALSE))
   
-
-    # If bootstrap_obj is NULL, treat it as a predictive model (yhats)
-    
-    if (is.null(mode)) {
-      stop("Mode argument must be provided when using yhats option.")
-    }
-    
-    #internal_fit_function <- function(i) {
-    
-    options(dplyr.summarise.inform = FALSE)
-    
-    if (mode == 'classification') {
-      
-      pred_fun <- function(m, dat) {
-        
-        predict(
-          m, dat[, colnames(yhats[[i]]$data[-1]), drop = FALSE],
-          type = "prob"
-        )$`.pred_1`
-      }
-      
-      metrics <- list(
-        logloss = MetricsWeighted::logLoss,
-        `ROC AUC` = MetricsWeighted::AUC,
-        `% Dev Red` = MetricsWeighted::r_squared_bernoulli
+  # Split workflow depending on if mrBootstrap_obj is supplied
+  # (later this could be an S3 method)
+  if (is.null(mrBootstrap_obj)) {
+    vi_df <- mrVip_mrIMLobj(yhats)
+  } else {
+    vi_df <- mrVip_mrIMLboot(mrBootstrap_obj)
+  }
+  
+  # Summarize in table form(used for mrVipPCA)
+  vi_tbl <- vi_df %>%
+    dplyr::group_by(response, var) %>%
+    dplyr::summarise(sd_value = mean(sd_value)) %>%
+    tidyr::pivot_wider(
+      id_cols = "var",
+      names_from = "response",
+      values_from = "sd_value"
+    ) %>%
+    tibble::column_to_rownames("var") %>%
+    dplyr::mutate(
+      dplyr::across(
+        tidyselect::everything(),
+        ~replace(., is.na(.), mean(., na.rm = TRUE))
       )
-      
-    } else {
-      
-      pred_fun <- function(m, dat) {
-        predict(m, dat[, colnames(X), drop = FALSE])[[".pred"]]
-        
-      }
-      
-      metrics=list(rmse = MetricsWeighted::rmse)
-    }
-    
-    models <- purrr::map(
-      yhats,
-      purrr::pluck("last_mod_fit")
     )
+  
+  #-----------------------------------------------------------------------------
+  # General plotting
+  #-----------------------------------------------------------------------------
+  # Get top global variables
+  highest_vi_df <- vi_df %>% 
+    dplyr::group_by(var) %>% 
+    dplyr::summarise(mean_imp = mean(sd_value)) %>%
+    dplyr::slice_max(
+      order_by = mean_imp,
+      n = global_top_var
+    )
+  # Change geom type depending on if bootstrap object is supplied or not
+  geom_VIplot <- ifelse(
+    is.null(mrBootstrap_obj),
+    ggplot2::geom_col, # Is this right?????
+    ggplot2::geom_boxplot
+  )
+  # Plot the variable importance scores
+  p_global_vi <- vi_df %>% 
+    dplyr::filter(var %in% highest_vi_df$var) %>%
+    dplyr::group_by(var) %>% 
+    dplyr::mutate(mean_imp = mean(sd_value)) %>%
+    dplyr::slice_max(
+      order_by = mean_imp,
+      prop = (global_top_var / length(unique(vi_df$var)))
+    ) %>%
+    ggplot2::ggplot(
+      ggplot2::aes(x = sd_value, y = reorder(var, mean_imp))
+    ) +
+    geom_VIplot() +
+    ggplot2::theme_bw() +
+    ggplot2::labs(x = "Importance", y = "Features") +
+    ggplot2::theme(
+      axis.title.x = ggplot2::element_text(size = 8),
+      axis.title.y = ggplot2::element_text(size = 8)
+    ) +
+    ggplot2::xlim(0, NA)
+  
+  # Get only the fits that surpass user suplied threashold
+  perf_metric <- ifelse(mode == "classification", "roc_AUC", "rsquared")
+  models_to_plot <- model_perf[[1]] %>%
+    dplyr::rename(metric = perf_metric) %>%
+    # Filter to only fits that meet theshold criteria
+    dplyr::filter(
+      metric > threshold
+    ) %>%
+    dplyr::arrange(metric, ) %>%
+    # Limit to the top 9 for uncrowded plotting 
+    tail(9) %>%
+    dplyr::pull(response)
+  
+  # Plot the local response VIP in a grid
+  p_local_vi_list <- lapply(
+    models_to_plot,
+    function(resp) {
+      local_highest_vi_df <- vi_df %>%
+        dplyr::filter(response == resp) %>%
+        dplyr::group_by(var) %>% 
+        dplyr::summarise(mean_imp = mean(sd_value)) %>%
+        dplyr::slice_max(
+          order_by = mean_imp,
+          n = local_top_var
+        )
+      vi_df %>%
+        dplyr::filter(
+          response == resp,
+          var %in% local_highest_vi_df$var
+        ) %>%
+        dplyr::group_by() %>%
+        ggplot2::ggplot(
+          ggplot2::aes(x = sd_value, y = reorder(var, sd_value))
+        ) +
+        ggplot2::geom_boxplot() +
+        ggplot2::theme_bw() +
+        ggplot2::labs(x = "Importance", y = "") +
+        ggplot2::scale_y_discrete(label = abbreviate) +
+        ggplot2::theme(
+          axis.title.x = ggplot2::element_text(size = 8),
+          axis.title.y = ggplot2::element_text(size = 8)
+        ) +
+        ggplot2::labs(subtitle = resp) +
+        ggplot2::xlim(0, max(vi_df$sd_value))
+    }
+  )
+  
+  p_local_vi <- patchwork::wrap_plots(p_local_vi_list, axis_titles = "collect")
+  
+  #-----------------------------------------------------------------------------
+  # Add user defined taxa plot if needed
+  #----------------------------------------------------------------------------- 
+  
+  if(!is.null(taxa)) {
+    taxa_highest_vi_df <- vi_df %>%
+      dplyr::filter(response == taxa) %>%
+      dplyr::group_by(var) %>% 
+      dplyr::summarise(mean_imp = mean(sd_value)) %>%
+      dplyr::slice_max(
+        order_by = mean_imp,
+        n = local_top_var
+      )
+    p_taxa_vi <- vi_df %>%
+      dplyr::filter(
+        response == taxa,
+        var %in% taxa_highest_vi_df$var
+      ) %>%
+      dplyr::group_by() %>%
+      ggplot2::ggplot(
+        ggplot2::aes(x = sd_value, y = reorder(var, sd_value))
+      ) +
+      ggplot2::geom_boxplot() +
+      ggplot2::theme_bw() +
+      ggplot2::labs(x = "Importance", y = "Features") +
+      ggplot2::scale_y_discrete(label = abbreviate) +
+      ggplot2::theme(
+        axis.title.x = ggplot2::element_text(size = 8),
+        axis.title.y = ggplot2::element_text(size = 8)
+      ) +
+      ggplot2::labs(subtitle = taxa) +
+      ggplot2::xlim(0, max(vi_df$sd_value))
     
-    fl_list <- vector("list", length(yhats))
-    
-    vi_df <- list()  # Initialize a list to store the final data frames
-    
-    for (i in seq_along(fl_list)) {
+    p_VIP <- (p_global_vi + p_local_vi) / p_taxa_vi
       
-      fl_list[[i]] <- flashlight(
-        
-        model = yhats[[i]]$mod1_k,
-        label = colnames(Y)[i],
+  } else {
+    p_VIP <- (p_global_vi + p_local_vi)
+  }
+  
+  #-----------------------------------------------------------------------------
+  # Return a list
+  #-----------------------------------------------------------------------------
+  
+  list(
+    vi_df,
+    vi_tbl,
+    p_VIP
+  )
+  
+}
+
+mrVip_mrIMLboot <- function(mrIMLboot_obj) {
+  # Unlist the object at the top level
+  bootstrap_obj <- bs_malaria %>% # << change bs_malaria!
+    unlist(recursive = FALSE)
+  
+  var_importance_df <- future.apply::future_lapply(
+    bootstrap_obj,
+    function(boot) {
+      boot %>%
+        dplyr::bind_rows(.id = "var") %>%
+        dplyr::group_by(var) %>%
+        dplyr::summarise(
+          sd_value = sd(value),
+          response = unique(response),
+          bootstrap = unique(bootstrap)
+        )
+    }
+  ) %>%
+    dplyr::bind_rows()
+  
+  # Should be set up now to generate plots from large global df...
+  var_importance_df
+}
+
+mrVip_mrIMLobj <- function(yhats) {
+  # Run flashlight on mrIML object and then get sd of partial dependence values
+  ## Set flashlight metrics
+  flashlight_ops <- mrIML_flashlight_setup(
+    mode
+  )
+  ## Run flashlight PD and summarize variable importance via SD.
+  var_imp_list <- lapply(
+    seq_along(yhats),
+    function(i) {
+      fl <- flashlight::flashlight(
+        model = yhats[[i]]$last_mod_fit,
+        label = names(yhats)[i],
         y = 'class', 
         data = yhats[[i]]$data,
-        predict_function = pred_fun,
-        metrics = metrics
+        predict_function = flashlight_ops$pred_fun,
+        metrics = flashlight_ops$metrics
       )
-      
-      # Define variable names based on whether X1 is NULL
-      if (is.null(X1)) {
-        var_names <- colnames(X)
-      } else {
-        var_names <- colnames(cbind(X, Y[-i]))  
-      }
-      
-      vi_list <- list()  # Initialize a list to store variable importance data frames
-      
-      # Calculate variable importance for each variable
-      for (j in seq_along(var_names)) {
-        
-        pd_ <- flashlight::light_profile(fl_list[[i]], v = var_names[j])
-        
-        # Calculate standard deviation of each variable
-        sd_value <- sd(pd_$data$value)
-        
-        # Create a data frame with variable name and standard deviation
-        vi_list[[j]] <- data.frame(var = var_names[j], sd_value = sd_value, response = colnames(Y)[i])
-      }
-      
-      # Combine variable importance data frames into one data frame
-      vi_df[[i]] <- do.call(rbind, vi_list)
-    }
-    
-    # Combine all variable importance data frames into one table
-    vi_table <- do.call(rbind, vi_df)
-    
-      # Get top variables
-      G_target_data_avg <- vi_table %>% 
-        dplyr::group_by(var) %>% 
-        dplyr::summarise(mean_imp = mean(sd_value)) 
-      
-      #filter variables
-      G_top_vars <- head(G_target_data_avg[order(-G_target_data_avg$mean_imp), ], global_top_var)
-      G_target_data_final_df <- vi_table %>% 
-        dplyr::filter(var %in% G_top_vars$var)
-      
-      #first plot
-      p1 <- ggplot(G_target_data_final_df, aes(y = reorder(var, sd_value), x = sd_value))+
-        geom_col() +
-        theme_bw()+
-        labs(x = "Importance", y = "Features")+
-        theme(
-          axis.title.x = element_text(size = 8),
-          axis.title.y = element_text(size = 8)
-        )
-      
-      #plot individual taxa 
-      
-      plot_list <- list()
-      
-      unique_responses <- unique(G_target_data_final_df$response)
-      
-      #reduces number of plots - focuses on responses best predicted
-      
-      if (mode=='classification'){
-        
-      perf_filter <- ModelPerf[[1]] %>% filter (roc_AUC > threshold)
-      
-      } else {
-        
-      perf_filter <- ModelPerf[[1]] %>% filter (rsquared > threshold)
-      }
-      
-      response_names_filt <- perf_filter$response
-      
-      for (response_value in response_names_filt) {
-        
-        response_data <- subset(G_target_data_final_df, response == response_value)
-        
-        target_data_final_df <-  response_data %>% 
-          slice_max(order_by = sd_value, n = local_top_var)
-        
-        plot <- ggplot(target_data_final_df, aes(x = sd_value, y = reorder(var, sd_value))) +
-          geom_boxplot() +
-          theme_bw() +
-          labs(x = "Importance", y = response_value) +
-          theme(
-            axis.title.x = element_text(size = 8),
-            axis.title.y = element_text(size = 8)
+      ligth_prof_df <- lapply(
+        names(yhats[[i]]$data)[-1],
+        function(v_name) {
+          pd <- flashlight::light_profile(
+            fl,
+            v_name
           )
-        plot_list[[response_value]] <- plot
-      }
-      
-      p2 <- arrangeGrob(grobs = plot_list, plot = FALSE)
-      
-      combined_plot <- plot_grid(p1, p2, rel_heights = c(1, 0.5), labels = "auto")
-      
-      #for a taxa of interest
-      if(!is.null(taxa)){
-        
-        # Filter the data for the provided taxa
-        target_data <- vi_table %>% dplyr::filter(response == taxa)
-        
-        # Calculate the mean importance of each variable
-        target_data_avg <- target_data %>% 
-          dplyr::group_by(var) %>% 
-          dplyr::summarise(mean_imp = mean(sd_value)) %>% 
-          ungroup()
-        
-        # Get the top variables
-        top_vars <- head(target_data_avg[order(-target_data_avg$mean_imp), ], local_top_var)
-        
-        # Filter the data to include only the top variables
-        target_data_final_df <- target_data %>% dplyr::filter(var %in% top_vars$var)
-        
-        # Create the boxplot for the target
-        p3 <- ggplot(target_data_final_df, aes(x = sd_value, y = reorder(var, sd_value))) +
-          geom_boxplot() +
-          theme_bw() +
-          labs(x = "Importance", y = taxa) +
-          scale_y_discrete(label = abbreviate) +
-          theme(
-            axis.title.x = element_text(size = 8),
-            axis.title.y = element_text(size = 8)
-          )
-        
-        #publication ready plot  
-        combined_plot <- plot_grid(p1, p2,p3, rel_heights = c(1, 0.5), labels = "auto")
-        
-      }
-      
-      
-      #for bootstraps
-      
-      if (!is.null(mrBootstrap_obj)) {
-      
-      n_response <- ncol(Y)
-      complete_df <- cbind(Y, X)
-      n_data <- ncol(complete_df)
-      
-      bind_rows_by_name <- function(list_obj, object_name) {
-        filtered_list <- list_obj[names(list_obj) %in% object_name]
-        bind_rows(filtered_list)
-      }
-      
-      internal_fit_function <- function(i) {
-        
-        object_name <- names(complete_df[i])
-        
-        combined_list <- list()  # Create an empty list to store combined objects
-        
-        for (j in 1:n_response) {
-          combined_object <- map_dfr(mrBootstrap_obj[[j]], bind_rows_by_name, object_name)
-          
-          if (nrow(combined_object) > 0) {
-            
-            combined_objfinal <- combined_object #this makes sure it doesnt save the duplicates
-            
-            combined_list[[j]] <-  combined_objfinal  # Append the combined object to the list
-          }
+          pd$data
         }
-        
-        combined_df <- do.call(rbind, combined_list)  # Convert the list to a data frame
-        
-        return(combined_df)
-      }
-      
-      pd_list <- future_lapply(seq_len(n_data), internal_fit_function, future.seed = TRUE)
-      
-      
-      vi_list <- list()  # Create an empty list to store the plots
-      
-      for (i in seq_along(pd_list)) {
-        
-        #extract data for each variable in the models
-        df <-  pd_list[[i]]
-        
-        #calculate the standard deviation of each bootstrap for each taxa
-        result <- df %>%
-          dplyr::group_by(response, bootstrap) %>%
-          summarise(sd_value = sd(value))%>% 
-          ungroup() 
-        
-        #add the variables names back in
-        
-        df_names <- rep(names(df[1]), nrow(result))
-        
-        result_update <- cbind(result, var=df_names)
-        
-        vi_list[[i]] <- result_update
-        
-      }
-      
-      vi_df <- do.call(rbind, vi_list)
-      #NB#could have a groupCv argument here
-      
-      G_target_data_avg <- vi_df %>% 
-        dplyr::group_by(var) %>% 
-        summarise(mean_imp = mean(sd_value)) 
-      
-      # Create the boxplot for the target
-      
-      #get top variables
-      G_top_vars <- head(G_target_data_avg[order(-G_target_data_avg$mean_imp), ], global_top_var)
-      
-      G_target_data_final_df <- vi_df %>% 
-        dplyr::filter(var %in% G_top_vars$var)
-      
-      #plot overall importance 
-      p1 <- ggplot(G_target_data_final_df, aes(y=reorder(var,sd_value), x=sd_value))+
-        geom_boxplot()+
-        theme_bw()+
-        labs(x="Importance", y="Features")+
-        theme(
-          axis.title.x = element_text(size = 8),  # Adjust the size as needed
-          axis.title.y = element_text(size = 8)
+      ) %>%
+        magrittr::set_names(names(yhats[[i]]$data)[-1]) %>%
+        dplyr::bind_rows(.id = "var") %>%
+        dplyr::group_by(var) %>%
+        dplyr::summarise(
+          sd_value = sd(value),
+          response = names(yhats)[i],
+          bootstrap = NA
         )
-      
-      #grid.arrange(p1)
-      
-      #boxplots for each individual predictor
-      
-      # Filter the data based on the threshold and calculate mean values for each target
-      
-      filtered_data <-  vi_df %>%
-        dplyr::group_by(response) %>%
-        summarise(sd_value = mean(sd_value)) %>%
-        right_join(ModelPerf[[1]], by = join_by(response)) %>% 
-        filter(roc_AUC > threshold) %>% 
-        ungroup()
-      
-      # Create a list to store the plots
-      plot_list <- list()
-      
-      # Generate boxplots for each target
-      for (k in 1:nrow(filtered_data)) {
-        
-        target <- filtered_data$response[k]###
-        
-        # Filter the data for the current target
-        target_data <-  vi_df %>%
-          filter(response == {{target}})
-        
-        target_data_avg <- target_data %>% 
-          dplyr::group_by(var) %>% 
-          dplyr::summarise(mean_imp = mean(sd_value)) %>% 
-          ungroup()
-        
-        # Create the boxplot for the target
-        
-        #get top variables
-        top_vars <- head(target_data_avg[order(-target_data_avg$mean_imp), ], local_top_var)
-        
-        target_data_final_df <- target_data %>% 
-          dplyr::filter(var %in% top_vars$var)
-        
-        plot <- ggplot(target_data_final_df, aes(x = sd_value, y = reorder(var, sd_value))) +
-          geom_boxplot() +
-          theme_bw()+
-          labs(x="Importance", y=target)+
-          scale_y_discrete(label=abbreviate)+
-          theme(
-            axis.title.x = element_text(size = 8),  # Adjust the size as needed
-            axis.title.y = element_text(size = 8)
-          )
-        
-        # Add the plot to the list
-        plot_list[[k]] <- plot
-      }
-      
-      # Arrange and display the plots in a grid
-      #p2 <- grid.arrange(grobs = plot_list, plot = FALSE)
-      p2 <- arrangeGrob(grobs = plot_list, plot = FALSE)
-      
-      #publication ready plot  
-      combined_plot <- plot_grid(p1, p2, rel_heights = c(1, 0.5), labels = "auto")
-      
-      #for a taxa of interest
-      if(!is.null(taxa)){
-
-          # Filter the data for the provided taxa
-          target_data <- vi_df %>% filter(response == taxa)
-          
-          # Calculate the mean importance of each variable
-          target_data_avg <- target_data %>% 
-            dplyr::group_by(var) %>% 
-            summarise(mean_imp = mean(sd_value)) %>% 
-            ungroup()
-          
-          # Get the top variables
-          top_vars <- head(target_data_avg[order(-target_data_avg$mean_imp), ], local_top_var)
-          
-          # Filter the data to include only the top variables
-          target_data_final_df <- target_data %>% filter(var %in% top_vars$var)
-          
-          # Create the boxplot for the target
-          p3 <- ggplot(target_data_final_df, aes(x = sd_value, y = reorder(var, sd_value))) +
-            geom_boxplot() +
-            theme_bw() +
-            labs(x = "Importance", y = taxa) +
-            scale_y_discrete(label = abbreviate) +
-            theme(
-              axis.title.x = element_text(size = 8),
-              axis.title.y = element_text(size = 8)
-            )
-        
-        #publication ready plot  
-        combined_plot <- plot_grid(p1, p2,p3, rel_heights = c(1, 0.5), labels = "auto")
-        
-      }
-      
     }
-    
-    #------------------------------------------------------------------  
-    #Importance PCA plot. Responses with similar importance scores group together
-    #------------------------------------------------------------------    
- 
+  )
+  # Return a df to plot
+  ## Bind flashlight PD results
+  var_imp_list %>%
+    dplyr::bind_rows()
+}
 
-      
-      if (plot.pca) {
-   
-  vi_table_wide <- vi_table %>% 
-    pivot_wider(
-                id_cols = 'var',
-                names_from = "response",
-                values_from = "sd_value") %>% 
-                column_to_rownames('var') %>% 
-                mutate(across(everything(), ~replace(., is.na(.), mean(., na.rm = TRUE))))#or impute with code below
-  
-  # #X1 will have missing values. This algorithm will impute them with no impact on the pca
- 
-       # if(!is.null(X1)) {
-  # 
-  #   ## First the number of components has to be chosen
-  #   ## (for the reconstruction step)
-  #   
-  # nb <- estim_ncpPCA(vi_table_wide,ncp.max=4)
-  #   
-  # ## Multiple Imputation
-  # vi_table_wide_t <- missMDA::MIPCA( vi_table_wide, ncp = 1)
-  # 
-  # #get the data
-  # vi_table_wide <- vi_table_wide_t$res.imputePCA 
-  # 
-  # }
-  #     
-  # else {
-  #   
-  #   #keep the data as is otherwise
-  #   vi_table_wide <- vi_table_wide
-  # }
-  
-      #seems like it doesn't make too much difference
-    a.pca <-  t(vi_table_wide) %>% 
-      
-      prcomp() # do PCA
-    print('here')
-    #-----------------------------------------------------------------------------------------
-    #outlier detection
-    
-    uscores <- a.pca$x %>%
-      as.data.frame()
-    
-    outL <- apply(uscores, 2, function(x) which( (abs(x - median(x)) / mad(x)) > 6 ))
-    
-    #-----------------------------------------------------------------------------------------
-    
-    pca_val <-  a.pca  %>%
-      tidy(matrix = "eigenvalues")
-    
-    trans <- t(vi_table_wide)
-    
-    p3 <- a.pca %>%
-      augment(trans) %>% 
-      ggplot(aes(.fittedPC1, .fittedPC2)) + 
-      geom_point() + 
-      ggrepel::geom_label_repel(aes(label = rownames(trans)),
-                                box.padding   = 0.35, 
-                                point.padding = 0.5,
-                                label.size = 0.1,
-                                segment.color = 'grey50') +
-      theme_bw()
-    
-    p4 <- a.pca %>%
-      tidy(matrix = "eigenvalues") %>%
-      ggplot(aes(PC, percent)) +
-      geom_col(fill = "#56B4E9", alpha = 0.8) +
-      scale_x_continuous(breaks = 1:9) +
-      scale_y_continuous(
-        labels = scales::percent_format(),
-        expand = expansion(mult = c(0, 0.01))
-      ) +
-      theme_bw() 
-    
-    combined_plot_PCA <- plot_grid( p3, p4, rel_heights = c(1, 0.5), labels = "auto")
-    
- }
-      else {
+#' Principle Component Analysis of [mrIML] variable importance
+#' 
+#' @param mrVip_obj A list returned by [mrVip()].
+#' 
+#' @returns A list of PCA results:
+#' * `$PCA_plot`
+#' * `$PC_outlires`
+#' * `$eigenvalues`
+#' * `$PC_scores`
+#' 
+#' @export
 
-        combined_plot_PCA <- NULL
-        outLiers  <- NULL
-        pca_val <- NULL
-        scores <- NULL
-      }
-
-    return(list(vi_df,vi_table_wide, combined_plot,  combined_plot_PCA, outLiers=outL,  pca_val=pca_val, scores=uscores))
-  }
-
-  
+mrVipPCA <- function(mrVip_obj) {
+  vi_tbl <- mrVip_obj[[2]]
+  # Run PCA
+  pc_analasys <- t(vi_tbl) %>%
+    prcomp()
+  # Get scores
+  pc_scores <- pc_analasys$x %>%
+    tibble::as_tibble() %>%
+    dplyr::mutate(
+      response = rownames(pc_analasys$x)
+    )
+  # Get eigenvalue info
+  eigenvalues <- pc_analasys %>%
+    generics::tidy(matrix = "eigenvalues")
+  # Calculate outliers in each PC
+  outliers <- apply(
+    pc_scores %>%
+      dplyr::select(-response),
+    MARGIN = 2,
+    FUN = function(x) which((abs(x - median(x)) / mad(x)) > 6)
+  )
+  # Plot responses relative to first two PCs
+  p_pc_plot <- pc_scores %>%
+    ggplot2::ggplot(
+      ggplot2::aes(x = PC1, y = PC2, label = response)
+    ) +
+    ggplot2::geom_point() +
+    ggrepel::geom_label_repel() +
+    ggplot2::theme_bw()
+  # Plot the variability captured by each PC
+  p_pc_var_explained <- eigenvalues %>%
+    ggplot2::ggplot(
+      ggplot2::aes(x = PC, y = percent)) +
+    ggplot2::geom_col() +
+    ggplot2::scale_x_continuous(breaks = 1:9) +
+    ggplot2::scale_y_continuous(
+      labels = scales::percent_format(),
+      expand = ggplot2::expansion(mult = c(0, 0.01))
+    ) +
+    ggplot2::theme_bw() 
+  # Return a list
+  list(
+    PCA_plot = patchwork::wrap_plots(p_pc_plot, p_pc_var_explained),
+    PC_outliers = outliers,
+    eigenvalues = eigenvalues,
+    PC_scores = pc_scores
+  )
+}
