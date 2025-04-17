@@ -137,6 +137,16 @@ mrIML_internal_bootstrap_fun <- function(wf,
       }
     ) %>%
       dplyr::bind_rows()
+    if(nrow(bootstrap_sample) < 100) {
+      warning(
+        paste(
+          "Downsampling when there are only a few observations of a particular",
+          "class can cause issues further down the line in the mrIML workflow.",
+          "We recomend no downsampling by default and removing responses where",
+          "one calss is extreemly rare or common."
+        )
+      )
+    }
   }
   
   # Refit model and run flashlight
