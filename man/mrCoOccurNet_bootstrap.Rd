@@ -4,57 +4,92 @@
 \alias{mrCoOccurNet_bootstrap}
 \title{Generate a MrIML co-occurrence network}
 \usage{
-mrCoOccurNet_bootstrap(mrPD_obj, Y)
+mrCoOccurNet_bootstrap(mrBootstrap_obj)
 }
 \arguments{
-\item{mrPD_obj}{A list of model predictions.}
-
-\item{Y}{The response data.}
+\item{mrBootstrap_obj}{A of bootstrapped partial dependencies output from
+\code{\link[=mrBootstrap]{mrBootstrap()}}.}
 }
 \value{
-A dataframe representing the co-occurrence network with strength and directionality.
+A data frame representing the co-occurrence network with strength and
+directionality.
 }
 \description{
-This function generates a co-occurrence network from a provided list and calculates strength and directionality of the relationships.
+This function generates a co-occurrence network from a provided list and
+calculates strength and directionality of the relationships.
 }
 \examples{
-\dontrun{
-# Example usage:
-#set up analysis
-Y <- dplyr::select(Bird.parasites, -scale.prop.zos)\%>\% 
-dplyr::select(sort(names(.)))#response variables eg. SNPs, pathogens, species....
-X <- dplyr::select(Bird.parasites, scale.prop.zos) # feature set
-X1 <- Y \%>\%
-dplyr::select(sort(names(.)))
-model_rf <- 
-rand_forest(trees = 100, mode = "classification", mtry = tune(), min_n = tune()) \%>\% #100 trees are set for brevity. Aim to start with 1000
-set_engine("randomForest")
-yhats_rf <- mrIMLpredicts(X=X, Y=Y,
-X1=X1,'Model=model_rf , 
-balance_data='no',mode='classification',
-tune_grid_size=5,seed = sample.int(1e8, 1),'morans=F,
-prop=0.7, k=5, racing=T) #
+\dontshow{if (!identical(Sys.getenv("NOT_CRAN"), "true")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+library(tidymodels)
 
-bs_analysis <- mrBootstrap(yhats=yhats_rf,Y=Y, num_bootstrap = 5)
-assoc_net<- mrCoOccurNet_bootstrap (mrPD_obj=pds , Y=Y)
+#' data <- MRFcov::Bird.parasites
+Y <- data \%>\%
+  select(-scale.prop.zos) \%>\%
+  select(order(everything()))
+X <- data \%>\%
+  select(scale.prop.zos)
 
-assoc_net_filtered <-  assoc_net \%>\% 
-filter(mean_strength > 0.05)
-g <- graph_from_data_frame(assoc_net_filtered, directed=TRUE, vertices=names(Y)) #matching Y data
-E(g)$Value <- assoc_net_filtered$mean_strength###chnge this as needed
-E(g)$Color <- ifelse(assoc_net_filtered$direction == "negative", "blue", "red")
+model_rf <- rand_forest(
+  trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+  mode = "classification",
+  mtry = tune(),
+  min_n = tune()
+) \%>\%
+  set_engine("randomForest")
+
+mrIML_rf <- mrIMLpredicts(
+  X = X,
+  Y = Y,
+  X1 = Y,
+  Model = model_rf,
+  prop = 0.7,
+  k = 5
+)
+
+mrIML_rf_boot <- mrIML_rf \%>\%
+  mrBootstrap()
+
+assoc_net_filtered <- mrIML_rf_boot \%>\% 
+  mrCoOccurNet_bootstrap() \%>\%
+  filter(mean_strength > 0.05)
+ 
+#convert to igraph
+g <- graph_from_data_frame(
+  assoc_net_filtered,
+  directed = TRUE,
+  vertices = names(Y)
+)
+E(g)$Value <- assoc_net_filtered$mean_strength
+E(g)$Color <- ifelse(
+  assoc_net_filtered$direction == "negative",
+  "blue", "red"
+)
+# Convert the igraph object to a ggplot object with NMDS layout
 gg <- ggnetwork(g)
-ggplot(gg, aes(x = x, y = y, xend = xend, yend = yend)) +
- geom_edges(aes(color = Color, linewidth = (Value)), curvature = 0.2,
-            arrow = arrow(length = unit(5, "pt"), type = "closed")) + #makes arrows bigger
- geom_nodes(color = "gray", size = degree(g, mode = "out")/2)+#, fill='black', stroke =2) +
-scale_color_identity() +
+# Plot the graph
+ggplot(
+  gg,
+  aes(x = x, y = y, xend = xend, yend = yend)
+) +
+ geom_edges(
+   aes(color = Color, linewidth = Value),
+   curvature = 0.2,
+   arrow = arrow(length = unit(5, "pt"), type = "closed")
+ ) +
+ geom_nodes(
+   color = "gray",
+   size = degree(g, mode = "out") / 2
+ ) +
+ scale_color_identity() +
  theme_void() +
  theme(legend.position = "none")  +
- geom_nodelabel_repel(aes(label = name),
-                     box.padding = unit(0.5, "lines"),
-                      data = gg,
-                      size=2,
-                     segment.colour = "black",
-                     colour = "white", fill = "grey36")} 
+ geom_nodelabel_repel(
+   aes(label = name),
+   box.padding = unit(0.5, "lines"),
+   size = 2,
+   segment.colour = "black",
+   colour = "white",
+   fill = "grey36"
+ )
+\dontshow{\}) # examplesIf}
 }
