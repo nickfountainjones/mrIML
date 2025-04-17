@@ -21,11 +21,13 @@ calculates strength and directionality of the relationships.
 \examples{
 \dontshow{if (!identical(Sys.getenv("NOT_CRAN"), "true")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(tidymodels)
+library(igraph)
+library(ggnetwork)
 
-#' data <- MRFcov::Bird.parasites
+data <- MRFcov::Bird.parasites
 Y <- data \%>\%
   select(-scale.prop.zos) \%>\%
-  select(order(everything()))
+  dplyr::select(order(everything()))
 X <- data \%>\%
   select(scale.prop.zos)
 

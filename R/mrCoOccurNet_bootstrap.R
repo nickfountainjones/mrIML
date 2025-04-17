@@ -11,11 +11,13 @@
 #'
 #' @examplesIf !identical(Sys.getenv("NOT_CRAN"), "true")
 #' library(tidymodels)
+#' library(igraph)
+#' library(ggnetwork)
 #' 
-#' #' data <- MRFcov::Bird.parasites
+#' data <- MRFcov::Bird.parasites
 #' Y <- data %>%
 #'   select(-scale.prop.zos) %>%
-#'   select(order(everything()))
+#'   dplyr::select(order(everything()))
 #' X <- data %>%
 #'   select(scale.prop.zos)
 #'
