@@ -57,54 +57,54 @@
 #'                      colour = "white", fill = "grey36")} 
 #' @export
 
-mrCoOccurNet_bootstrap <- function(mrPD_obj, Y){   #,  variable ='Plas
+mrCoOccurNet_bootstrap <- function(mrBootstrap_obj){   #,  variable ='Plas
+  # Expand bootstrap object
+  pd_boot_df <- lapply(
+    mrBootstrap_obj %>%
+      purrr::flatten() %>%
+      purrr::flatten(),
+    function(pd_df) {
+      names(pd_df)[1] <- "X"
+      pd_df
+    }
+  ) %>%
+    dplyr::bind_rows(.id = "var")
+  # Filter to only taxa
+  taxa <- pd_boot_df$response %>%
+    unique()
+  pd_boot_df <- pd_boot_df %>%
+    dplyr::filter(var %in% taxa) %>%
+    dplyr::mutate(X = ifelse(X == 1, "present", "absent"))
+  # Calculate the strengths of edges
+  edge_strength <- pd_boot_df %>%
+    dplyr::group_by(var, response, bootstrap) %>%
+    dplyr::summarise(sd_value = sd(value)) %>%
+    dplyr::group_by(var, response) %>%
+    dplyr::summarise(
+      mean_strength = mean(sd_value),
+      lower_ci = quantile(sd_value, probs = 0.025),
+      upper_ci = quantile(sd_value, probs = 0.974)
+    )
+  # Calculate the direction of influence (positive or negative)
+  edge_direction <- pd_boot_df %>%
+    tidyr::spread(X, value) %>%
+    dplyr::mutate(direction = present - absent) %>%
+    dplyr::group_by(var, response) %>%
+    dplyr::summarise(mean_direction = mean(direction)) %>%
+    dplyr::mutate(direction = ifelse(mean_direction > 0, "positive", "negative"))
   
-  n_response <- length(Y)
-  
-  mrPD_obj <- mrPD_obj[[1]] #dont want the plot
-  
-  PD_yList <- mrPD_obj[seq_along(Y)] #just keep the taxa
-  
-  result_final_df <- list()
-  
-  #cooccur_list <- #lapply(PD_yList, function(i){
-  for (i in seq_along(PD_yList)) {
-    
-    #extract data for each variable in the models
-    df <-  PD_yList [[i]]
-    
-    #calculate the standard deviation of each bootstrap for each taxa
-    
-    df1 <- df %>% mutate(predictor=names(df[1])) %>% 
-      rename(class = 1)
-    
-    result_sd <- df1 %>%
-      group_by(target, bootstrap) %>%
-      summarize(sd_value = sd(value)) %>% 
-      group_by(target) %>% 
-      summarize(mean_strength = mean(sd_value), lower_ci = quantile(sd_value, probs = 0.025), upper_ci = quantile(sd_value, probs = 0.975)) %>% 
-      mutate(predictor=df1$predictor[1])
-    
-    
-    result_final <- df1 %>%
-      spread(class, value) %>%
-      mutate(direction = `1` - `0`) %>% 
-      group_by(target) %>% 
-      summarize(mean_direction=mean(direction)) %>% 
-      mutate(direction = ifelse(mean_direction > 0, "positive", "negative")) %>% 
-      right_join(result_sd, by='target')
-    
-    result_final_df[[i]] <- result_final
-    
-    
-  }
-  
-  complete_net <- do.call(rbind,result_final_df) 
-  
-  complete_network <- complete_net %>%  rename(taxa_1=predictor,taxa_2= target) %>% 
-    dplyr::select(taxa_1, taxa_2, direction, mean_strength, lower_ci, upper_ci, mean_direction)
-  
-  return(complete_network)
+  # Join and return edge data for plotting
+  dplyr::full_join(edge_strength, edge_direction) %>%
+    dplyr::rename(taxa_1 = var, taxa_2= response) %>% 
+    dplyr::select(
+      taxa_1,
+      taxa_2,
+      direction,
+      mean_strength,
+      lower_ci,
+      upper_ci,
+      mean_direction
+    )
   
 }
 
