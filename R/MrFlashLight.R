@@ -83,8 +83,10 @@ mrFlashlight <- function(mrIMLobj,
 mrIML_flashlight_setup <- function(mode, predict_function = NULL) {
   if (mode == "classification") {
     pred_fun <- function(m, dat) {
+      if (!("workflow" %in% class(m))) {
+        m <- hardhat::extract_workflow(m)
+      }
       pred <- m %>%
-        hardhat::extract_workflow() %>%
         predict(
           new_data = dat,
           type = "prob"

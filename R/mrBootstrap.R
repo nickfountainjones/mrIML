@@ -63,8 +63,7 @@ mrBootstrap <- function(mrIMLobj,
     yhats,
     function(yhat) {
       data <- yhat$data
-      wf <- yhat$last_mod_fit %>%
-        tune::extract_workflow()
+      wf <- yhat$last_mod_fit
       list(
         data = data,
         workflow = wf
@@ -150,7 +149,10 @@ mrIML_internal_bootstrap_fun <- function(wf,
   }
   
   # Refit model and run flashlight
-  model_fit <- workflows::fit(wf, data = bootstrap_sample)
+  model_fit <- workflows::fit(
+    hardhat::extract_workflow(wf),
+    data = bootstrap_sample
+  )
   fl <- flashlight::flashlight(
     model = model_fit,
     label = "class",

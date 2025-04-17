@@ -25,7 +25,49 @@
 #' for the individual response models.
 #' 
 #' @examples
-#' # example code
+#' library(tidymodels)
+#' 
+#' # Without bootstrap
+#' data <- MRFcov::Bird.parasites
+#' Y <- data %>%
+#'   select(-scale.prop.zos) %>%
+#'   select(order(everything()))
+#' X <- data %>%
+#'   select(scale.prop.zos)
+#'
+#' # Specify a random forest tidy model
+#' model_rf <- rand_forest(
+#'   trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+#'   mode = "classification",
+#'   mtry = tune(),
+#'   min_n = tune()
+#' ) %>%
+#'   set_engine("randomForest")
+#' 
+#' mrIML_rf <- mrIMLpredicts(
+#'   X = X,
+#'   Y = Y,
+#'   X1 = Y,
+#'   Model = model_rf,
+#'   prop = 0.7,
+#'   k = 5
+#' )
+#' 
+#' mrIML_rf_perf <- mrIML_rf %>%
+#'   mrIMLperformance()
+#' 
+#' mrvip(mrIML_rf, model_perf = mrIML_rf_perf, taxa = "Plas")
+#' 
+#' # With bootstrap
+#' 
+#' mrIML_rf_boot <- mrIML_rf %>%
+#'   mrBootstrap()
+#'   
+#' mrvip(
+#'   mrIML_rf,
+#'   mrBootstrap_obj = mrIML_rf_boot,
+#'   model_perf = mrIML_rf_perf
+#'  )
 #' 
 #' @export
 
@@ -35,23 +77,23 @@ mrvip <- function(mrIMLobj,
                   global_top_var = 10,
                   local_top_var = 5,
                   taxa = NULL,
-                  model_perf = NULL,
-                  plot_pca = TRUE) {
+                  model_perf = NULL) {
   # Deconstruct mrIMLobj
   yhats <- mrIMLobj$Fits
   X <- mrIMLobj$Data$X
   Y <- mrIMLobj$Data$Y
   X1 <- mrIMLobj$Data$X1
   mode <- mrIMLobj$Model$mode
+  
   # Reset global_ and local_top_var to the total number of variables if needed
   global_top_var <- ifelse(
-    global_top_var > ncol(cbind(X, X1)),
-    ncol(cbind(X, X1)),
+    global_top_var > ncol(dplyr::bind_cols(X, X1)),
+    ncol(dplyr::bind_cols(X, X1)),
     global_top_var
   )
   local_top_var <- ifelse(
-    local_top_var > ncol(cbind(X, X1)),
-    ncol(cbind(X, X1)),
+    local_top_var > ncol(dplyr::bind_cols(X, X1)),
+    ncol(dplyr::bind_cols(X, X1)),
     local_top_var
   )
   # Set local options to be restored on exit
@@ -60,7 +102,7 @@ mrvip <- function(mrIMLobj,
   # Split workflow depending on if mrBootstrap_obj is supplied
   # (later this could be an S3 method)
   if (is.null(mrBootstrap_obj)) {
-    vi_df <- mrVip_mrIMLobj(yhats)
+    vi_df <- mrVip_mrIMLobj(mrIMLobj)
   } else {
     vi_df <- mrVip_mrIMLboot(mrBootstrap_obj)
   }
@@ -222,7 +264,7 @@ mrvip <- function(mrIMLobj,
 
 mrVip_mrIMLboot <- function(mrIMLboot_obj) {
   # Unlist the object at the top level
-  bootstrap_obj <- bs_malaria %>% # << change bs_malaria!
+  bootstrap_obj <- mrIMLboot_obj %>% # << change bs_malaria!
     unlist(recursive = FALSE)
   
   var_importance_df <- future.apply::future_lapply(
@@ -244,26 +286,26 @@ mrVip_mrIMLboot <- function(mrIMLboot_obj) {
   var_importance_df
 }
 
-mrVip_mrIMLobj <- function(yhats) {
+mrVip_mrIMLobj <- function(mr_iml_obj) {
   # Run flashlight on mrIML object and then get sd of partial dependence values
   ## Set flashlight metrics
   flashlight_ops <- mrIML_flashlight_setup(
-    mode
+    mr_iml_obj$Model$mode
   )
   ## Run flashlight PD and summarize variable importance via SD.
   var_imp_list <- lapply(
-    seq_along(yhats),
+    seq_along(mr_iml_obj$Fits),
     function(i) {
       fl <- flashlight::flashlight(
-        model = yhats[[i]]$last_mod_fit,
-        label = names(yhats)[i],
+        model = mr_iml_obj$Fits[[i]]$last_mod_fit,
+        label = names(mr_iml_obj$Fits)[i],
         y = 'class', 
-        data = yhats[[i]]$data,
+        data = mr_iml_obj$Fits[[i]]$data,
         predict_function = flashlight_ops$pred_fun,
         metrics = flashlight_ops$metrics
       )
       ligth_prof_df <- lapply(
-        names(yhats[[i]]$data)[-1],
+        names(mr_iml_obj$Fits[[i]]$data)[-1],
         function(v_name) {
           pd <- flashlight::light_profile(
             fl,
@@ -272,12 +314,12 @@ mrVip_mrIMLobj <- function(yhats) {
           pd$data
         }
       ) %>%
-        magrittr::set_names(names(yhats[[i]]$data)[-1]) %>%
+        magrittr::set_names(names(mr_iml_obj$Fits[[i]]$data)[-1]) %>%
         dplyr::bind_rows(.id = "var") %>%
         dplyr::group_by(var) %>%
         dplyr::summarise(
           sd_value = sd(value),
-          response = names(yhats)[i],
+          response = names(mr_iml_obj$Fits)[i],
           bootstrap = NA
         )
     }
