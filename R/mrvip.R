@@ -7,8 +7,9 @@
 #'
 #' @param mrIMLobj A list object output by [mrIMLpredict()].
 #' @param mrBootstrap_obj A list of bootstrap results output by [mrBootstrap()].
-#' @param ModelPerf A list object containing model performance metrics output by
-#' [mrIMLperformance].
+#' @param model_perf A list object containing model performance metrics output by
+#' [mrIMLperformance()]. If not supplied then [mrIMLperformance()] is run inside
+#' [mrvip()] to get performance metrics.
 #' @param threshold The performance threshold for response models (AUC for
 #' classification and $R^2$ for regression). Only response models that meet this
 #' performance criteria are plotted.
@@ -35,7 +36,6 @@
 #' X <- data %>%
 #'   select(scale.prop.zos)
 #'
-#' # Specify a random forest tidy model
 #' model_rf <- rand_forest(
 #'   trees = 100, # 100 trees are set for brevity. Aim to start with 1000
 #'   mode = "classification",
@@ -53,10 +53,7 @@
 #'   k = 5
 #' )
 #' 
-#' mrIML_rf_perf <- mrIML_rf %>%
-#'   mrIMLperformance()
-#' 
-#' mrvip(mrIML_rf, model_perf = mrIML_rf_perf, taxa = "Plas")
+#' mrvip(mrIML_rf, taxa = "Plas")
 #' 
 #' # With bootstrap
 #' 
@@ -65,9 +62,8 @@
 #'   
 #' mrvip(
 #'   mrIML_rf,
-#'   mrBootstrap_obj = mrIML_rf_boot,
-#'   model_perf = mrIML_rf_perf
-#'  )
+#'   mrBootstrap_obj = mrIML_rf_boot
+#' )
 #' 
 #' @export
 
@@ -84,7 +80,8 @@ mrvip <- function(mrIMLobj,
   Y <- mrIMLobj$Data$Y
   X1 <- mrIMLobj$Data$X1
   mode <- mrIMLobj$Model$mode
-  
+  # Get model performance if not supplied
+  if(is.null(model_perf)) model_perf <- mrIMLperformance(mrIMLobj)
   # Reset global_ and local_top_var to the total number of variables if needed
   global_top_var <- ifelse(
     global_top_var > ncol(dplyr::bind_cols(X, X1)),

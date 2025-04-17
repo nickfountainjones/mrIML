@@ -2,79 +2,91 @@
 % Please edit documentation in R/mrvip.R
 \name{mrvip}
 \alias{mrvip}
-\title{Calculates and helps interpret variable importance for mrIML models.}
+\title{Calculates and helps interpret variable importance for \link{mrIML} models.}
 \usage{
 mrvip(
-  yhats = NULL,
+  mrIMLobj,
   mrBootstrap_obj = NULL,
-  X = X,
-  X1 = NULL,
-  Y = Y,
-  mode = "classification",
   threshold = 0.1,
   global_top_var = 10,
   local_top_var = 5,
   taxa = NULL,
-  ModelPerf = ModelPerf,
-  plot.pca = T
+  model_perf = NULL
 )
 }
 \arguments{
-\item{yhats}{A list of model predictions.}
+\item{mrIMLobj}{A list object output by \code{\link[=mrIMLpredict]{mrIMLpredict()}}.}
 
-\item{mrBootstrap_obj}{The object containing model bootstrapping results.}
+\item{mrBootstrap_obj}{A list of bootstrap results output by \code{\link[=mrBootstrap]{mrBootstrap()}}.}
 
-\item{X}{The predictor data.}
+\item{threshold}{The performance threshold for response models (AUC for
+classification and $R^2$ for regression). Only response models that meet this
+performance criteria are plotted.}
 
-\item{X1}{A \code{dataframe} extra predictor set used in each model. For the MrIML Joint species distribution model (JSDM) this is just a copy of the response data.}
+\item{global_top_var}{The number of top global variables to display
+(default: 10).}
 
-\item{Y}{The response data.}
+\item{local_top_var}{The number of top local variables for each response to
+display (default: 5).}
 
-\item{mode}{\code{character}'classification' or 'regression' i.e., is the generative model a regression or classification?}
-
-\item{threshold}{The threshold for model performance (AUC) below which variables are filtered (default: 0.1).}
-
-\item{global_top_var}{The number of top global variables to display (default: 10).}
-
-\item{local_top_var}{The number of top local variables for each response to display (default: 5).}
-
-\item{ModelPerf}{A list containing model performance metrics for each response variable.}
+\item{model_perf}{A list object containing model performance metrics output by
+\code{\link[=mrIMLperformance]{mrIMLperformance()}}. If not supplied then \code{\link[=mrIMLperformance]{mrIMLperformance()}} is run inside
+\code{\link[=mrvip]{mrvip()}} to get performance metrics.}
 }
 \value{
-A list containing variable importance data and a combined plot.
+A list with:
+\itemize{
+\item \verb{$vi_data}: Variable importance data its raw form (including bootstrap
+samples if \code{mrBootstrap_obj} was supplied).
+\item \verb{$vi_tbl}: Variable importance data point estimates.
+\item \verb{$vi_plot}: A group plot of the most important variables both globally and
+for the individual response models.
+}
 }
 \description{
-Calculates and helps interpret variable importance for mrIML models.
+Summarizes variable importance in a \link{mrIML} model at both a global (accross
+all the response models) and local (for individual response models). This can
+be done for a plain \link{mrIML} model or bootstrap results obtained from
+\code{\link[=mrBootstrap]{mrBootstrap()}}.
 }
 \examples{
-\dontrun{
-# Example usage:
-#set up analysis
-Y <- dplyr::select(Bird.parasites, -scale.prop.zos)\%>\% 
-dplyr::select(sort(names(.)))#response variables eg. SNPs, pathogens, species....
-X <- dplyr::select(Bird.parasites, scale.prop.zos) # feature set
-X1 <- Y \%>\%
-dplyr::select(sort(names(.)))
-model_rf <- 
-rand_forest(trees = 100, mode = "classification", mtry = tune(), min_n = tune()) \%>\% #100 trees are set for brevity. Aim to start with 1000
-set_engine("randomForest")
-yhats_rf <- mrIMLpredicts(X=X, Y=Y,
-X1=X1,'Model=model_rf , 
-balance_data='no',mode='classification',
-tune_grid_size=5,seed = sample.int(1e8, 1),'morans=F,
-prop=0.7, k=5, racing=T) #
-ModelPerf <- mrIMLperformance(yhats_rf, Model=model_rf, Y=Y, mode='classification')
+library(tidymodels)
 
-bs_analysis <- mrBootstrap(yhats=yhats_rf,Y=Y, num_bootstrap = 5)
-bs_impVI <- mrvip(yhats=yhats_rf, mrBootstrap_obj=bs_analysis, ModelPerf=ModelPerf, 
-threshold=0.8,  X=X, Y=Y, X1=X1, global_top_var=10,
-local_top_var=5)
-bs_impVI[[1]] #importance data bootstrap
-bs_impVI[[2]] #importance data point estimate
-bs_impVI[[3]] #importance plot
-bs_impVI[[4]] #PCA
-bs_impVI[[5]] #outliers
-bs_impVI[[6]] #pc loadings
-bs_impVI[[7]] #PC scores
-}
+# Without bootstrap
+data <- MRFcov::Bird.parasites
+Y <- data \%>\%
+  select(-scale.prop.zos) \%>\%
+  select(order(everything()))
+X <- data \%>\%
+  select(scale.prop.zos)
+
+model_rf <- rand_forest(
+  trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+  mode = "classification",
+  mtry = tune(),
+  min_n = tune()
+) \%>\%
+  set_engine("randomForest")
+
+mrIML_rf <- mrIMLpredicts(
+  X = X,
+  Y = Y,
+  X1 = Y,
+  Model = model_rf,
+  prop = 0.7,
+  k = 5
+)
+
+mrvip(mrIML_rf, taxa = "Plas")
+
+# With bootstrap
+
+mrIML_rf_boot <- mrIML_rf \%>\%
+  mrBootstrap()
+  
+mrvip(
+  mrIML_rf,
+  mrBootstrap_obj = mrIML_rf_boot
+)
+
 }
