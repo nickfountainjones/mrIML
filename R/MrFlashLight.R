@@ -12,15 +12,57 @@
 #' @details This function enables users to utilize interpretable machine learning methods to understand their multi-response and single-response models.
 #'
 #' @examples 
-#' # Single response
-#' fl <- mrFlashlight(yhats, X, Y, response = "single", index = 1, mode = "regression")
-#' plot(light_performance(fl), fill = "orange") + labs(x = element_blank())
-#' plot(light_breakdown(fl, new_obs = cbind(X, Y)[1, ]), by = X, v = Y)
-#' int <- light_interaction(fl, pairwise = TRUE)
+#' library(tidymodels)
+#' library(flashlight)
+#' 
+#' data <- MRFcov::Bird.parasites
+#' Y <- data %>%
+#'   select(-scale.prop.zos) %>%
+#'   select(order(everything()))
+#' X <- data %>%
+#'   select(scale.prop.zos)
+#' 
+#' model_rf <- rand_forest(
+#'   trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+#'   mode = "classification",
+#'   mtry = tune(),
+#'   min_n = tune()
+#' ) %>%
+#'   set_engine("randomForest")
 #'
-#' # Multiple response
-#' flashlightObj <- mrFlashlight(yhats, X, Y, response = "multi", mode = "regression")
-#' @export 
+#' mrIML_rf <- mrIMLpredicts(
+#'   X = X,
+#'   Y = Y,
+#'   X1 = Y,
+#'   Model = model_rf,
+#'   prop = 0.7,
+#'   k = 5
+#' )
+#' 
+#' fl <- mrFlashlight(
+#'   mrIML_rf,
+#'   response = "multi",
+#'   index = 1
+#' )
+#' 
+#' # Performance comparison
+#' fl %>%
+#'   light_performance(
+#'     metrics = list(`ROC AUC` = MetricsWeighted::AUC)
+#'   ) %>%
+#'   plot() +
+#'   ylim(0, 1)
+#'   
+#' # Partial dependence curves
+#' fl %>%
+#'   light_profile(data = cbind(X, Y), "scale.prop.zos") %>%
+#'   plot()
+#'   
+#' # Two-way partial dependence
+#' fl %>%
+#'   light_profile2d(c("scale.prop.zos","Plas")) %>%
+#'   plot()
+#' @export
 
 
 mrFlashlight <- function(mrIMLobj,
