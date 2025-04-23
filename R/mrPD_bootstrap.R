@@ -1,48 +1,68 @@
 #' Bootstrap Partial Dependence plots
 #'
-#' This function bootstraps model predictions and generates partial dependence plots for each response variable.
-#' It also creates a combined plot for the top variables of interest.
+#' This function bootstraps model predictions and generates partial dependence
+#' plots for each response variable. It also creates a combined plot for the top
+#' variables of interest.
 #'
-#' @param mrBootstrap_obj A list of model bootstraps generated using mrBootstrap function.
-#' @param vi_obj Variable Importance data.
-#' @param X The predictor data.
-#' @param Y The response data.
+#' @param mrIML_obj A list object returned by [mrIMLpredicts()].
+#' @param mrBootstrap_obj A list object returned by [mrBootstrap()].
+#' @param vi_obj A list object returned by [mrvip()]. If `vi_obj` is not
+#' provided then it is created inside `mrPD_bootstrap` by running [mrvip()]
 #' @param target The target variable for generating plots.
 #' @param global_top_var The number of top variables to consider (default: 2).
 #' 
-#' @return A list containing the partial dependence plots for each response variable and a combined plot.
-#' @export
+#' @return A list containing the partial dependence plots for each response
+#' variable and a combined plot???
 #'
 #' @examples
-#' \dontrun{
-#'#' # Example usage:
-#' #set up analysis
-#' Y <- dplyr::select(Bird.parasites, -scale.prop.zos)%>% 
-#' dplyr::select(sort(names(.)))#response variables eg. SNPs, pathogens, species....
-#' X <- dplyr::select(Bird.parasites, scale.prop.zos) # feature set
-
-#' X1 <- Y %>%
-#' dplyr::select(sort(names(.)))
-#'model_rf <- 
-#' rand_forest(trees = 100, mode = "classification", mtry = tune(), min_n = tune()) %>% #100 trees are set for brevity. Aim to start with 1000
-#' set_engine("randomForest")
-#' yhats_rf <- mrIMLpredicts(X=X, Y=Y,
-#'X1=X1,'Model=model_rf , 
-#'balance_data='no',mode='classification',
-#'tune_grid_size=5,seed = sample.int(1e8, 1),'morans=F,
-#'prop=0.7, k=5, racing=T) #
-#'bs_analysis <- mrBootstrap(yhats=yhats_rf,Y=Y, num_bootstrap = 5)
-#'pds <- mrPD_bootstrap(mrBootstrap_obj=bs_malaria, vi_obj=bs_impVIa, X, Y,
-#'target='Plas', global_top_var=5)
-#'pd_list <- pds[[1]] #data
-#'pds[[2]]#plot }
-
-
-mrPD_bootstrap <- function(mrBootstrap_obj,
-                           vi_obj,
-                           X, Y,
+#' library(tidymodels)
+#' 
+#' data <- MRFcov::Bird.parasites
+#' Y <- data %>%
+#'   select(-scale.prop.zos) %>%
+#'   dplyr::select(order(everything()))
+#' X <- data %>%
+#'   select(scale.prop.zos)
+#'
+#' model_rf <- rand_forest(
+#'   trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+#'   mode = "classification",
+#'   mtry = tune(),
+#'   min_n = tune()
+#' ) %>%
+#'   set_engine("randomForest")
+#' 
+#' mrIML_rf <- mrIMLpredicts(
+#'   X = X,
+#'   Y = Y,
+#'   X1 = Y,
+#'   Model = model_rf,
+#'   prop = 0.7,
+#'   k = 5
+#' )
+#' 
+#' mrIML_rf_boot <- mrIML_rf %>%
+#'   mrBootstrap()
+#'   
+#' mrPD_bootstrap(
+#'   mrIML_rf,
+#'   mrIML_rf_boot,
+#'   target = "Plas",
+#'   global_top_var = 4
+#' )
+#' @export
+mrPD_bootstrap <- function(mrIML_obj,
+                           mrBootstrap_obj,
+                           vi_obj = NULL,
                            target,
                            global_top_var = 2) {
+  # Unpack mrIML_obj
+  Y <- mrIML_obj$Data$Y
+  X <- mrIML_obj$Data$X
+  if (is.null(vi_obj)) {
+    vi_obj <- mrIML_obj %>%
+      mrIMLperformance()
+  }
   
   n_response <- ncol(Y)
   complete_df <- cbind(Y, X)

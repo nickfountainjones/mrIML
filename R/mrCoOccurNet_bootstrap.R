@@ -6,8 +6,8 @@
 #' @param mrBootstrap_obj A of bootstrapped partial dependencies output from
 #' [mrBootstrap()].
 #'
-#' @return A data frame representing the co-occurrence network with strength and
-#' directionality.
+#' @return A data frame representing the co-occurrence network with edge
+#' strengths and directionality.
 #'
 #' @examplesIf !identical(Sys.getenv("NOT_CRAN"), "true")
 #' library(tidymodels)
