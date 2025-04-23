@@ -1,118 +1,106 @@
-#' Calculate covariate partial dependencies for mrIML JSDMs (Joint species distirbution models)
+#' Investigate partial dependencies of a covariate for mrIML JSDMs (Joint
+#' species distirbution models)
 #'
-#' This function calculates the covariate partial dependency plot for a specified environmental/host variable.
-#' It also filters the taxa based on standard deviation thresholds and visualizes the results.
+#' This function is a wrapper around [mrFlashlight()] that plots the covariate
+#' partial dependencies for a specified environmental/host variable. It also
+#' filters the taxa based on standard deviation thresholds.
 #'
-#' @param yhats A list of model predictions.
-#' @param Y The response data.
-#' @param X The predictor data.
-#' @param X1 Additional predictor data excluding the variable of interest.
+#' @param mrIMLobj A list object output by [mrIMLpredict()].
 #' @param var The variable of interest for calculating the profile.
-#' @param sdthresh The standard deviation threshold for filtering taxa (default: 0.05).
+#' @param sdthresh The standard deviation threshold for filtering taxa
+#' (default: 0.05).
 #' 
-#' @return A plot displaying the covariate profile and change in probability for the specified variable.
-#' @export
-#'
+#' @return A plot displaying the covariate partial dependence profiles for those
+#' models that meet the `sdthreshold` requirement and another summarizing the
+#' rates of change in probability for the specified variable
+#' (the derivatives of the PD curves).
+#' 
 #' @examples
-#' \dontrun{
-#' # Example usage:
-#' #set up analysis
-#' Y <- dplyr::select(Bird.parasites, -scale.prop.zos)%>% 
-#' dplyr::select(sort(names(.)))#response variables eg. SNPs, pathogens, species....
-#' X <- dplyr::select(Bird.parasites, scale.prop.zos) # feature set
-#' X1 <- Y %>%
-#' dplyr::select(sort(names(.)))
-#'model_rf <- 
-#' rand_forest(trees = 100, mode = "classification", mtry = tune(), min_n = tune()) %>% #100 trees are set for brevity. Aim to start with 1000
-#' set_engine("randomForest")
-#' yhats_rf <- mrIMLpredicts(X=X, Y=Y,
-#'X1=X1,'Model=model_rf , 
-#'balance_data='no',mode='classification',
-#'tune_grid_size=5,seed = sample.int(1e8, 1),'morans=F,
-#'prop=0.7, k=5, racing=T) #
-#'ModelPerf <- mrIMLperformance(yhats_rf, Model=model_rf, Y=Y, mode='classification')
+#' library(tidymodels)
+#' 
+#' # Without bootstrap
+#' data <- MRFcov::Bird.parasites
+#' Y <- data %>%
+#'   select(-scale.prop.zos) %>%
+#'   select(order(everything()))
+#' X <- data %>%
+#'   select(scale.prop.zos)
 #'
-#'covar <- mr_Covar(yhats, X=X,X1=X1, Y=Y, var='scale.prop.zos', sdthresh =0.01) #sdthrsh just plots taxa responding the most.
-
-#' }
-
-mr_Covar <- function(yhats, Y, X, X1, var,  sdthresh =0.05) {
+#' model_rf <- rand_forest(
+#'   trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+#'   mode = "classification",
+#'   mtry = tune(),
+#'   min_n = tune()
+#' ) %>%
+#'   set_engine("randomForest")
+#' 
+#' mrIML_rf <- mrIMLpredicts(
+#'   X = X,
+#'   Y = Y,
+#'   X1 = Y,
+#'   Model = model_rf,
+#'   prop = 0.7,
+#'   k = 5
+#' )
+#' 
+#' mrIML_rf %>%
+#'   mr_Covar(var = "scale.prop.zos", sdthresh = 0.05)
+#' 
+#' @export
+mr_Covar <- function(mrIMLobj,
+                     var, 
+                     sdthresh = 0.05) {
+  # Unpack mrIMLobj
+  yhats <- mrIMLobj$Fits
+  Y <- mrIMLobj$Data$Y
+  X <- mrIMLobj$Data$X
+  X1 <- mrIMLobj$Data$X1
+  mode <- mrIMLobj$Model$mode
   
-  n_response <- length(Y)
+  # Run flashlifht
+  profiles_fl <- mrFlashlight(
+    mrIMLobj,
+    response = "multi"
+  ) %>%
+    flashlight::light_profile(var)
   
-  profileData_combined <- lapply(seq_len(n_response), function(i) {
-    
-    fl <- mrFlashlight(yhats, X = cbind(X, X1[-i]), Y = Y, response = "single", index = i, mode = 'classification')
-    var_names <- setdiff(names(yhats[[i]]$data)[-1], names(Y))
-    
-      pd_data <- light_profile(fl, v = paste(var)) 
-      nameCov <- as.data.frame(rep(paste(var), times=nrow(pd_data$data)))
-      pd_data_final <- cbind(nameCov, pd_data$data)
-      names(pd_data_final)[1] = 'cov'
-      names(pd_data_final)[2] = 'cov_grid'
-      names(pd_data_final)[4] = paste("value_",i) ###
-      
-      pd_data_final 
-      
-  })
+  # Filter results and get derivatives
+  profiles_df <- profiles_fl$data %>%
+    dplyr::rename(cov_grid = var) %>%
+    dplyr::group_by(label) %>%
+    mutate(
+      sd = sd(value),
+      cov_grad = cov_grid + (0.5 * (lead(cov_grid) - cov_grid)),
+      cov_diff = abs(lead(value) - value)
+    ) %>%
+    dplyr::filter(
+      sd >= sdthresh
+    )
   
- 
-  all_data <- do.call(cbind, profileData_combined)
-
-  plot_data <-  all_data %>% select(all_of(names(all_data)[duplicated(names(all_data))]%>% setdiff('value'))) 
+  p_pd <- profiles_df %>%
+    ggplot2::ggplot(
+      ggplot2::aes(x = cov_grid, y = value, colour = label)
+    ) +
+    ggplot2::geom_line() +
+    ggplot2::geom_point() +
+    ggplot2::theme_bw() +
+    ggplot2::ylab("Prob of occurance") +
+    ggplot2::xlab(var) +
+    ggplot2::labs(colour = "Taxa") +
+    ggplot2::ylim(0, 1) +
+    ggplot2::xlim(range(profiles_df$cov_grid))
   
-  value_data  <- all_data %>% select(contains('value')) 
-  colnames(value_data) <- names(Y) 
+  p_pd_diff <- profiles_df %>%
+    dplyr::filter(!is.na(cov_diff)) %>%
+    ggplot2::ggplot(
+      ggplot2::aes(x = cov_grad, group = cov_grad, y = cov_diff)
+    ) +
+    ggplot2::geom_boxplot() +
+    ggplot2::theme_bw() +
+    ggplot2::ylab("Change in prob") +
+    ggplot2::xlab(var) +
+    ggplot2::ylim(0, 1) +
+    ggplot2::xlim(range(profiles_df$cov_grid))
   
-  #filter taxa not strongly responding
-  sdev<- value_data %>% 
-    summarize(across(everything(), sd)) #double check this works
-    
-  Xred <- sdev %>%
-    select(where(~. >= sdthresh)) %>% t() %>% as.data.frame() %>% 
-    rownames_to_column()
-  
-  names(Xred)[1] <- 'taxa'
-  
-  r_value_data <- value_data %>%   select(any_of(Xred$taxa))
-  
-  combi_data_sub <- as.data.frame(cbind(plot_data, r_value_data)) %>% select(-counts, -label, -type)
-  
-  combi_data_prep_sub <- combi_data_sub %>% 
-    pivot_longer(cols = matches(names(Y)), values_to = "value")
-  
-  p1 <- ggplot(combi_data_prep_sub, aes(x = cov_grid, y = value, colour=name)) +
-    geom_line() +
-    labs(x = paste0(var), y = "Probability of occurence") +
-    scale_color_discrete(name = "Taxa") +
-    theme_bw()
-  
-  #for the complete data
-  combi_data<- as.data.frame(cbind(plot_data, value_data)) %>% 
-    select(-counts, -label, -type) 
-  
-  combi_data_prep <-  combi_data %>% 
-    pivot_longer(cols = matches(names(Y)), values_to = "value")
-  
- 
-  #cumulation
-  # Step 2: Convert "cov_grid" column to factor with specific order if needed. 
-  #need to do this for the complete data.
-  #change combiprep
-  combi_data_prep$cov_grid <- factor(combi_data_prep$cov_grid, levels = unique(combi_data_prep$cov_grid))
-  
-  # Step 3: Calculate change in values
-  df <- combi_data_prep %>%
-    arrange(cov_grid) %>%
-    group_by(cov_grid) %>%
-    mutate(change = ifelse(is.na(value - lag(value)), 0, value - lag(value)))
-  
-  # Step 4: Plot smoothed change in values
-  p2 <-ggplot(df, aes(x = cov_grid, y = abs(change))) +
-    geom_boxplot() +
-    labs(x = paste0(var), y = "Change in probability") +
-    theme_bw()
-  
-  grid.arrange(p1, p2)
-
+  patchwork::wrap_plots(p_pd, p_pd_diff, ncol = 1, axis_titles = "collect")
 }
