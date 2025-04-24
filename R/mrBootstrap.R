@@ -1,29 +1,53 @@
-#' Bootstrap model predictions
+#' Bootstrap mrIML model predictions
 #'
 #' This function bootstraps model predictions and generates variable profiles
-#' for each response variable based on the provided yhats.
+#' for each response variable.
 #'
-#' @param yhats A list of model predictions (e.g., from mrIMLpredicts).
-#' @param num_bootstrap The number of bootstrap samples to generate (default: 10).
-#' @param Y The response data.
-#' @param mode \code{character}: 'classification' or 'regression' depending on the model type.
-#' @param downsample Logical. Should the bootstrap samples be downsampled? (default: FALSE).
-#' @return A list containing bootstrap samples of variable profiles for each response variable.
+#' @param mrIMLobj A list object output by [mrIMLpredict()].
+#' @param num_bootstrap The number of bootstrap samples to generate
+#' (default: 10).
+#' @param downsample Logical. Should the bootstrap samples be downsampled?
+#' (default: FALSE).
+#' 
+#' @return A list containing bootstrap samples of variable profiles for each
+#' response variable.
+#' 
+#' @examples !identical(Sys.getenv("NOT_CRAN"), "true")
+#' library(tidymodels)
+#'
+#' data <- MRFcov::Bird.parasites
+#' Y <- data %>%
+#'   select(-scale.prop.zos) %>%
+#'   select(order(everything()))
+#' X <- data %>%
+#'   select(scale.prop.zos)
+#'
+#' # Specify a random forest tidy model
+#' model_rf <- rand_forest(
+#'   trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+#'   mode = "classification",
+#'   mtry = tune(),
+#'   min_n = tune()
+#' ) %>%
+#'   set_engine("randomForest")
+#'
+#' mrIML_rf <- mrIMLpredicts(
+#'   X = X,
+#'   Y = Y,
+#'   X1 = Y,
+#'   Model = model_rf,
+#'   prop = 0.7,
+#'   k = 5
+#' )
+#' 
+#' # cl <- parallel::makeCluster(5)
+#' # future::plan(cluster, workers=cl)
+#' 
+#' mrIML_bootstrap <- mrIML_rf %>%
+#'   mrBootstrap(
+#'   num_bootstrap = 50
+#'   )
 #' @export
-#' @examples
-#' \dontrun{
-#' # Example usage:
-#'
-#' # Prepare response data
-#' Y <- dplyr::select(Bird.parasites, -scale.prop.zos) %>%
-#'   dplyr::select(sort(names(.))) # Response variables (e.g., SNPs, pathogens, species)
-#'
-#' # Example list of yhats generated from mrIMLpredicts (assume yhats_rf is defined)
-#' yhats_rf <- mrIMLpredicts(...) # Replace with actual code to generate yhats_rf
-#'
-#' # Perform bootstrap analysis
-#' bs_analysis <- mrBootstrap(yhats = yhats_rf, Y = Y, num_bootstrap = 50, mode = "classification")
-#' }
 mrBootstrap <- function(mrIMLobj,
                         num_bootstrap = 10,
                         downsample = FALSE) {
@@ -87,7 +111,8 @@ mrBootstrap <- function(mrIMLobj,
         bootstrap_wf[[var_id]]$data,
         metrics = flashlight_ops$metrics,
         pred_fun = flashlight_ops$pred_fun,
-        downsample_to = min_class_counts[[var_id]], # will be NULL if downsample = FALSE
+        # will be NULL if downsample = FALSE
+        downsample_to = min_class_counts[[var_id]],
         response_name = names(yhats)[var_id],
         boot_id = boot_id
       )
