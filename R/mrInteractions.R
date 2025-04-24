@@ -14,130 +14,216 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' # Example usage:
-#' #set up analysis
-#' Y <- dplyr::select(Bird.parasites, -scale.prop.zos)%>% 
-#' dplyr::select(sort(names(.)))#response variables eg. SNPs, pathogens, species....
-#' X <- dplyr::select(Bird.parasites, scale.prop.zos) # feature set
-
-#' X1 <- Y %>%
-#' dplyr::select(sort(names(.)))
-#'model_rf <- 
-#' rand_forest(trees = 100, mode = "classification", mtry = tune(), min_n = tune()) %>% #100 trees are set for brevity. Aim to start with 1000
-#' set_engine("randomForest")
-#' yhats_rf <- mrIMLpredicts(X=X, Y=Y,
-#'X1=X1,'Model=model_rf , 
-#'balance_data='no',mode='classification',
-#'tune_grid_size=5,seed = sample.int(1e8, 1),'morans=F,
-#'prop=0.7, k=5, racing=T) 
-#'int_ <- mrInteractions(yhats=yhats_rf, X, Y, num_bootstrap=10,
-#'feature = 'Microfilaria', top.int=10)
-#'int_[[1]] # overall plot
-#'int_[[2]] # individual plot for the response of choice 
-#'int_[[3]] #two way plot# }
-
-
-
-mrInteractions <- function(yhats, X, Y, num_bootstrap = 1, feature = feature, top.int = 10) {
+#' library(tidymodels)
+#'
+#' data <- MRFcov::Bird.parasites
+#' Y <- data %>%
+#'   select(-scale.prop.zos) %>%
+#'   select(order(everything()))
+#' X <- data %>%
+#'   select(scale.prop.zos)
+#'
+#' # Specify a random forest tidy model
+#' model_rf <- rand_forest(
+#'   trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+#'   mode = "classification",
+#'   mtry = tune(),
+#'   min_n = tune()
+#' ) %>%
+#'   set_engine("randomForest")
+#'
+#' mrIML_rf <- mrIMLpredicts(
+#'   X = X,
+#'   Y = Y,
+#'   X1 = Y,
+#'   Model = model_rf,
+#'   prop = 0.7,
+#'   k = 5
+#' )
+#' 
+#' mrIML_interactions_rf <- mrInteractions(
+#'   mrIML_rf,
+#'   num_bootstrap = 10,
+#'   feature = "Plas"
+#' )
+#' 
+#' mrIML_interactions_rf[[1]]
+#' mrIML_interactions_rf[[2]]
+#' mrIML_interactions_rf[[3]]
+#'   
+mrInteractions <- function(mrIMLobj,
+                           num_bootstrap = 1,
+                           feature = NULL,
+                           top_int = 10) {
+  # Unpack mrIMLobj
+  yhats <- mrIMLobj$Fits
+  Y <- mrIMLobj$Data$Y
+  X <- mrIMLobj$Data$X
+  X1 <- mrIMLobj$Data$X1
+  mode <- mrIMLobj$Model$mode
   
-  internal_fit_function <- function(k) {
-    features <- colnames(yhats[[k]]$data)[-1]
-    n <- nrow(yhats[[k]]$data)
-    int_raw <- list()
-    for (i in 1:num_bootstrap) {
-      bootstrap_sample <- if (num_bootstrap > 1) {
-        yhats[[k]]$data[sample(1:n, replace = TRUE), ]
-      } else {
-        yhats[[k]]$data
-      }
-      model_fit <- if (num_bootstrap > 1) {
-        wflow <- yhats[[k]]$last_mod_fit %>% tune::extract_workflow()
-        wflow$data <- bootstrap_sample
-        fit(wflow, data = bootstrap_sample)
-      } else {
-        yhats[[k]]$mod1_k %>% tune::extract_fit_parsnip()
-      }
-      
-      pred_fun <- function(m, dat) {
-        predict(m, dat[, colnames(bootstrap_sample)[-1], drop = FALSE], type = "prob")$.pred_1
-      }
-      s <- hstats(model_fit, v = names(yhats[[k]]$data_train)[-1], 
-                  X = yhats[[k]]$data_train, pred_fun = pred_fun, 
-                  n_max = 300, pairwise_m = length(names(yhats[[k]]$data_train)[-1]), 
-                  threeway_m = 0, verbose = FALSE)
-      overall <- data.frame(response = names(Y[k]), overall = h2(s)[[1]], bs = i)
-      one_way <- data.frame(one_way = h2_overall(s, plot = FALSE)[[1]]) %>% 
-        rownames_to_column("predictor")
-      metadata <- data.frame(response = rep(names(Y[k]), nrow(one_way)), bstrap = rep(i, nrow(one_way)))
-      one_way_df <- cbind(one_way, metadata)
-      two_way <- data.frame(two_way_int = h2_pairwise(s, plot = FALSE)[[1]]) %>% 
-        rownames_to_column("predictor")
-      meta_data2 <- data.frame(response = rep(names(Y[k])), bstrap = rep(i, nrow(two_way)))
-      two_way_df <- cbind(two_way, meta_data2)
-      interaction_objects <- list(overall_int = overall, 
-                                  one_way_int = one_way_df, two_way_int = two_way_df)
-      int_raw[[i]] <- interaction_objects
-    }
-    return(int_raw)
+  # If no feature supplied default to first response variable
+  if (is.null(feature)) feature <- names(yhats)[1]
+  
+  # Prepare the work for workers (multithreaded)
+  response_vect <- rep(names(yhats), each = num_bootstrap)
+  boot_vect <- rep(1:num_bootstrap, length(yhats))
+  planned_work <- lapply(
+    seq_along(response_vect),
+    function(i) list(response = response_vect[i], boot = boot_vect[i])
+  )
+  
+  # Define prediction function
+  pred_fun <- function(m, dat) {
+    predict(m, dat, type = "prob")[[".pred_1"]] # Only set up for "classification"?
   }
   
-  bstraps_int_list <- future_lapply(seq_along(yhats), internal_fit_function, future.seed = TRUE)
+  # Calculate H statistics over responses and bootstraps (multithreaded)
+  hstats_list <- future.apply::future_lapply(
+    planned_work,
+    function(p) {
+      # prepare sample data
+      bootstrap_sample <- yhats[[p$response]]$data
+      if(num_bootstrap > 1) {
+        bootstrap_sample <- bootstrap_sample %>%
+          dplyr::slice(
+            sample(1:dplyr::n(), replace = TRUE)
+          )
+      }
+      
+      # fit model
+      wflow <- yhats[[p$response]]$last_mod_fit %>%
+        tune::extract_workflow()
+      wflow$data <- bootstrap_sample
+      model_fit <- workflows::fit(wflow, data = bootstrap_sample)
+      
+      # Calculate H statistics
+      s <- hstats::hstats(
+        model_fit,
+        v = names(bootstrap_sample)[-1],
+        X = bootstrap_sample[-1],
+        pred_fun = pred_fun,
+        verbose = FALSE,
+        pairwise_m = min(top_int, (ncol(bootstrap_sample) - 1))
+      )
+      
+      list(
+        response = p$response,
+        boot = p$boot,
+        H2 = hstats::h2(s) %>%
+          mrIML:::h2_to_tibble() %>%
+          dplyr::mutate(
+            response = p$response,
+            bstrap = p$boot
+          ),
+        H2_overall = hstats::h2_overall(s) %>%
+          mrIML:::h2_to_tibble() %>%
+          dplyr::mutate(
+            response = p$response,
+            bstrap = p$boot
+          ),
+        H2_pairwise = hstats::h2_pairwise(
+          s,
+          normalize = FALSE,
+          squared = FALSE
+        ) %>%
+          mrIML:::h2_to_tibble() %>%
+          dplyr::mutate(
+            response = p$response,
+            bstrap = p$boot
+          )
+      )
+    },
+    future.seed = TRUE
+  )
   
-  # Combine bootstrap results
-  overall_int_final <- do.call(rbind, lapply(bstraps_int_list, function(sublist) {
-    extracted_overall_int <- map(sublist, pluck, "overall_int")
-    do.call(rbind, extracted_overall_int)
-  }))
+  # Extract H statistics
+  overall_int_df <- purrr::map(
+    hstats_list,
+    purrr::pluck("H2")
+  ) %>%
+    dplyr::bind_rows()
   
-  # Plot overall interactions
-  p1 <- ggplot(overall_int_final, aes(x = reorder(response, -overall), y = overall)) + 
-    geom_boxplot() + labs(title = "Overall interactions", x = "Response", y = "Overall") + theme_bw()+
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  overall_one_way_df <- purrr::map(
+    hstats_list,
+    purrr::pluck("H2_overall")
+  ) %>%
+    dplyr::bind_rows()
   
-  # Combine one-way interaction results
-  overall_one_way_final <- do.call(rbind, lapply(bstraps_int_list, function(sublist) {
-    extracted_one_way_int <- map(sublist, pluck, "one_way_int")
-    do.call(rbind, extracted_one_way_int)
-  }))
+  overall_two_way_df <- purrr::map(
+    hstats_list,
+    purrr::pluck("H2_pairwise")
+  ) %>%
+    dplyr::bind_rows()
   
-  # Filter and plot one-way interactions
+  # Plot comparisons
+  p_overall <- overall_int_df %>%
+    dplyr::rename(name = "response") %>%
+    plot_hstat() +
+    ggplot2::labs(
+      title = "Overall interactions",
+      x = "Response",
+      y = "Overall"
+    )
   
-  filtered_one_way_pred <- overall_one_way_final %>% filter(response == feature) %>% 
-    group_by(predictor) %>% 
-    summarise(avg_one_way_int = mean(one_way)) %>% 
-    arrange(desc(avg_one_way_int)) %>% 
-    top_n(top.int)
+  p_one_way_filtered <- overall_one_way_df %>%
+    dplyr::filter(response == feature) %>%
+    plot_hstat() +
+    ggplot2::labs(
+      title = paste0(feature, " interaction contribution"),
+      x = "Variable",
+      y = "Overall interaction strength"
+    )
   
-  filtered_one_way<- overall_one_way_final %>% 
-    filter(response == feature) %>% 
-    filter(predictor %in% filtered_one_way_pred$predictor)
+  p_two_way_filtered <- overall_two_way_df %>%
+    dplyr::filter(response == feature) %>%
+    plot_hstat() +
+    ggplot2::labs(
+      title = paste0(feature, " pairwise interaction strengths"),
+      x = "Interaction",
+      y = "Interaction strength"
+    )
   
-  p2 <- ggplot(filtered_one_way, aes(x = reorder(predictor, -one_way), y = one_way)) + 
-    geom_boxplot() + labs(title = paste(feature, "one-way interactions", sep = " "), 
-                          x = feature, y = paste(feature, "interaction importance", sep = " ")) + theme_bw()
-  
-  # Combine two-way interaction results
-  overall_two_way_final <- do.call(rbind, lapply(bstraps_int_list, function(sublist) {
-    extracted_two_way_int <- map(sublist, pluck, "two_way_int")
-    do.call(rbind, extracted_two_way_int)
-  }))
-  
-  # Filter and plot two-way interactions
-  filtered_two_way_pred <- overall_two_way_final %>% filter(response == feature) %>% 
-    group_by(predictor) %>% 
-    summarise(avg_two_way_int = mean(two_way_int)) %>% 
-    arrange(desc(avg_two_way_int)) %>% 
-    top_n(top.int)
-  
-  filtered_two_way<- overall_two_way_final %>% 
-    filter(response == feature) %>% 
-    filter(predictor %in% filtered_two_way_pred$predictor)
-  
-  p3 <- ggplot(filtered_two_way, aes(x = reorder(predictor, -two_way_int), y = two_way_int)) + 
-    geom_boxplot() + labs(title = paste(feature, "two-way interactions", sep = " "), 
-                          x = feature, y = paste(feature, "interaction importance", sep = " ")) + 
-    theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
-  
-  return(list(p1, p2, p3, overall_int_final, overall_one_way_final, overall_two_way_final))
+  # Arrange output
+  list(
+    p_h2 = p_overall,
+    p_h2_overall = p_one_way_filtered,
+    p_h2_pairwise = p_two_way_filtered,
+    h2_df = overall_int_df,
+    h2_overall_df = overall_one_way_df,
+    h2_pairwise_df = overall_two_way_df
+  )
+}
+# Helper functions
+h2_to_tibble <- function(h2_score) {
+  h2_mat <- h2_score[["M"]]
+  h2_vals <- drop(h2_mat)
+  tibble::tibble(
+    name = names(h2_vals),
+    value = h2_vals
+  )
+}
+plot_hstat <- function(hstat_df) {
+  hstat_df %>%
+    dplyr::group_by(name) %>%
+    dplyr::summarise(
+      mean_value = mean(value, na.rm = TRUE),
+      ub_value = quantile(value, probs = c(0.95)),
+      lb_value = quantile(value, probs = c(0.05))
+    ) %>%
+    ggplot2::ggplot(
+      ggplot2::aes(x = reorder(name, -mean_value), y = mean_value)
+    ) +
+    ggplot2::geom_col() +
+    ggplot2::geom_errorbar(
+      ggplot2::aes(
+        ymin = lb_value,
+        ymax = ub_value
+      ),
+      width = 0.4
+    ) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(
+      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
+    )
 }
