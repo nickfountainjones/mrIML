@@ -1,18 +1,32 @@
 #' Calculate and visualize feature interactions
 #'
-#' This function calculates and visualizes interactions in the model using bootstrapping.
-#' It provides overall, one-way, and two-way interactions for specified features.
+#' A wrapper around [hstats::hstats()]. Calculates and visualizes H-statistics
+#' for interactions in the model using bootstrapping. See [help("hstats")] for
+#' details on H-statistics.
 #'
-#' @param yhats A list of model predictions.
-#' @param X The predictor data.
-#' @param Y The response data.
-#' @param num_bootstrap The number of bootstrap samples to generate (default: 1).
+#' @param mrIMLobj A list object output by [mrIMLpredict()].
+#' @param num_bootstrap The number of bootstrap samples to generate
+#' (default: 1).
 #' @param feature The feature for which interactions need to be calculated.
-#' @param top.int The number of top interactions to display (default: 10).
+#' @param top_int The number of top interactions to display (default: 10).
 #'
-#' @return A list containing the visualizations for overall, one-way, and two-way interactions, as well as the interaction dataframes.
-#' @export
-#'
+#' @return A list containing
+#' * `$p_h2`: An ordered bar-plot of the variability in each response model that
+#' is unexplained by the main effects.
+#' * `$p_h2_overall`: An ordered bar-plot of the percentage of prediction
+#' variability that can be attributed to interaction with each predictor for the
+#' model specified by `feature`.
+#' * `$p_h2_pairwise`: An ordered bar-plot of the strength of the two-way
+#' interactions in the model specified by `feature`. Strength is of an
+#' interaction is taken to be the un-normalized square root of of the
+#' H2-pairwise statistic (which is on the prediction scale).
+#' * `$h2_df`: A data frame of the H2 statistics for each response model, and
+#' bootstraps if applicable.
+#' * `$h2_overall_df`: A data frame of the H2-overall statistics for variable in
+#' each response model, and bootstraps if applicable.
+#' * `$h2_pairwise_df`: A data frame of the H2-pairwise statistics for variable
+#' in each response model, and bootstraps if applicable.
+#' 
 #' @examples
 #' library(tidymodels)
 #'
@@ -50,7 +64,7 @@
 #' mrIML_interactions_rf[[1]]
 #' mrIML_interactions_rf[[2]]
 #' mrIML_interactions_rf[[3]]
-#'   
+#' @export  
 mrInteractions <- function(mrIMLobj,
                            num_bootstrap = 1,
                            feature = NULL,
