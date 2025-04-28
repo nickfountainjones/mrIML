@@ -24,7 +24,7 @@ provided then a standard multi-response model will be fit to the data (i.e.
 the response values will be independent conditional on the predictors). See
 \strong{Details} section bellow.}
 
-\item{Model}{Any model from the \link{tidymodels} package. See examples.}
+\item{Model}{Any model from the \pkg{tidymodels} package. See examples.}
 
 \item{balance_data}{A character string.
 \itemize{
@@ -46,22 +46,22 @@ if \code{racing = TRUE}.}
 \item{k}{A numeric value. Sets the number of folds in the cross-validation.
 10-fold CV is the default.}
 
-\item{racing}{A logical value. If \code{TRUE}, MrIML performs the grid search
+\item{racing}{A logical value. If \code{TRUE}, \code{mrIML} performs the grid search
 using the \code{\link[finetune:tune_race_anova]{finetune::tune_race_anova()}} method. \code{racing = TRUE} is now the
 default method of tuning.}
 }
 \value{
 A list object with three slots:
 \itemize{
-\item \verb{$Model}: The \link{tidymodels} object that was fit.
+\item \verb{$Model}: The \pkg{tidymodels} object that was fit.
 \item \verb{$Data}: A list of the raw data.
 \item \verb{$Fits}: A list of the fitted models to each response variable.
 }
 }
 \description{
 This function fits separate classification/regression models, specified in
-the \link{tidymodels} framework, for each response variable in a data set. This is
-the core function of \link{mrIML}.
+the \pkg{tidymodels} framework, for each response variable in a data set. This is
+the core function of \code{mrIML}.
 }
 \details{
 Additional details about two types of model...

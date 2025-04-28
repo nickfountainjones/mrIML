@@ -1,10 +1,10 @@
 #' Calculate and visualize feature interactions
 #'
 #' A wrapper around [hstats::hstats()]. Calculates and visualizes H-statistics
-#' for interactions in the model using bootstrapping. See [help("hstats")] for
+#' for interactions in the model using bootstrapping. See `help("hstats")` for
 #' details on H-statistics.
 #'
-#' @param mrIMLobj A list object output by [mrIMLpredict()].
+#' @param mrIMLobj A list object output by [mrIMLpredicts()].
 #' @param num_bootstrap The number of bootstrap samples to generate
 #' (default: 1).
 #' @param feature The feature for which interactions need to be calculated.

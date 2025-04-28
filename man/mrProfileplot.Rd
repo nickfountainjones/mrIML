@@ -2,28 +2,63 @@
 % Please edit documentation in R/MrProfilePlots.R
 \name{mrProfileplot}
 \alias{mrProfileplot}
-\title{mrProfileplot:  Wrapper to plot mutlti-response model agnostic profile plots (partial dependences and accumulated local effects).}
+\title{Wrapper to plot mutlti-response model agnostic profile plots (partial
+dependences and accumulated local effects).}
 \usage{
 mrProfileplot(profileData, sdthresh = 0.05)
 }
 \arguments{
-\item{profileData}{\code{dataframe} is the data generated from the flashlight packages 'light_profile' function.}
+\item{profileData}{A data frame generated from \code{\link[flashlight:light_profile]{flashlight::light_profile()}}.}
 
-\item{'sdthresh'}{\code{numeric} value used to filter responses that are not changing across the values of the feature (based on standard deviation)}
+\item{'sdthresh'}{A numeric value used to filter responses that are not
+changing across the values of the feature (based on standard deviation).}
 }
 \description{
-mrProfileplot:  Wrapper to plot mutlti-response model agnostic profile plots (partial dependences and accumulated local effects).
+Wrapper to plot mutlti-response model agnostic profile plots (partial
+dependences and accumulated local effects).
 }
 \details{
-The aim of this function is to plot (1) a reduced set of response variables that are responding to the feature of choice (plot 1)
-and the average ALE of partial dependency  for all responses combined (plot 2). When there are many responses plot 1 makes interpretation easier by focussing on the
-the responses changing the most with a feature. The feature selected and plot type must be specified 'light_profile' function
+The aim of this function is to plot (1) a reduced set of response
+variables that are responding to the feature of choice (plot 1) and the
+average ALE of partial dependency  for all responses combined (plot 2). When
+there are many responses plot 1 makes interpretation easier by focussing on
+the responses changing the most with a feature. The feature selected and plot
+type must be specified \code{\link[flashlight:light_profile]{flashlight::light_profile()}} function.
 }
 \examples{
-flashlightObj <- mrFlashlight(yhats, X, Y, response = "multi")
+library(tidymodels)
+library(flashlight)
 
-profileData_pd <- light_profile(flashlightObj, v = "Grassland") #partial dependencies
-profileData_ale <- light_profile(flashlightObj, v = "Grassland", type = "ale") #acumulated local effects
-mrProfileplot(profileData_pd , sdthresh =0.05)
-mrProfileplot(profileData_ale , sdthresh =0.05)
+data <- MRFcov::Bird.parasites
+Y <- data \%>\%
+  select(-scale.prop.zos) \%>\%
+  select(order(everything()))
+X <- data \%>\%
+  select(scale.prop.zos)
+
+model_rf <- rand_forest(
+  trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+  mode = "classification",
+  mtry = tune(),
+  min_n = tune()
+) \%>\%
+  set_engine("randomForest")
+
+mrIML_rf <- mrIMLpredicts(
+  X = X,
+  Y = Y,
+  X1 = Y,
+  Model = model_rf,
+  prop = 0.7,
+  k = 5
+)
+
+fl <- mrFlashlight(
+  mrIML_rf,
+  response = "multi"
+)
+
+profileData_pd <- light_profile(fl, v = "scale.prop.zos")
+mrProfileplot(profileData_pd, sdthresh = 0.05)[[1]]
+mrProfileplot(profileData_pd, sdthresh = 0.05)[[2]]
 }

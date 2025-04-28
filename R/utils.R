@@ -3,12 +3,14 @@
 #' @details This function allows you to remove response units (OTUs or SNPs or
 #' species) from your response data as a preprocessing step. Suitable when the
 #' response is a binary outcome.
+#' 
 #' @param X is a data.frame with rows as sites or individuals or populations and
 #' columns as loci or species OTUs.
 #' @param lower is the lower threshold value  in which response varialkes are
 #' removed from the data.frame.
 #' @param higher is the upper threshold value  in which response varialkes are
 #' removed from the data.frame.
+#' 
 #' @examples
 #' \dontrun{ 
 #'   X <- filterRareCommon(Responsedata, lower = 0.4, higher = 0.7)
@@ -37,8 +39,8 @@ filterRareCommon <- function(X,
 #' Currently if there is missing data (NAs) it either imputes them as the mode
 #' or leaves them. A histogram is also produced of the missing data.
 #' 
-#' @param pedfile
-#' @param mapfile
+#' @param pedfile A file location.
+#' @param mapfile A file location.
 #' 
 #' @examples
 #' \dontrun{
@@ -139,6 +141,7 @@ readSnpsPed <- function(pedfile, mapfile){
 #' @param p_val A \code{numeric} this sets the significance threshold for axes
 #' in explaining variance in the original resistance matrix based on redundancy
 #' analysis. In effect this filters out axes that don't explain variance.
+#' 
 #' @examples
 #' \dontrun{
 #'   Y <- res. st_components(filename = 'Bobcat_cs_matrices', p_val = 0.01)
@@ -280,9 +283,3 @@ resist_components <- function (foldername = foldername,
   #save as a data frame
   as.data.frame(do.call(cbind, final_d))
 }
-
-
-
-
-
-

@@ -2,7 +2,7 @@
 % Please edit documentation in R/mrvip.R
 \name{mrvip}
 \alias{mrvip}
-\title{Calculates and helps interpret variable importance for \link{mrIML} models.}
+\title{Calculates and helps interpret variable importance for \code{mrIML} models.}
 \usage{
 mrvip(
   mrIMLobj,
@@ -15,7 +15,7 @@ mrvip(
 )
 }
 \arguments{
-\item{mrIMLobj}{A list object output by \code{\link[=mrIMLpredict]{mrIMLpredict()}}.}
+\item{mrIMLobj}{A list object output by \code{\link[=mrIMLpredicts]{mrIMLpredicts()}}.}
 
 \item{mrBootstrap_obj}{A list of bootstrap results output by \code{\link[=mrBootstrap]{mrBootstrap()}}.}
 
@@ -29,9 +29,9 @@ performance criteria are plotted.}
 \item{local_top_var}{The number of top local variables for each response to
 display (default: 5).}
 
-\item{model_perf}{A list object containing model performance metrics output by
-\code{\link[=mrIMLperformance]{mrIMLperformance()}}. If not supplied then \code{\link[=mrIMLperformance]{mrIMLperformance()}} is run inside
-\code{\link[=mrvip]{mrvip()}} to get performance metrics.}
+\item{model_perf}{A list object containing model performance metrics output
+by \code{\link[=mrIMLperformance]{mrIMLperformance()}}. If not supplied then \code{\link[=mrIMLperformance]{mrIMLperformance()}} is run
+inside \code{mrvip()} to get performance metrics.}
 }
 \value{
 A list with:
@@ -44,9 +44,9 @@ for the individual response models.
 }
 }
 \description{
-Summarizes variable importance in a \link{mrIML} model at both a global (accross
+Summarizes variable importance in a \code{mrIML} model at both a global (accross
 all the response models) and local (for individual response models). This can
-be done for a plain \link{mrIML} model or bootstrap results obtained from
+be done for a plain \code{mrIML} model or bootstrap results obtained from
 \code{\link[=mrBootstrap]{mrBootstrap()}}.
 }
 \examples{

@@ -4,48 +4,78 @@
 \alias{mrInteractions}
 \title{Calculate and visualize feature interactions}
 \usage{
-mrInteractions(yhats, X, Y, num_bootstrap = 1, feature = feature, top.int = 10)
+mrInteractions(mrIMLobj, num_bootstrap = 1, feature = NULL, top_int = 10)
 }
 \arguments{
-\item{yhats}{A list of model predictions.}
+\item{mrIMLobj}{A list object output by \code{\link[=mrIMLpredicts]{mrIMLpredicts()}}.}
 
-\item{X}{The predictor data.}
-
-\item{Y}{The response data.}
-
-\item{num_bootstrap}{The number of bootstrap samples to generate (default: 1).}
+\item{num_bootstrap}{The number of bootstrap samples to generate
+(default: 1).}
 
 \item{feature}{The feature for which interactions need to be calculated.}
 
-\item{top.int}{The number of top interactions to display (default: 10).}
+\item{top_int}{The number of top interactions to display (default: 10).}
 }
 \value{
-A list containing the visualizations for overall, one-way, and two-way interactions, as well as the interaction dataframes.
+A list containing
+\itemize{
+\item \verb{$p_h2}: An ordered bar-plot of the variability in each response model that
+is unexplained by the main effects.
+\item \verb{$p_h2_overall}: An ordered bar-plot of the percentage of prediction
+variability that can be attributed to interaction with each predictor for the
+model specified by \code{feature}.
+\item \verb{$p_h2_pairwise}: An ordered bar-plot of the strength of the two-way
+interactions in the model specified by \code{feature}. Strength is of an
+interaction is taken to be the un-normalized square root of of the
+H2-pairwise statistic (which is on the prediction scale).
+\item \verb{$h2_df}: A data frame of the H2 statistics for each response model, and
+bootstraps if applicable.
+\item \verb{$h2_overall_df}: A data frame of the H2-overall statistics for variable in
+each response model, and bootstraps if applicable.
+\item \verb{$h2_pairwise_df}: A data frame of the H2-pairwise statistics for variable
+in each response model, and bootstraps if applicable.
+}
 }
 \description{
-This function calculates and visualizes interactions in the model using bootstrapping.
-It provides overall, one-way, and two-way interactions for specified features.
+A wrapper around \code{\link[hstats:hstats]{hstats::hstats()}}. Calculates and visualizes H-statistics
+for interactions in the model using bootstrapping. See \code{help("hstats")} for
+details on H-statistics.
 }
 \examples{
-\dontrun{
-# Example usage:
-#set up analysis
-Y <- dplyr::select(Bird.parasites, -scale.prop.zos)\%>\% 
-dplyr::select(sort(names(.)))#response variables eg. SNPs, pathogens, species....
-X <- dplyr::select(Bird.parasites, scale.prop.zos) # feature set
-X1 <- Y \%>\%
-dplyr::select(sort(names(.)))
-model_rf <- 
-rand_forest(trees = 100, mode = "classification", mtry = tune(), min_n = tune()) \%>\% #100 trees are set for brevity. Aim to start with 1000
-set_engine("randomForest")
-yhats_rf <- mrIMLpredicts(X=X, Y=Y,
-X1=X1,'Model=model_rf , 
-balance_data='no',mode='classification',
-tune_grid_size=5,seed = sample.int(1e8, 1),'morans=F,
-prop=0.7, k=5, racing=T) 
-int_ <- mrInteractions(yhats=yhats_rf, X, Y, num_bootstrap=10,
-feature = 'Microfilaria', top.int=10)
-int_[[1]] # overall plot
-int_[[2]] # individual plot for the response of choice 
-int_[[3]] #two way plot# }
+library(tidymodels)
+
+data <- MRFcov::Bird.parasites
+Y <- data \%>\%
+  select(-scale.prop.zos) \%>\%
+  select(order(everything()))
+X <- data \%>\%
+  select(scale.prop.zos)
+
+# Specify a random forest tidy model
+model_rf <- rand_forest(
+  trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+  mode = "classification",
+  mtry = tune(),
+  min_n = tune()
+) \%>\%
+  set_engine("randomForest")
+
+mrIML_rf <- mrIMLpredicts(
+  X = X,
+  Y = Y,
+  X1 = Y,
+  Model = model_rf,
+  prop = 0.7,
+  k = 5
+)
+
+mrIML_interactions_rf <- mrInteractions(
+  mrIML_rf,
+  num_bootstrap = 10,
+  feature = "Plas"
+)
+
+mrIML_interactions_rf[[1]]
+mrIML_interactions_rf[[2]]
+mrIML_interactions_rf[[3]]
 }

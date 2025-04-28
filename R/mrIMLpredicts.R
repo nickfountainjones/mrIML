@@ -3,15 +3,15 @@
 #' @description
 #'
 #' This function fits separate classification/regression models, specified in
-#' the [tidymodels] framework, for each response variable in a data set. This is
-#' the core function of [mrIML].
+#' the \pkg{tidymodels} framework, for each response variable in a data set. This is
+#' the core function of `mrIML`.
 #'
 #' @param Y,X,X1 Data frames containing the response, predictor, and the join
 #' response variables (if fitting GN model) respectively. If `X1` is not
 #' provided then a standard multi-response model will be fit to the data (i.e.
 #' the response values will be independent conditional on the predictors). See
 #' **Details** section bellow.
-#' @param Model Any model from the [tidymodels] package. See examples.
+#' @param Model Any model from the \pkg{tidymodels} package. See examples.
 #' @param balance_data A character string.
 #' * "up": up-samples the data to equal class sizes.
 #' * "down": down-samples the data to equal class sizes.
@@ -21,7 +21,7 @@
 #' @param tune_grid_size A numeric value that sets the grid size for
 #' hyperparameter tuning. Larger grid sizes increase computational time. Ignored
 #' if `racing = TRUE`.
-#' @param racing A logical value. If `TRUE`, MrIML performs the grid search
+#' @param racing A logical value. If `TRUE`, `mrIML` performs the grid search
 #' using the [finetune::tune_race_anova()] method. `racing = TRUE` is now the
 #' default method of tuning.
 #' @param k A numeric value. Sets the number of folds in the cross-validation.
@@ -35,7 +35,7 @@
 #' The finer details of how things such as `balance_data`...
 #'
 #' @returns A list object with three slots:
-#' * `$Model`: The [tidymodels] object that was fit.
+#' * `$Model`: The \pkg{tidymodels} object that was fit.
 #' * `$Data`: A list of the raw data.
 #' * `$Fits`: A list of the fitted models to each response variable.
 #'

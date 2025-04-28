@@ -1,18 +1,18 @@
 #' Calculate general performance metrics of a mrIML model
 #'
 #' @description
-#' Summarizes the performance of a `mrIML` object created using [mrIMLpredicts]
-#' in a way so that different models can be easily compared.
+#' Summarizes the performance of a `mrIML` object created using
+#' [mrIMLpredicts()] in a way so that different models can be easily compared.
 #' For regression models, root mean squared error (RMSE) and R-squared are
 #' reported, while for classification models, area under the ROC (AUC), Mathews
 #' correlation coefficient (MMC), positive predictive value (PPC), specificity,
 #' and sensitivity are reported.
 #'
-#' @param mrIMLobj A list object created by [mrIMLpredicts] containing 
+#' @param mrIMLobj A list object created by [mrIMLpredicts()] containing 
 #' multi-response models.
 #'
 #' @returns A list with two slots.
-#' * `$model_performance`: A [tibble] of commonly used metric that can be used
+#' * `$model_performance`: A \pkg{tibble} of commonly used metric that can be used
 #' to compare model performance of classification models. Performance metrics
 #' are based on the test data defined during [mrIMLpredicts()].
 #' * `$global_performance_summary`: A global performance metric: the average of

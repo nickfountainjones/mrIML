@@ -2,12 +2,12 @@
 % Please edit documentation in R/mrvip.R
 \name{mrVipPCA}
 \alias{mrVipPCA}
-\title{Principle Component Analysis of \link{mrIML} variable importance}
+\title{Principle Component Analysis of \code{mrIML} variable importance}
 \usage{
 mrVipPCA(mrVip_obj)
 }
 \arguments{
-\item{mrVip_obj}{A list returned by \code{\link[=mrVip]{mrVip()}}.}
+\item{mrVip_obj}{A list returned by \code{\link[=mrvip]{mrvip()}}.}
 }
 \value{
 A list of PCA results:
@@ -19,5 +19,5 @@ A list of PCA results:
 }
 }
 \description{
-Principle Component Analysis of \link{mrIML} variable importance
+Principle Component Analysis of \code{mrIML} variable importance
 }

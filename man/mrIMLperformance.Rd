@@ -7,13 +7,13 @@
 mrIMLperformance(mrIMLobj)
 }
 \arguments{
-\item{mrIMLobj}{A list object created by \link{mrIMLpredicts} containing
+\item{mrIMLobj}{A list object created by \code{\link[=mrIMLpredicts]{mrIMLpredicts()}} containing
 multi-response models.}
 }
 \value{
 A list with two slots.
 \itemize{
-\item \verb{$model_performance}: A \link{tibble} of commonly used metric that can be used
+\item \verb{$model_performance}: A \pkg{tibble} of commonly used metric that can be used
 to compare model performance of classification models. Performance metrics
 are based on the test data defined during \code{\link[=mrIMLpredicts]{mrIMLpredicts()}}.
 \item \verb{$global_performance_summary}: A global performance metric: the average of
@@ -22,8 +22,8 @@ models and RMSE for regression model.
 }
 }
 \description{
-Summarizes the performance of a \code{mrIML} object created using \link{mrIMLpredicts}
-in a way so that different models can be easily compared.
+Summarizes the performance of a \code{mrIML} object created using
+\code{\link[=mrIMLpredicts]{mrIMLpredicts()}} in a way so that different models can be easily compared.
 For regression models, root mean squared error (RMSE) and R-squared are
 reported, while for classification models, area under the ROC (AUC), Mathews
 correlation coefficient (MMC), positive predictive value (PPC), specificity,

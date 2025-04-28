@@ -1,15 +1,15 @@
-#' Calculates and helps interpret variable importance for [mrIML] models.
+#' Calculates and helps interpret variable importance for `mrIML` models.
 #'
-#' Summarizes variable importance in a [mrIML] model at both a global (accross
+#' Summarizes variable importance in a `mrIML` model at both a global (accross
 #' all the response models) and local (for individual response models). This can
-#' be done for a plain [mrIML] model or bootstrap results obtained from
+#' be done for a plain `mrIML` model or bootstrap results obtained from
 #' [mrBootstrap()]. 
 #'
-#' @param mrIMLobj A list object output by [mrIMLpredict()].
+#' @param mrIMLobj A list object output by [mrIMLpredicts()].
 #' @param mrBootstrap_obj A list of bootstrap results output by [mrBootstrap()].
-#' @param model_perf A list object containing model performance metrics output by
-#' [mrIMLperformance()]. If not supplied then [mrIMLperformance()] is run inside
-#' [mrvip()] to get performance metrics.
+#' @param model_perf A list object containing model performance metrics output
+#' by [mrIMLperformance()]. If not supplied then [mrIMLperformance()] is run
+#' inside `mrvip()` to get performance metrics.
 #' @param threshold The performance threshold for response models (AUC for
 #' classification and $R^2$ for regression). Only response models that meet this
 #' performance criteria are plotted.
@@ -327,9 +327,9 @@ mrVip_mrIMLobj <- function(mr_iml_obj) {
     dplyr::bind_rows()
 }
 
-#' Principle Component Analysis of [mrIML] variable importance
+#' Principle Component Analysis of `mrIML` variable importance
 #' 
-#' @param mrVip_obj A list returned by [mrVip()].
+#' @param mrVip_obj A list returned by [mrvip()].
 #' 
 #' @returns A list of PCA results:
 #' * `$PCA_plot`

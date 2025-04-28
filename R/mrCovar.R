@@ -5,7 +5,7 @@
 #' partial dependencies for a specified environmental/host variable. It also
 #' filters the taxa based on standard deviation thresholds.
 #'
-#' @param mrIMLobj A list object output by [mrIMLpredict()].
+#' @param mrIMLobj A list object output by [mrIMLpredicts()].
 #' @param var The variable of interest for calculating the profile.
 #' @param sdthresh The standard deviation threshold for filtering taxa
 #' (default: 0.05).

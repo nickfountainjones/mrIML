@@ -2,28 +2,76 @@
 % Please edit documentation in R/mrPlotInteractions.R
 \name{mrPlot_interactions}
 \alias{mrPlot_interactions}
-\title{Plots global interactions as well as individual response interaction importance.}
+\title{Plots global interactions as well as individual response interaction
+importance.}
 \usage{
 mrPlot_interactions(interactions, X, Y, top_ranking = 3, top_response = 10)
 }
 \arguments{
-\item{interactions}{A \code{dataframe} data frame generated from mrInteractioms function}
+\item{interactions}{A data frame generated from \code{\link[=mrInteractions]{mrInteractions()}}.}
 
-\item{X}{A \code{dataframe} feature data set}
+\item{X}{A data frame of the feature data set.}
 
-\item{Y}{A \code{dataframe} response data set}
+\item{Y}{A data frame of the response data set.}
 
-\item{top_ranking}{A \code{numeric} determines how many of the strongest feature interacions to view/include}
+\item{top_ranking}{An integer value that determines how many of the strongest
+feature interactions to view/include.}
 
-\item{top_response}{A \code{numeric} how many of the response variables with the strongest interactions to view}
+\item{top_response}{An integer value for how many of the response variables
+with the strongest interactions should be plotted view.}
 }
 \description{
-Plots global interactions as well as individual response interaction importance.
+Plots global interactions as well as individual response interaction
+importance.
 }
 \details{
-1st plot: Barplots showing the mean and cumulative importance of each of the top pairs of interactions in the model.
+1st plot: Barplots showing the mean and cumulative importance of each of the
+top pairs of interactions in the model.
 2nd plot: Barplot of the responses with the strongest interactions
-3rd plot: Barplots of the strongest interactions for each of the top response variables.
-interactions <-mrInteractions(yhats, X, Y) #this is computationally intensive so multicores are needed. If stopped prematurely - have to reload things
-mrPlot_interactions(Interact, X,Y, top_ranking = 3, top_response=3)
+3rd plot: Barplots of the strongest interactions for each of the top response
+variables.
+}
+\examples{
+!identical(Sys.getenv("NOT_CRAN"), "true")
+library(tidymodels)
+
+data <- MRFcov::Bird.parasites
+Y <- data \%>\%
+  select(-scale.prop.zos) \%>\%
+  select(order(everything()))
+X <- data \%>\%
+  select(scale.prop.zos)
+
+# Specify a random forest tidy model
+model_rf <- rand_forest(
+  trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+  mode = "classification",
+  mtry = tune(),
+  min_n = tune()
+) \%>\%
+  set_engine("randomForest")
+
+mrIML_rf <- mrIMLpredicts(
+  X = X,
+  Y = Y,
+  X1 = Y,
+  Model = model_rf,
+  prop = 0.7,
+  k = 5
+)
+
+mrIML_interactions_rf <- mrInteractions(
+  mrIML_rf,
+  num_bootstrap = 10,
+  feature = "Plas"
+)
+
+#mrPlot_interactions(
+# mrIML_interactions_rf,
+# X,
+# Y,
+# top_ranking = 3,
+# top_response = 3
+#)
+
 }

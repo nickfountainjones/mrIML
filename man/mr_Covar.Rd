@@ -2,49 +2,59 @@
 % Please edit documentation in R/mrCovar.R
 \name{mr_Covar}
 \alias{mr_Covar}
-\title{Calculate covariate partial dependencies for mrIML JSDMs (Joint species distirbution models)}
+\title{Investigate partial dependencies of a covariate for mrIML JSDMs (Joint
+species distirbution models)}
 \usage{
-mr_Covar(yhats, Y, X, X1, var, sdthresh = 0.05)
+mr_Covar(mrIMLobj, var, sdthresh = 0.05)
 }
 \arguments{
-\item{yhats}{A list of model predictions.}
-
-\item{Y}{The response data.}
-
-\item{X}{The predictor data.}
-
-\item{X1}{Additional predictor data excluding the variable of interest.}
+\item{mrIMLobj}{A list object output by \code{\link[=mrIMLpredicts]{mrIMLpredicts()}}.}
 
 \item{var}{The variable of interest for calculating the profile.}
 
-\item{sdthresh}{The standard deviation threshold for filtering taxa (default: 0.05).}
+\item{sdthresh}{The standard deviation threshold for filtering taxa
+(default: 0.05).}
 }
 \value{
-A plot displaying the covariate profile and change in probability for the specified variable.
+A plot displaying the covariate partial dependence profiles for those
+models that meet the \code{sdthreshold} requirement and another summarizing the
+rates of change in probability for the specified variable
+(the derivatives of the PD curves).
 }
 \description{
-This function calculates the covariate partial dependency plot for a specified environmental/host variable.
-It also filters the taxa based on standard deviation thresholds and visualizes the results.
+This function is a wrapper around \code{\link[=mrFlashlight]{mrFlashlight()}} that plots the covariate
+partial dependencies for a specified environmental/host variable. It also
+filters the taxa based on standard deviation thresholds.
 }
 \examples{
-\dontrun{
-# Example usage:
-#set up analysis
-Y <- dplyr::select(Bird.parasites, -scale.prop.zos)\%>\% 
-dplyr::select(sort(names(.)))#response variables eg. SNPs, pathogens, species....
-X <- dplyr::select(Bird.parasites, scale.prop.zos) # feature set
-X1 <- Y \%>\%
-dplyr::select(sort(names(.)))
-model_rf <- 
-rand_forest(trees = 100, mode = "classification", mtry = tune(), min_n = tune()) \%>\% #100 trees are set for brevity. Aim to start with 1000
-set_engine("randomForest")
-yhats_rf <- mrIMLpredicts(X=X, Y=Y,
-X1=X1,'Model=model_rf , 
-balance_data='no',mode='classification',
-tune_grid_size=5,seed = sample.int(1e8, 1),'morans=F,
-prop=0.7, k=5, racing=T) #
-ModelPerf <- mrIMLperformance(yhats_rf, Model=model_rf, Y=Y, mode='classification')
+library(tidymodels)
 
-covar <- mr_Covar(yhats, X=X,X1=X1, Y=Y, var='scale.prop.zos', sdthresh =0.01) #sdthrsh just plots taxa responding the most.
-}
+# Without bootstrap
+data <- MRFcov::Bird.parasites
+Y <- data \%>\%
+  select(-scale.prop.zos) \%>\%
+  select(order(everything()))
+X <- data \%>\%
+  select(scale.prop.zos)
+
+model_rf <- rand_forest(
+  trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+  mode = "classification",
+  mtry = tune(),
+  min_n = tune()
+) \%>\%
+  set_engine("randomForest")
+
+mrIML_rf <- mrIMLpredicts(
+  X = X,
+  Y = Y,
+  X1 = Y,
+  Model = model_rf,
+  prop = 0.7,
+  k = 5
+)
+
+mrIML_rf \%>\%
+  mr_Covar(var = "scale.prop.zos", sdthresh = 0.05)
+
 }

@@ -3,7 +3,7 @@
 #' This function bootstraps model predictions and generates variable profiles
 #' for each response variable.
 #'
-#' @param mrIMLobj A list object output by [mrIMLpredict()].
+#' @param mrIMLobj A list object output by [mrIMLpredicts()].
 #' @param num_bootstrap The number of bootstrap samples to generate
 #' (default: 10).
 #' @param downsample Logical. Should the bootstrap samples be downsampled?

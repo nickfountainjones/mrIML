@@ -11,8 +11,8 @@ mrCoOccurNet_bootstrap(mrBootstrap_obj)
 \code{\link[=mrBootstrap]{mrBootstrap()}}.}
 }
 \value{
-A data frame representing the co-occurrence network with strength and
-directionality.
+A data frame representing the co-occurrence network with edge
+strengths and directionality.
 }
 \description{
 This function generates a co-occurrence network from a provided list and

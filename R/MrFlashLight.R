@@ -2,10 +2,10 @@
 #' 
 #' A wrapper function around [flashlight::flashlight()] to run multi-response
 #' model agnostic interpretable machine learning analyses. The output can be
-#' interogated using the core functionality of \pkg{flashlight}: see
-#' [vignette("flashlight", package = "flashlight")]
+#' interrogated using the core functionality of \pkg{flashlight}: see
+#' `vignette("flashlight", package = "flashlight")'.
 #'
-#' @param mrIMLobj A list object output by [mrIMLpredict()].
+#' @param mrIMLobj A list object output by [mrIMLpredicts()].
 #' @param response A character string indicating the type of response:
 #' `"single"` selects one response (indicated by `index`) and `"multi"` selects
 #' all responses.
@@ -14,7 +14,7 @@
 #' @param predict_function A function specifying a user-defined prediction
 #' function (optional).
 #' 
-#' @returns 
+#' @returns A flashlight or multi-flashlight object.
 #' 
 #' @examples 
 #' library(tidymodels)
