@@ -44,12 +44,15 @@
 #' mrIML_rf_boot <- mrIML_rf %>%
 #'   mrBootstrap()
 #'   
-#' mrPD_bootstrap(
+#' mrIML_rf_PD <- mrPD_bootstrap(
 #'   mrIML_rf,
 #'   mrIML_rf_boot,
 #'   target = "Plas",
 #'   global_top_var = 4
 #' )
+#' 
+#' head(mrIML_rf_PD[[1]])
+#' mrIML_rf_PD[[2]]
 #' @export
 mrPD_bootstrap <- function(mrIML_obj,
                            mrBootstrap_obj,
@@ -60,8 +63,10 @@ mrPD_bootstrap <- function(mrIML_obj,
   Y <- mrIML_obj$Data$Y
   X <- mrIML_obj$Data$X
   if (is.null(vi_obj)) {
-    vi_obj <- mrIML_obj %>%
-      mrIMLperformance()
+    vi_obj <- mrvip(
+      mrIMLobj = mrIML_obj,
+      mrBootstrap_obj = mrBootstrap_obj
+    )
   }
   
   n_response <- ncol(Y)
