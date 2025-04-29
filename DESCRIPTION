@@ -16,7 +16,6 @@ Imports:
     dplyr,
     magrittr,
     rlang,
-    generics,
     ggplot2,
     hardhat,
     patchwork,
@@ -41,8 +40,7 @@ Imports:
     MetricsWeighted,
     scales,
     finetune,
-    hstats,
-    data.table
+    hstats
 Suggests: 
     knitr,
     rmarkdown,
@@ -55,7 +53,8 @@ Suggests:
     tidymodels,
     parsnip,
     gridExtra,
-    future
+    future,
+    generics
 License: MIT + file LICENSE
 LazyData: true    
 VignetteBuilder: knitr, rmarkdown
