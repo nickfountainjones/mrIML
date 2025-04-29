@@ -267,10 +267,10 @@ mrIML_internal_fit_function <- function(i,
     workflows::fit(data = data_train)
   
   if (mode == "classification") {
-    yhatO <- predict(mod1_k, new_data = data, type = "prob")
+    yhatO <- stats::predict(mod1_k, new_data = data, type = "prob")
     yhat <- yhatO$.pred_1
     
-    yhatT <- predict(mod1_k, new_data = data_test, type = "class") %>%
+    yhatT <- stats::predict(mod1_k, new_data = data_test, type = "class") %>%
       dplyr::bind_cols(
         data_test %>%
           dplyr::select(.data$class)
@@ -293,10 +293,10 @@ mrIML_internal_fit_function <- function(i,
     deviance_morans <- deviance
     deviance_morans[is.infinite(deviance_morans)] <- 2
   } else {
-    yhatO <- predict(mod1_k, new_data = data_train)
+    yhatO <- stats::predict(mod1_k, new_data = data_train)
     yhat <- yhatO$.pred
     
-    yhatT <- predict(mod1_k, new_data = data_test)
+    yhatT <- stats::predict(mod1_k, new_data = data_test)
     
     deviance <- NULL
   }

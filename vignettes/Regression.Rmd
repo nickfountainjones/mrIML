@@ -107,10 +107,10 @@ yhats_lm <- mrIMLpredicts(X=X,
 Model performance can be examined the same way as in the classification example, however the metrics are different. We provide root mean square error (rmse) and R2. You can see that the overall R2 is 0.13 but there is substantial variation across loci in predictive performance.
 
 ```{r}
-ModelPerf_lm <- mrIMLperformance(yhats_lm,
-                                 Model=model_lm,
-                                 Y=Y,
-                                 mode='regression')
+ModelPerf_lm <- mrIMLperformance(yhats_lm)#,
+                                 #Model=model_lm,
+                                 #Y=Y,
+                                 #mode='regression')
 ModelPerf_lm[[1]] #predictive performance for individual responses. 
 ModelPerf_lm[[2]]#overall average r2 
 ```
@@ -133,10 +133,10 @@ yhats_rf <- mrIMLpredicts(X=X,
 
 #save(yhats, file='Regression_rf')
 
-ModelPerf_rf <- mrIMLperformance(yhats_rf,
-                                 Model=model_rf,
-                                 Y,
-                                 mode='regression')
+ModelPerf_rf <- mrIMLperformance(yhats_rf)#,
+                                 #Model=model_rf,
+                                 #Y,
+                                 #mode='regression')
 
 ModelPerf_rf[[1]] #predictive performance for individual responses. 
 ModelPerf_rf[[2]]#overall average r2 
@@ -144,7 +144,7 @@ ModelPerf_rf[[2]]#overall average r2
 #easier to see with plots
 plots <- mrPerformancePlot(ModelPerf1=ModelPerf_lm,
                            ModelPerf2 = ModelPerf_rf,
-                           mod_names=c('linear_reg','rand_forest'),
+                           #mod_names=c('linear_reg','rand_forest'),
                            mode='regression' ) 
 
 plots[[1]]
@@ -176,11 +176,12 @@ Note that you can also calculate bootstraps for importance scores (and partial d
 
 Now we can explore the model further my plotting the relationships between our SNPs and a feature in our set. Lets choose bio_1 (mean annual temperature) and plot the individual and global (average of all SNPs) partial dependency (PD) plots. 
 ```{r, warning=FALSE}
-flashlightObj <- mrFlashlight(yhats=yhats_rf,
-                              X=X,
-                              Y=Y,
-                              response = "multi",
-                              mode="regression")
+flashlightObj <- mrFlashlight(mrIMLobj = yhats_rf, #yhats=yhats_rf,
+                              #X=X,
+                              #Y=Y,
+                              #mode="regression",
+                              response = "multi")
+                              
 
 profileData_pd <- light_profile(flashlightObj,
                                 v = "bio_1") #partial dependencies

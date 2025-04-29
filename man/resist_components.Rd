@@ -4,7 +4,7 @@
 \alias{resist_components}
 \title{Calculates resistance components from a list of pairwise resistance surfaces}
 \usage{
-resist_components(foldername = foldername, p_val = p_val)
+resist_components(foldername = foldername, p_val = p_val, cl = NULL)
 }
 \arguments{
 \item{foldername}{A \code{character} this is the location where the
@@ -13,6 +13,9 @@ resistance surfaces are stored.}
 \item{p_val}{A \code{numeric} this sets the significance threshold for axes
 in explaining variance in the original resistance matrix based on redundancy
 analysis. In effect this filters out axes that don't explain variance.}
+
+\item{cl}{A parallel argument to be passed to \code{\link[vegan:dbrda]{vegan::capscale()}} if parallel
+compute is wanted.}
 }
 \description{
 Calculates resistance components from a list of pairwise resistance surfaces

@@ -153,7 +153,10 @@ mrvip <- function(mrIMLobj,
       prop = (global_top_var / length(unique(vi_df$var)))
     ) %>%
     ggplot2::ggplot(
-      ggplot2::aes(x = .data$sd_value, y = reorder(.data$var, .data$mean_imp))
+      ggplot2::aes(
+        x = .data$sd_value,
+        y = stats::reorder(.data$var, .data$mean_imp)
+      )
     ) +
     geom_VIplot() +
     ggplot2::theme_bw() +
@@ -170,7 +173,7 @@ mrvip <- function(mrIMLobj,
     dplyr::rename(metric = .data[[perf_metric]]) %>%
     dplyr::filter(.data$metric > threshold) %>%
     dplyr::arrange(.data$metric) %>%
-    tail(9) %>%
+    utils::tail(9) %>%
     dplyr::pull(.data$response)
   
   # Plot the local response VIP in a grid
@@ -189,7 +192,10 @@ mrvip <- function(mrIMLobj,
           .data$var %in% local_highest_vi_df$var
         ) %>%
         ggplot2::ggplot(
-          ggplot2::aes(x = .data$sd_value, y = reorder(.data$var, .data$sd_value))
+          ggplot2::aes(
+            x = .data$sd_value,
+            y = stats::reorder(.data$var, .data$sd_value)
+          )
         ) +
         ggplot2::geom_boxplot() +
         ggplot2::theme_bw() +
@@ -223,7 +229,10 @@ mrvip <- function(mrIMLobj,
         .data$var %in% taxa_highest_vi_df$var
       ) %>%
       ggplot2::ggplot(
-        ggplot2::aes(x = .data$sd_value, y = reorder(.data$var, .data$sd_value))
+        ggplot2::aes(
+          x = .data$sd_value,
+          y = stats::reorder(.data$var, .data$sd_value)
+        )
       ) +
       ggplot2::geom_boxplot() +
       ggplot2::theme_bw() +
@@ -264,7 +273,7 @@ mrVip_mrIMLboot <- function(mrIMLboot_obj) {
         dplyr::bind_rows(.id = "var") %>%
         dplyr::group_by(.data$var) %>%
         dplyr::summarise(
-          sd_value = sd(.data$value),
+          sd_value = stats::sd(.data$value),
           response = unique(.data$response),
           bootstrap = unique(.data$bootstrap),
           .groups = "drop"
@@ -306,7 +315,7 @@ mrVip_mrIMLobj <- function(mr_iml_obj) {
         dplyr::bind_rows(.id = "var") %>%
         dplyr::group_by(.data$var) %>%
         dplyr::summarise(
-          sd_value = sd(.data$value),
+          sd_value = stats::sd(.data$value),
           response = names(mr_iml_obj$Fits)[i],
           bootstrap = NA,
           .groups = "drop"
@@ -333,7 +342,7 @@ mrVipPCA <- function(mrVip_obj) {
   
   # Run PCA
   pc_analasys <- t(vi_tbl) %>%
-    prcomp(scale. = TRUE)
+    stats::prcomp(scale. = TRUE)
   
   # Get scores
   pc_scores <- pc_analasys$x %>%
@@ -355,7 +364,7 @@ mrVipPCA <- function(mrVip_obj) {
     pc_scores %>%
       dplyr::select(-.data$response),
     MARGIN = 2,
-    FUN = function(x) which((abs(x - median(x)) / mad(x)) > 6)
+    FUN = function(x) which((abs(x - stats::median(x)) / stats::mad(x)) > 6)
   )
   
   # Plot responses relative to first two PCs

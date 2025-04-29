@@ -69,7 +69,7 @@ mr_Covar <- function(mrIMLobj,
     dplyr::rename(cov_grid = .data[[var]]) %>%
     dplyr::group_by(.data$label) %>%
     dplyr::mutate(
-      sd = sd(.data$value),
+      sd = stats::sd(.data$value),
       cov_grad = .data$cov_grid + (0.5 * (dplyr::lead(.data$cov_grid) - .data$cov_grid)),
       cov_diff = abs(dplyr::lead(.data$value) - .data$value)
     ) %>%

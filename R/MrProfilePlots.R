@@ -58,7 +58,7 @@ mrProfileplot <- function(profileData,
   # Select only SNPs that are responding to this feature
   std <- b %>%
     dplyr::group_by(.data$label) %>%
-    dplyr::summarise(sdALE = sd(.data$value))
+    dplyr::summarise(sdALE = stats::sd(.data$value))
   
   Xred <- std %>%
     dplyr::filter(.data$sdALE >= sdthresh)

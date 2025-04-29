@@ -74,10 +74,9 @@ model_rf <-rand_forest(trees = 100,
                        min_n = tune()) %>% #100 trees are set for brevity. Aim to start with 1000
           set_engine("randomForest")
 
-model_lm <- #model used to generate yhat
-  logistic_reg() %>%
+model_lm <- logistic_reg() %>%
   set_engine("glm") %>%
-  set_mode("classification") #just for your response
+  set_mode("classification")
 ```
 
 ```{r eval=FALSE}
@@ -91,49 +90,58 @@ Aside from adding JSDM functionality with the X1 call, we have also enabled MrIM
 
 ```{r, message = FALSE, warnings = FALSE}
 #random forest
-yhats_rf <- mrIMLpredicts(X=X, Y=Y,
-                          X1=X1,
-                          Model=model_rf,
-                          balance_data='no',
-                          mode='classification',
-                          seed = sample.int(1e8, 1),
-                          morans=F,
-                          prop=0.7, k=5, racing=T)
+yhats_rf <- mrIMLpredicts(
+  X = X,
+  Y = Y,
+  X1 = X1,
+  Model = model_rf,
+  balance_data = 'no',
+  #seed = sample.int(1e8, 1),
+  #morans = F,
+  prop = 0.7,
+  k = 5,
+  racing = TRUE
+)
 
 #linear model
-yhats_lm <- mrIMLpredicts(X=X,Y=Y,
-                            X1=X1_fact,
-                            Model=model_lm , 
-                            balance_data='no',
-                            mode='classification',
-                            seed = sample.int(1e8, 1),
-                            prop=0.6, racing=F, k=5)
+yhats_lm <- mrIMLpredicts(
+  X = X,
+  Y = Y,
+  #X1 = X1_fact,
+  Model = model_lm , 
+  balance_data = 'no',
+  prop = 0.6,
+  k = 5,
+  racing = FALSE
+)
 ```
 ## Comparing performance
 
 It's important to compare if there are any advantages to using a random forest approach. Interpreation would be easier overall if logistic regression gave similar predictive performance.
 
 ```{r, message = FALSE, warnings = FALSE}
-ModelPerf_rf <- mrIMLperformance(yhats_rf,
-                                 Model=model_rf,
-                                 Y=Y,
-                                 mode='classification')
+ModelPerf_rf <- mrIMLperformance(yhats_rf)#,
+                                 #Model=model_rf,
+                                 #Y=Y,
+                                 #mode='classification')
 
 ModelPerf_rf[[1]] #across all parasites
 ModelPerf_rf[[2]] #overall
 
-ModelPerf_lm <- mrIMLperformance(yhats_lm,
-                                 Model=model_lm,
-                                 Y=Y, mode='classification')
+ModelPerf_lm <- mrIMLperformance(yhats_lm)#,
+                                 #Model=model_lm,
+                                 #Y=Y, mode='classification')
 
 ModelPerf_lm[[1]]
 ModelPerf_lm[[2]]
 
 plots <- mrPerformancePlot(ModelPerf1=ModelPerf_lm,
                            ModelPerf2=ModelPerf_rf,
-                           mod_names=c('linear_reg','rand_forest'),
-                           mode='classification' ) 
-plots
+                           mode='classification' )
+
+plots[[1]]
+plots[[2]]
+plots[[3]]
 ```
 If we just look at the overall AUC values, it looks like model performance is quite similar (0.86 for the rf and 0.81 for the lm). However, when we look a the Mathew's correlation coefficient (MCC) for each taxa in the lm model we see that for *H.killangoi* and Plas (*Plasmodium*) the values are much lower (e.g. 0.02, basically just a guess) compared to 0.31 for rf). Remember the classes are imbalanced so AUC tends to be an inflated measure. This is evidence that non-linear relationships can make a difference to prediction overall. We will interrogate the rf model further.
 
@@ -151,10 +159,10 @@ yhats_rf_noAssoc <- mrIMLpredicts(X=X,
                                   k=5,
                                   racing=T)
 
-ModelPerf_rf_noAssoc <- mrIMLperformance(yhats_rf_noAssoc,
-                                         Model=model_rf,
-                                         Y=Y,
-                                         mode='classification')
+ModelPerf_rf_noAssoc <- mrIMLperformance(yhats_rf_noAssoc)#,
+                                         #Model=model_rf,
+                                         #Y=Y,
+                                         #mode='classification')
 
 ModelPerf_rf_noAssoc[[1]]
 ModelPerf_rf[[1]] #performance including associations
@@ -199,27 +207,23 @@ plan(cluster, workers=cl)
 
 ```{r, message = FALSE, warnings = FALSE}
 #do bootstraps.
-bs_malaria <- mrBootstrap(yhats=yhats_rf,
-                          Y=Y, 
-                          num_bootstrap = 10,
-                          downsample = TRUE,
-                          mode='classification') 
+bs_malaria <- mrBootstrap(yhats_rf,
+                          num_bootstrap = 100,
+                          downsample = TRUE)#yhats=yhats_rf,
+                          #Y=Y, 
+                          #num_bootstrap = 10,
+                          #downsample = TRUE,
+                          #mode='classification') 
 #make sure downsample=TRUE as this did improve performance
 #just 10 bootstraps to keep this short. We suggest using more for a final analysis (100 is reasonable but depends on how big the data is)
 
 #up to here -not working properly
 bs_impVI <- mrvip(
+  mrIMLobj = yhats_rf,
   mrBootstrap_obj = bs_malaria,
-  yhats = yhats_rf_downSamp,
-  X = X,
-  X1 = X1,
-  Y = Y,
-  mode = 'classification',
-  threshold = 0.0,
-  global_top_var = 10,
-  local_top_var = 5,
-  taxa = NULL,
-  ModelPerf = ModelPerf_rf_downSamp)
+  model_perf = ModelPerf_rf,
+  taxa = "Plas"
+)#_downSamp)
 
 bs_impVI[[3]]  #importance plot. There are plenty of other insights possible
 #the 'global_top_var' provides a limit to how many predictors are included in the community-wide plot. 'local_top_var provides a limit to the number of individual taxa plots. The threshold excludes plotting individual importance plots for taxa not well predicted by the model.
@@ -238,12 +242,13 @@ pds <- mrPD_bootstrap(mrBootstrap_obj=bs_malaria,
                       target='Plas',
                       global_top_var=5)
 ```
+
 These plots show that, for example, the presence of *Microfilaria* greatly increass the probability of observing *Plasmodium* (from ~0.32 to 0.58 while holding all other variables at their mean value). Note that these are marginal relationships (i.e. isolating the effect of just each predictor). When host abundance is high the probability of detecting *Plasmodium* descreases non-linearly (a threshold of around ~0). The other parasites have less effect.
 
 If we want to explore the effect of host abundance overall we can use the 'mr_Covar' function.
 
 ```{r, message = FALSE, warnings = FALSE}
-covar <- mr_Covar(yhats=yhats_rf_downSamp,
+covar <- mr_Covar(yhats=yhats_rf$Fits,#_downSamp,
                   X=X,
                   X1=X1,
                   Y=Y,
@@ -262,7 +267,7 @@ assoc_net<- mrCoOccurNet_bootstrap (mrPD_obj=pds,
                                     Y=Y)
 
 assoc_net_filtered <-  assoc_net %>% 
-  filter(mean_strength > 0.1)
+  filter(mean_strength > 0.05)
 #based on our simulations the following rule of thumb for associations. Any association  < 0.05  for mean strength is included.
 
 #convert to igraph
@@ -299,7 +304,7 @@ ggplot(gg, aes(x = x, y = y, xend = xend, yend = yend)) +
 Finally, we can quantify the importance of interactions overall as well as one and two-way interaction importance using the same bootstrap approach.See https://github.com/mayer79/hstats for more details about the method.
 
 ```{r, message = FALSE, warnings = FALSE}
-int_ <- mrInteractions(yhats=yhats_rf,
+int_ <- mrInteractions(yhats=yhats_rf$Fits,
                        X,
                        Y,
                        num_bootstrap=10,

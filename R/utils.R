@@ -24,11 +24,11 @@ filterRareCommon <- function(X,
   r = nrow(X)
   Xt <- as.data.frame(t(X))
   Xt$Xsum <- rowSums(Xt[1:n,] )
-  FilterNoCommon <- subset(Xt, Xsum < (r * higher)) 
-  FilterNoRare <- subset(FilterNoCommon , Xsum > (r * lower))
+  FilterNoCommon <- subset(Xt, .data$Xsum < (r * higher)) 
+  FilterNoRare <- subset(FilterNoCommon , .data$Xsum > (r * lower))
   #remove 'new' sort column
   FilterNoRare$Xsum <- NULL
-  X <- as.data.frame(t(FilterNoRare))
+  X <- tibble::as_tibble(t(FilterNoRare))
   X
 }
 
@@ -144,6 +144,8 @@ readSnpsPed <- function(pedfile, mapfile){
 #' @param p_val A \code{numeric} this sets the significance threshold for axes
 #' in explaining variance in the original resistance matrix based on redundancy
 #' analysis. In effect this filters out axes that don't explain variance.
+#' @param cl A parallel argument to be passed to [vegan::capscale()] if parallel
+#' compute is wanted.
 #' 
 #' @examples
 #' \dontrun{
@@ -152,7 +154,8 @@ readSnpsPed <- function(pedfile, mapfile){
 #' @export 
 
 resist_components <- function (foldername = foldername,
-                               p_val = p_val){
+                               p_val = p_val,
+                               cl = NULL){
   
   files <- list.files(paste(foldername))
   
@@ -163,7 +166,7 @@ resist_components <- function (foldername = foldername,
     seq(1, n_matrix),
     function(i) {
     # ! Need to be csv in a folder within your working directory
-    data_resist <-  read.csv(paste0("./", foldername,'/', files[i]))
+    data_resist <- utils::read.csv(paste0("./", foldername,'/', files[i]))
     #remove row information. It is important that the matrix is symmetric
     data_resist[1] <- NULL
     
@@ -200,7 +203,7 @@ resist_components <- function (foldername = foldername,
     #plot it
     Tr_PcoA <- ggplot2::ggplot( # Would be good to make this 3D at some point
       PcoA2D_AT,
-      ggplot2::aes(x = PCoA1, y = PCoA2, label = siteData$Site)
+      ggplot2::aes(x = .data$PCoA1, y = .data$PCoA2, label = siteData$Site)
     ) +
       ggplot2::geom_point(size =2) +
       ggplot2::geom_text(
@@ -221,9 +224,9 @@ resist_components <- function (foldername = foldername,
           " variance explained)"
         )
       ) +
-      ggplot2:theme_bw()
+      ggplot2::theme_bw()
     
-    print( Tr_PcoA)
+    print(Tr_PcoA)
     
     #------------------------------------------ 
     #Select only significant axes
@@ -245,7 +248,7 @@ resist_components <- function (foldername = foldername,
         parallel = cl
       )
       
-      sig <- anova(vare.cap) #999 permutations
+      sig <- stats::anova(vare.cap) #999 permutations
       
       pval <- sig$`Pr(>F)`
       
@@ -261,13 +264,13 @@ resist_components <- function (foldername = foldername,
     
     #select significant pcs
     threholdScore <- sigPC %>%
-      dplyr::filter( `P-value`<= p_val)
+      dplyr::filter(.data$`P-value`<= p_val)
     
     #------------------------------------------   
     
     #select informative axes
     ReducedAxis <- pcdat %>%
-      data.table::subset(select = threholdScore$Axis)
+      subset(select = threholdScore$Axis)
     
     # add site data
     ReducedAxisDF <- cbind(siteData, ReducedAxis)

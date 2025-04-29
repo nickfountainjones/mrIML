@@ -90,7 +90,7 @@ mrInteractions <- function(mrIMLobj,
   
   # Define prediction function
   pred_fun <- function(m, dat) {
-    predict(m, dat, type = "prob")[[".pred_1"]] # Only set up for "classification"?
+    stats::predict(m, dat, type = "prob")[[".pred_1"]] # Only "classification"?
   }
   
   # Calculate H statistics over responses and bootstraps (multithreaded)
@@ -225,12 +225,15 @@ plot_hstat <- function(hstat_df) {
     dplyr::group_by(.data$name) %>%
     dplyr::summarise(
       mean_value = mean(.data$value, na.rm = TRUE),
-      ub_value = quantile(.data$value, probs = 0.95),
-      lb_value = quantile(.data$value, probs = 0.05),
+      ub_value = stats::quantile(.data$value, probs = 0.95),
+      lb_value = stats::quantile(.data$value, probs = 0.05),
       .groups = "drop"
     ) %>%
     ggplot2::ggplot(
-      ggplot2::aes(x = reorder(.data$name, -.data$mean_value), y = .data$mean_value)
+      ggplot2::aes(
+        x = stats::reorder(.data$name, -.data$mean_value),
+        y = .data$mean_value
+      )
     ) +
     ggplot2::geom_col() +
     ggplot2::geom_errorbar(

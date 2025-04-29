@@ -97,7 +97,7 @@ mrPD_bootstrap <- function(mrIML_obj,
     dplyr::group_by(.data$var) %>%
     dplyr::summarise(mean_sd = mean(.data$sd_value), .groups = "drop") %>%
     dplyr::arrange(dplyr::desc(.data$mean_sd)) %>%
-    head(global_top_var) %>%
+    utils::head(global_top_var) %>%
     dplyr::pull(.data$var)
   
   # Create PD plots

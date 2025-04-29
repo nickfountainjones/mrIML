@@ -33,7 +33,7 @@ library(mrIML)
 
 #other packages needed
 pacman::p_load(
-  mrIML, parsnip, tidymodels, workflows, tidyverse, flashlight, tune, future,
+  parsnip, tidymodels, workflows, tidyverse, flashlight, tune, future,
   devtools, DALEX, plyr, vip, ggsci, ggrepel, breakDown, future.apply, janitor
 )
 ```
@@ -111,10 +111,10 @@ yhats <- mrIMLpredicts(X=X, #features/predictors
 ```
 We can then assess our model performance using a number of performance metrics including area under the curve (AUC), sensitivity, specificity and Matthews correlation coefficient (MCC).
 ```{r performance, include=TRUE}
-ModelPerf <- mrIMLperformance(yhats=yhats,
-                              Model=model1,
-                              Y=Y,
-                              mode='classification')
+ModelPerf <- mrIMLperformance(yhats)#,
+                              #Model=model1,
+                              #Y=Y,
+                              #mode='classification')
 
 
 ModelPerf[[1]] #predictive performance for individual responses 
@@ -127,7 +127,7 @@ Here we can look at the variable importance. This is the dependence between our 
 #calculate variable importance
 #still got a bug here to do with the PCA
 impVI <- mrvip(
-  yhats=yhats,
+  yhats=yhats$Fits,
   mrBootstrap_obj = NULL,
   X = X,
   X1 = NULL,
@@ -157,11 +157,10 @@ plot(light_profile(fl, v = "Premises_in_3_miles"))
 The following function allows you to visualize and compare predicted risk among and within groups 
 ```{r, include=TRUE, warning=FALSE, message=FALSE, eval=F, fig.width=13}
 #apply the trained model to the entire data set to provide risk of predicted outbreak
-fit_bio <- pull_workflow_fit(yhats[[1]]$mod1_k)
+fit_bio <- pull_workflow_fit(yhats$Fits[[1]]$last_mod_fit$.workflow[[1]])
 
 predict(fit_bio,
-        X[, colnames(yhats[[i]]$data[-1]),
-        drop = FALSE],
+        X[, colnames(yhats$Fits[[1]]$data[-1]), drop = FALSE],
         type = "prob"
         )$`.pred_1`
 

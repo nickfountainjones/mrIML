@@ -99,8 +99,8 @@ mrPerformancePlot <- function(ModelPerf1 = NULL,
   
   # Detect outliers function
   findoutlier <- function(x) {
-    (x < (quantile(x, .25) - 1.5 * IQR(x))) | 
-      (x > (quantile(x, .75) + 1.5 * IQR(x)))
+    (x < (stats::quantile(x, .25) - 1.5 * stats::IQR(x))) | 
+      (x > (stats::quantile(x, .75) + 1.5 * stats::IQR(x)))
   }  
   
   model_compare_df <- lapply(
@@ -144,10 +144,8 @@ mrPerformancePlot <- function(ModelPerf1 = NULL,
       names_from = .data$model_name,
       values_from = c(.data$metric, .data$outlier),
       names_glue = "{.value}_{.name}"
-    ) %>%
-    dplyr::mutate(
-      diff_mod1_2 = .[[3]] - .[[2]]
     )
+  wide_df$diff_mod1_2 = wide_df[[3]] - wide_df[[2]]
   
   # Reshape back to long format for plotting
   long_df <- wide_df %>%
@@ -161,7 +159,7 @@ mrPerformancePlot <- function(ModelPerf1 = NULL,
   p2 <- long_df %>%
     ggplot2::ggplot(
       ggplot2::aes(
-        y = reorder(.data$response, .data$difference, decreasing = TRUE),
+        y = stats::reorder(.data$response, .data$difference, decreasing = TRUE),
         x = .data$difference
       )
     ) +

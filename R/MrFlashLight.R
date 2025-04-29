@@ -133,7 +133,7 @@ mrIML_flashlight_setup <- function(mode, predict_function = NULL) {
         m <- hardhat::extract_workflow(m)
       }
       pred <- m %>%
-        predict(
+        stats::predict(
           new_data = dat,
           type = "prob"
         )
@@ -149,7 +149,7 @@ mrIML_flashlight_setup <- function(mode, predict_function = NULL) {
     pred_fun <- function(m, dat) {
       pred <- m %>%
         hardhat::extract_workflow() %>%
-        predict(
+        stats::predict(
           new_data = dat
         )
       pred %>%
