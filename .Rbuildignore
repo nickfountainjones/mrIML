@@ -8,3 +8,7 @@
 ^\.github$
 ^package/_pkgdown\.yml$
 ^pkgdown/_pkgdown\.yml$
+^inst$
+^R/archive$
+^README\.Rmd$
+^data/archived-data$
