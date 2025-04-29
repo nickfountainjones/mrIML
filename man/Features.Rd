@@ -5,7 +5,8 @@
 \alias{Features}
 \title{Landscape and host feature (variable) data}
 \format{
-A data frame with 20 columns (features) and 19 rows (sampled bobcat locations). The columns include:
+A data frame with 20 columns (features) and 19 rows (sampled bobcat
+locations). The columns include:
 \describe{
 \item{Grassland}{Proportion of grassland in a 5km radius of the sample location.}
 \item{Shrub.Scrub}{Proportion of scrub in a 5km radius of the sample location.}
@@ -14,7 +15,9 @@ A data frame with 20 columns (features) and 19 rows (sampled bobcat locations). 
 }
 }
 \source{
-Fountain‐Jones, NM, Craft, ME, Funk, WC, et al. Urban landscapes can change virus gene flow and evolution in a fragmentation‐sensitive carnivore. Mol Ecol. 2017; 26: 6487–6498. https://doi.org/10.1111/mec.14375
+Fountain‐Jones, NM, Craft, ME, Funk, WC, et al. Urban landscapes can
+change virus gene flow and evolution in a fragmentation‐sensitive carnivore.
+Mol Ecol. 2017; 26: 6487–6498. https://doi.org/10.1111/mec.14375
 }
 \usage{
 Features
