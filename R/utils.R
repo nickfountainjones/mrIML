@@ -56,7 +56,7 @@ readSnpsPed <- function(pedfile, mapfile){
     stop("missing plink '.map' file")
   
   # Isolate SNP matrix from .ped file and and append sample IDs as row names
-  snpobj <- read.table(
+  snpobj <- utils::read.table(
     pedfile,
     row.names = 2,
     na.strings = c("0", "-9"),
@@ -65,14 +65,14 @@ readSnpsPed <- function(pedfile, mapfile){
   snpobj <- snpobj[-(1:5)]
   
   # Extract locus IDs from .map file, create col names and append to SNP matrix
-  lnames <- read.table(mapfile)[,2]
+  lnames <- utils::read.table(mapfile)[,2]
   locnames1 <- paste0(lnames, ".1")
   locnames2 <- paste0(lnames, ".2")
   locnames3 <- c(rbind(locnames1, locnames2))
   colnames(snpobj) <- locnames3
   
   if (any(is.na(snpobj))){
-    hist(
+    graphics::hist(
       colSums(is.na(as.matrix(snpobj))),
       main = "Missing genotypes per SNP",
       xlab = "No. missing genotpyes"
@@ -94,7 +94,10 @@ readSnpsPed <- function(pedfile, mapfile){
       
       for(i in 1:ncol(snpobj)){
         # Replace NAs with the major allele at a given locus
-        snpobj[i] <- na.replace(snpobj[i], Mode(snpobj[i], na.rm = TRUE)) 
+        snpobj[i] <- tidyr::replace_na(
+          snpobj[i],
+          Mode(snpobj[i], na.rm = TRUE)
+        ) 
         # Re-code the major allele as "0"
         snpobj[i] <- replace(
           snpobj[i],
@@ -126,7 +129,7 @@ readSnpsPed <- function(pedfile, mapfile){
     }
   }
   
-  data.matrix(snpobj, rownames.force = TRUE)
+  data.frame(snpobj, rownames.force = TRUE)
   
 }
 
@@ -195,17 +198,18 @@ resist_components <- function (foldername = foldername,
     names(PcoA2D_AT)[1:2] <- c('PCoA1', 'PCoA2')
     
     #plot it
-    Tr_PcoA <- ggplot( # Would be good to make this 3D at some point
+    Tr_PcoA <- ggplot2::ggplot( # Would be good to make this 3D at some point
       PcoA2D_AT,
-      aes(x = PCoA1, y = PCoA2, label = siteData$Site)
+      ggplot2::aes(x = PCoA1, y = PCoA2, label = siteData$Site)
     ) +
-      geom_point(size =2) +
-      geom_text(
+      ggplot2::geom_point(size =2) +
+      ggplot2::geom_text(
         col = 'black',
         size = 4,
         check_overlap = TRUE
       ) +
-      labs(
+      ggplot2::labs(
+        title = paste('PCoA', gsub('.csv','', files[i])),
         y = paste0(
           "PCoA-2 (",
           scales::label_percent()(l2),
@@ -217,8 +221,7 @@ resist_components <- function (foldername = foldername,
           " variance explained)"
         )
       ) +
-      theme_bw() +
-      ggtitle(paste('PCoA', gsub('.csv','', files[i])))
+      ggplot2:theme_bw()
     
     print( Tr_PcoA)
     
@@ -258,13 +261,13 @@ resist_components <- function (foldername = foldername,
     
     #select significant pcs
     threholdScore <- sigPC %>%
-      filter( `P-value`<= p_val)
+      dplyr::filter( `P-value`<= p_val)
     
     #------------------------------------------   
     
     #select informative axes
     ReducedAxis <- pcdat %>%
-      subset(select = threholdScore$Axis)
+      data.table::subset(select = threholdScore$Axis)
     
     # add site data
     ReducedAxisDF <- cbind(siteData, ReducedAxis)

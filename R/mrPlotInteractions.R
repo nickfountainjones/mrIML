@@ -180,7 +180,7 @@ mrPlot_interactions <- function(interactions,
       ggplot2::aes(fill = rowname, y = importance, x = rowname)
     ) + 
     ggplot2::geom_bar(position = "dodge", stat = "identity") +
-    ggplot2::scale_fill_viridis(discrete = TRUE, option = "E") +
+    viridis::scale_fill_viridis(discrete = TRUE, option = "E") +
     ggplot2::facet_wrap(~Response) +
     ggplot2::theme_bw() +
     ggplot2::theme(
