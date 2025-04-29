@@ -39,8 +39,6 @@
 #' * `$Data`: A list of the raw data.
 #' * `$Fits`: A list of the fitted models to each response variable.
 #'
-#' @export
-#'
 #' @examples
 #' library(tidymodels)
 #'
@@ -99,7 +97,8 @@
 #'   prop = 0.7,
 #'   k = 5
 #' )
-
+#' 
+#' @export
 mrIMLpredicts <- function(X,
                           X1 = NULL,
                           Y,
@@ -111,25 +110,25 @@ mrIMLpredicts <- function(X,
                           k = 10,
                           racing = TRUE) {
   mode <- Model$mode
-
+  
   # Coerce data to tibbles
   X <- tibble::as_tibble(X)
   Y <- tibble::as_tibble(Y)
   if (!is.null(X1)) X1 <- tibble::as_tibble(X1)
-
+  
   # Check modeling inputs
   check_equal_rows(X, X1, Y)
   if (!inherits(Model, "model_spec")) {
     stop("The model should be a properly specified tidymodel.")
   }
-
+  
   n_response <- length(Y)
-  pb <- txtProgressBar(min = 0, max = n_response, style = 3)
-
+  pb <- utils::txtProgressBar(min = 0, max = n_response, style = 3)
+  
   yhats <- future.apply::future_lapply(
     X = seq(1, n_response),
     FUN = function(i, fit_fun) {
-      setTxtProgressBar(pb, i)
+      utils::setTxtProgressBar(pb, i)
       fit_fun(
         i,
         .X = X,
@@ -146,17 +145,12 @@ mrIMLpredicts <- function(X,
       )
     },
     future.seed = TRUE,
-    # I think I only need to pass this function now because
-    # the workers are looking in library() to load packages.
     fit_fun = mrIML_internal_fit_function,
-    # So that %>% can be used. Since mrIML exports %>%, once
-    # package is build I should be able to just attach mrIML
-    # and remove the previous line.
     future.packages = c("magrittr")
   )
-
+  
   names(yhats) <- names(Y)
-
+  
   return(
     list(
       Model = Model,
@@ -179,7 +173,6 @@ mrIML_internal_fit_function <- function(i,
                                         mode,
                                         dummy,
                                         prop,
-                                        morans,
                                         tune_grid_size,
                                         k,
                                         racing,
@@ -187,55 +180,51 @@ mrIML_internal_fit_function <- function(i,
   if (!is.null(.X1)) {
     if (!is.null(.X)) {
       data <- tibble::as_tibble(
-        cbind(.Y[i], .X, .X1[-i])
+        cbind(.Y[[i]], .X, .X1[-i])
       )
     } else {
       data <- tibble::as_tibble(
-        cbind(.Y[i], .X1[-i])
+        cbind(.Y[[i]], .X1[-i])
       )
     }
   } else {
     if (!is.null(.X)) {
-      data <- tibble::as_tibble(cbind(.Y[i], .X))
+      data <- tibble::as_tibble(cbind(.Y[[i]], .X))
     } else {
       stop("At least one of X or X1 must be specified.")
     }
   }
-
-  # define response variable for either regression or classification
-  colnames(data)[1] <- c("class")
-
+  
+  # define response variable
+  colnames(data)[1] <- "class"
+  
   if (mode == "classification") {
     data$class <- as.factor(data$class)
   }
-
+  
   data_split <- rsample::initial_split(data, prop = prop)
-
+  
   # extract training and testing sets
   data_train <- rsample::training(data_split)
   data_test <- rsample::testing(data_split)
-
-  # n fold cross validation
+  
+  # n-fold cross validation
   data_cv <- rsample::vfold_cv(data_train, v = k)
-
+  
   if (balance_data == "down") {
-    data_recipe <- rsample::training(data_split) %>%
+    data_recipe <- data_train %>%
       recipes::recipe(class ~ ., data = data_train) %>%
-      themis::step_downsample(class)
-  }
-
-  if (balance_data == "up") {
-    data_recipe <- rsample::training(data_split) %>%
+      themis::step_downsample(.data$class)
+  } else if (balance_data == "up") {
+    data_recipe <- data_train %>%
       recipes::recipe(class ~ ., data = data_train) %>%
-      themis::step_rose(class)
-  }
-
-  if (balance_data == "no") {
-    data_recipe <- rsample::training(data_split) %>%
+      themis::step_rose(.data$class)
+  } else if (balance_data == "no") {
+    data_recipe <- data_train %>%
       recipes::recipe(class ~ ., data = data_train)
   }
-
-  if (dummy == TRUE) {
+  
+  if (dummy) {
     data_recipe <- data_recipe %>%
       recipes::step_dummy(
         recipes::all_nominal(),
@@ -243,12 +232,12 @@ mrIML_internal_fit_function <- function(i,
         one_hot = TRUE
       )
   }
-
+  
   mod_workflow <- workflows::workflow() %>%
     workflows::add_recipe(data_recipe) %>%
     workflows::add_model(Model)
-
-  if (racing == TRUE) {
+  
+  if (racing) {
     tune_m <- finetune::tune_race_anova(
       mod_workflow,
       resamples = data_cv
@@ -260,47 +249,35 @@ mrIML_internal_fit_function <- function(i,
       grid = tune_grid_size
     )
   }
-
+  
   if (mode == "classification") {
-    # select the best model
     best_m <- tune_m %>%
-      tune::select_best(metric = "roc_auc") # try mcc or roc_auc
-  }
-
-  if (mode == "regression") {
-    # select the best model
+      tune::select_best(metric = "roc_auc")
+  } else {
     best_m <- tune_m %>%
       tune::select_best(metric = "rmse")
   }
-
-  # final model specification
+  
   final_model <- tune::finalize_workflow(
     mod_workflow,
     best_m
   )
-
-  # now to fit the model
+  
   mod1_k <- final_model %>%
     workflows::fit(data = data_train)
-
-  # make predictions and calculate deviance residuals.
+  
   if (mode == "classification") {
-    # predictions
     yhatO <- predict(mod1_k, new_data = data, type = "prob")
-
     yhat <- yhatO$.pred_1
-
-    # predictions based on testing data
+    
     yhatT <- predict(mod1_k, new_data = data_test, type = "class") %>%
       dplyr::bind_cols(
         data_test %>%
-          dplyr::select(class)
+          dplyr::select(.data$class)
       )
-
+    
     truth <- as.numeric(as.character(data$class))
-
-    # pred_truth <- cbind(yhat, truth)
-
+    
     deviance <- sapply(
       seq_along(truth),
       function(j) {
@@ -312,33 +289,22 @@ mrIML_internal_fit_function <- function(i,
         return(resid)
       }
     )
-
+    
     deviance_morans <- deviance
-
-    # cant have Inf values. It means that the model isn't fitting this
-    # data point very well. This is a temporary fix.
     deviance_morans[is.infinite(deviance_morans)] <- 2
-  }
-
-  if (mode == "regression") {
+  } else {
     yhatO <- predict(mod1_k, new_data = data_train)
-
     yhat <- yhatO$.pred
-
-    # predictions based on testing data
-    yhatT <- predict(mod1_k, new_data = data_test) # %>%
-    # bind_cols(data_test %>% select(class))
-
+    
+    yhatT <- predict(mod1_k, new_data = data_test)
+    
     deviance <- NULL
   }
-
-  # The last fit; useful for some functionality.
+  
   last_mod_fit <- final_model %>%
     tune::last_fit(data_split)
-
-  # return data
+  
   list(
-    # mod1_k = mod1_k,
     last_mod_fit = last_mod_fit,
     tune_m = tune_m,
     data = data,
@@ -352,13 +318,12 @@ mrIML_internal_fit_function <- function(i,
 
 check_equal_rows <- function(X, X1, Y) {
   input_lengths <- c(nrow(X), nrow(X1), nrow(Y))
-
-  input_lengths <- input_lengths[!is.null(input_lengths)]
-
+  input_lengths <- input_lengths[!is.na(input_lengths)]
+  
   unique_nrow_vals <- input_lengths %>%
     unique() %>%
     length()
-
+  
   if (unique_nrow_vals != 1) {
     stop("All data inputs must have the same number of rows.", call. = FALSE)
   }

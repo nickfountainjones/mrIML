@@ -61,4 +61,5 @@ fl <- mrFlashlight(
 profileData_pd <- light_profile(fl, v = "scale.prop.zos")
 mrProfileplot(profileData_pd, sdthresh = 0.05)[[1]]
 mrProfileplot(profileData_pd, sdthresh = 0.05)[[2]]
+
 }

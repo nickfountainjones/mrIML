@@ -57,7 +57,7 @@ mr_Covar <- function(mrIMLobj,
   X1 <- mrIMLobj$Data$X1
   mode <- mrIMLobj$Model$mode
   
-  # Run flashlifht
+  # Run flashlight
   profiles_fl <- mrFlashlight(
     mrIMLobj,
     response = "multi"
@@ -66,34 +66,34 @@ mr_Covar <- function(mrIMLobj,
   
   # Filter results and get derivatives
   profiles_df <- profiles_fl$data %>%
-    dplyr::rename(cov_grid = var) %>%
-    dplyr::group_by(label) %>%
-    mutate(
-      sd = sd(value),
-      cov_grad = cov_grid + (0.5 * (lead(cov_grid) - cov_grid)),
-      cov_diff = abs(lead(value) - value)
+    dplyr::rename(cov_grid = .data[[var]]) %>%
+    dplyr::group_by(.data$label) %>%
+    dplyr::mutate(
+      sd = sd(.data$value),
+      cov_grad = .data$cov_grid + (0.5 * (dplyr::lead(.data$cov_grid) - .data$cov_grid)),
+      cov_diff = abs(dplyr::lead(.data$value) - .data$value)
     ) %>%
-    dplyr::filter(
-      sd >= sdthresh
-    )
+    dplyr::filter(.data$sd >= sdthresh)
   
+  # Plot partial dependence
   p_pd <- profiles_df %>%
     ggplot2::ggplot(
-      ggplot2::aes(x = cov_grid, y = value, colour = label)
+      ggplot2::aes(x = .data$cov_grid, y = .data$value, colour = .data$label)
     ) +
     ggplot2::geom_line() +
     ggplot2::geom_point() +
     ggplot2::theme_bw() +
-    ggplot2::ylab("Prob of occurance") +
+    ggplot2::ylab("Prob of occurrence") +
     ggplot2::xlab(var) +
     ggplot2::labs(colour = "Taxa") +
     ggplot2::ylim(0, 1) +
     ggplot2::xlim(range(profiles_df$cov_grid))
   
+  # Plot derivatives
   p_pd_diff <- profiles_df %>%
-    dplyr::filter(!is.na(cov_diff)) %>%
+    dplyr::filter(!is.na(.data$cov_diff)) %>%
     ggplot2::ggplot(
-      ggplot2::aes(x = cov_grad, group = cov_grad, y = cov_diff)
+      ggplot2::aes(x = .data$cov_grad, group = .data$cov_grad, y = .data$cov_diff)
     ) +
     ggplot2::geom_boxplot() +
     ggplot2::theme_bw() +

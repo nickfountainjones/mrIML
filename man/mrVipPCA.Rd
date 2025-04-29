@@ -2,7 +2,7 @@
 % Please edit documentation in R/mrvip.R
 \name{mrVipPCA}
 \alias{mrVipPCA}
-\title{Principle Component Analysis of \code{mrIML} variable importance}
+\title{Principle Component Analysis of mrIML variable importance}
 \usage{
 mrVipPCA(mrVip_obj)
 }
@@ -12,12 +12,12 @@ mrVipPCA(mrVip_obj)
 \value{
 A list of PCA results:
 \itemize{
-\item \verb{$PCA_plot}
-\item \verb{$PC_outlires}
-\item \verb{$eigenvalues}
-\item \verb{$PC_scores}
+\item $PCA_plot
+\item $PC_outlires
+\item $eigenvalues
+\item $PC_scores
 }
 }
 \description{
-Principle Component Analysis of \code{mrIML} variable importance
+Principle Component Analysis of mrIML variable importance
 }

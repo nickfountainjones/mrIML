@@ -63,7 +63,7 @@ mrPlot_interactions <- function(interactions,
                                 X,
                                 Y,
                                 top_ranking = 3,
-                                top_response = 10){
+                                top_response = 10) {
   
   n_features <- cbind(Y, X) %>%
     names() %>%
@@ -76,12 +76,11 @@ mrPlot_interactions <- function(interactions,
   
   colnames(interactions) <- names(Y)
   
- meanInteractions <- as.data.frame(rowMeans(interactions)) #calculate average
+  meanInteractions <- as.data.frame(rowMeans(interactions)) # Calculate average
   names(meanInteractions)[1] <- c('meanInt')
   
-  sumInteractions <- as.data.frame(rowSums(interactions)) #calculate average
+  sumInteractions <- as.data.frame(rowSums(interactions)) # Calculate sum
   names(sumInteractions)[1] <- c('sumInt')
-  
   
   intData <- as.data.frame(interactions)
   intData <- cbind(
@@ -92,13 +91,13 @@ mrPlot_interactions <- function(interactions,
   )
   
   inDataOrered <- intData %>%
-    dplyr::arrange(variables, meanInt)
-
+    dplyr::arrange(.data$variables, .data$meanInt)
+  
   inDataOrered_top <- inDataOrered[1L:top_ranking, ]
   
   p1 <- ggplot2::ggplot(
     inDataOrered_top,
-    ggplot2::aes(y = variables, x = meanInt)
+    ggplot2::aes(y = .data$variables, x = .data$meanInt)
   ) + 
     ggplot2::theme_bw() +
     ggplot2::labs(
@@ -111,77 +110,76 @@ mrPlot_interactions <- function(interactions,
   
   p2 <- ggplot2::ggplot(
     inDataOrered_top,
-    ggplot2::aes(y=variables, x= sumInt)
+    ggplot2::aes(y = .data$variables, x = .data$sumInt)
   ) + 
-    ggplot2::theme_bw()+
+    ggplot2::theme_bw() +
     ggplot2::labs(
       x = "Cumulative interaction importance",
-      y = "Feature interactions") +
+      y = "Feature interactions"
+    ) +
     ggplot2::geom_bar(stat = "identity")
+  
   # Plotting both ensures that the cumulative score isn't 
   # Biased towards some strong interactions for some predictors
   p_cum_imp <- patchwork::wrap_plots(p1, p2, nrow = 1)
-    
- #-----------------------------------------------------------------------------------
-    
- #select SNPS most effected by interactions for top 10 features
-    MostImp <- as.data.frame(colSums(inDataOrered_top[-1]))
-    names(MostImp ) <- "sumInteract" 
-    
-    MostImp_t <-  MostImp %>% 
-      t() %>% 
-      as.data.frame()
-    
-    MostImp_t$meanInt <- NULL #remove these stats as they are not needed
-    MostImp_t$sumInt <- NULL
-    
-    MostImp_f <-  MostImp_t %>% 
-      t() %>% 
-      as.data.frame() %>% 
-      tibble::rownames_to_column()
   
-      MostImp_ordered <- MostImp_f %>% 
-        dplyr::arrange(
-          dplyr::desc(sumInteract)
-        )
-    
-      top_int_response <-  as.data.frame(MostImp_ordered[1L:top_ranking, ])
-      
+  # Select SNPS most affected by interactions for top 10 features
+  MostImp <- as.data.frame(colSums(inDataOrered_top[-1]))
+  names(MostImp) <- "sumInteract" 
+  
+  MostImp_t <-  MostImp %>% 
+    t() %>% 
+    as.data.frame()
+  
+  MostImp_t$meanInt <- NULL # Remove these stats as they are not needed
+  MostImp_t$sumInt <- NULL
+  
+  MostImp_f <-  MostImp_t %>% 
+    t() %>% 
+    as.data.frame() %>% 
+    tibble::rownames_to_column()
+  
+  MostImp_ordered <- MostImp_f %>% 
+    dplyr::arrange(
+      dplyr::desc(.data$sumInteract)
+    )
+  
+  top_int_response <-  as.data.frame(MostImp_ordered[1L:top_ranking, ])
+  
   p_strongest_int <- ggplot2::ggplot(
     top_int_response,
-    ggplot2::aes(y=rowname, x= sumInteract)
-  ) + #cant get this descending for some reason
+    ggplot2::aes(y = .data$rowname, x = .data$sumInteract)
+  ) + 
     ggplot2::theme_bw() +
     ggplot2::labs(
       x = "Cumulative interaction importance",
       y = "Response"
     ) +
     ggplot2::geom_bar(stat = "identity")
-    
+  
   t_inDataOrered_top <- as.data.frame(t(inDataOrered_top)) %>% 
-        janitor::row_to_names(row_number = 1) %>% 
-        tibble::rownames_to_column()
-      
+    janitor::row_to_names(row_number = 1) %>% 
+    tibble::rownames_to_column()
+  
   topIntC <- t_inDataOrered_top %>%
-    dplyr::filter(rowname %in%  top_int_response$rowname)
+    dplyr::filter(.data$rowname %in% top_int_response$rowname)
   
   charvec <- as.data.frame(rep(topIntC$rowname, top_ranking))
   names(charvec) <- "Response"
   
   topIntC_plotData <- topIntC %>% 
-    tidyr::gather(key = "rowname", value = importance) %>% 
+    tidyr::gather(key = "rowname", value = "importance") %>% 
     dplyr::bind_cols(charvec)
-   
+  
   topIntC_plotData$importance <- as.numeric(topIntC_plotData$importance)
-   
-   
+  
   p_strongest_int_resp <- topIntC_plotData %>%
     ggplot2::ggplot(
-      ggplot2::aes(fill = rowname, y = importance, x = rowname)
+      ggplot2::aes(fill = .data$rowname, y = .data$importance, x = .data$rowname)
     ) + 
     ggplot2::geom_bar(position = "dodge", stat = "identity") +
     viridis::scale_fill_viridis(discrete = TRUE, option = "E") +
-    ggplot2::facet_wrap(~Response) +
+    ggplot2::facet_wrap(~.data$Response) +
     ggplot2::theme_bw() +
     ggplot2::theme(
       axis.title.x = ggplot2::element_blank(),

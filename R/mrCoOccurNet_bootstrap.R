@@ -83,9 +83,10 @@
 #'    colour = "white",
 #'    fill = "grey36"
 #'  )
+#'
 #' @export
 
-mrCoOccurNet_bootstrap <- function(mrBootstrap_obj){   #,  variable ='Plas
+mrCoOccurNet_bootstrap <- function(mrBootstrap_obj) {
   # Expand bootstrap object
   pd_boot_df <- lapply(
     mrBootstrap_obj %>%
@@ -97,53 +98,55 @@ mrCoOccurNet_bootstrap <- function(mrBootstrap_obj){   #,  variable ='Plas
     }
   ) %>%
     dplyr::bind_rows(.id = "var")
+  
   # Filter to only taxa
-  taxa <- pd_boot_df$response %>%
+  taxa <- pd_boot_df %>%
+    dplyr::pull(.data$response) %>%
     unique()
+  
   pd_boot_df <- pd_boot_df %>%
-    dplyr::filter(var %in% taxa) %>%
-    dplyr::mutate(X = ifelse(X == 1, "present", "absent"))
+    dplyr::filter(.data$var %in% taxa) %>%
+    dplyr::mutate(X = ifelse(.data$X == 1, "present", "absent"))
+  
   # Calculate the strengths of edges
   edge_strength <- pd_boot_df %>%
-    dplyr::group_by(var, response, bootstrap) %>%
-    dplyr::summarise(sd_value = sd(value)) %>%
-    dplyr::group_by(var, response) %>%
+    dplyr::group_by(.data$var, .data$response, .data$bootstrap) %>%
+    dplyr::summarise(sd_value = stats::sd(.data$value), .groups = "drop") %>%
+    dplyr::group_by(.data$var, .data$response) %>%
     dplyr::summarise(
-      mean_strength = mean(sd_value),
-      lower_ci = quantile(sd_value, probs = 0.025),
-      upper_ci = quantile(sd_value, probs = 0.974)
+      mean_strength = mean(.data$sd_value),
+      lower_ci = stats::quantile(.data$sd_value, probs = 0.025),
+      upper_ci = stats::quantile(.data$sd_value, probs = 0.974),
+      .groups = "drop"
     )
+  
   # Calculate the direction of influence (positive or negative)
   edge_direction <- pd_boot_df %>%
-    tidyr::spread(X, value) %>%
-    dplyr::mutate(direction = present - absent) %>%
-    dplyr::group_by(var, response) %>%
-    dplyr::summarise(mean_direction = mean(direction)) %>%
-    dplyr::mutate(direction = ifelse(mean_direction > 0, "positive", "negative"))
-  
-  # Join and return edge data for plotting
-  dplyr::full_join(edge_strength, edge_direction) %>%
-    dplyr::rename(taxa_1 = var, taxa_2= response) %>% 
-    dplyr::select(
-      taxa_1,
-      taxa_2,
-      direction,
-      mean_strength,
-      lower_ci,
-      upper_ci,
-      mean_direction
+    tidyr::pivot_wider(names_from = .data$X, values_from = .data$value) %>%
+    dplyr::mutate(direction = .data$present - .data$absent) %>%
+    dplyr::group_by(.data$var, .data$response) %>%
+    dplyr::summarise(
+      mean_direction = mean(.data$direction),
+      .groups = "drop"
+    ) %>%
+    dplyr::mutate(
+      direction = ifelse(.data$mean_direction > 0, "positive", "negative")
     )
   
+  # Join and return edge data for plotting
+  dplyr::full_join(
+    edge_strength,
+    edge_direction,
+    by = c("var", "response")
+  ) %>%
+    dplyr::rename(taxa_1 = .data$var, taxa_2 = .data$response) %>%
+    dplyr::select(
+      .data$taxa_1,
+      .data$taxa_2,
+      .data$direction,
+      .data$mean_strength,
+      .data$lower_ci,
+      .data$upper_ci,
+      .data$mean_direction
+    )
 }
-
-
-
-
-
-
-
-
-
-
-
-

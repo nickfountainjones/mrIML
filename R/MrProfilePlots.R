@@ -48,63 +48,58 @@
 #' profileData_pd <- light_profile(fl, v = "scale.prop.zos")
 #' mrProfileplot(profileData_pd, sdthresh = 0.05)[[1]]
 #' mrProfileplot(profileData_pd, sdthresh = 0.05)[[2]]
+#' 
 #' @export
 mrProfileplot <- function(profileData,
                           sdthresh = 0.05) {
   b <- profileData$data
-  feature <- names(b[1])
+  feature <- names(b)[1]
   
-  # select only SNPs that are responding to this featured
+  # Select only SNPs that are responding to this feature
   std <- b %>%
-    dplyr::group_by(label) %>%
-    dplyr::summarise(sdALE = sd(value))
-
+    dplyr::group_by(.data$label) %>%
+    dplyr::summarise(sdALE = sd(.data$value))
+  
   Xred <- std %>%
-    dplyr::filter(sdALE >= sdthresh)
-
+    dplyr::filter(.data$sdALE >= sdthresh)
+  
   redALE <- b %>%
-    dplyr::filter(label %in% Xred$label)
-
+    dplyr::filter(.data$label %in% Xred$label)
+  
   profileData$data <- redALE
-
+  
   redALEplot <- plot(profileData) +
     ggplot2::theme_bw()
-
+  
   #-----------------------------------------------
   # Calculate global ALE
-
-  if (lapply(b[1], is.factor) == FALSE) {
-    b[1] <- apply(b[1], 2, as.factor)
-
-    sum <- b %>%
-      dplyr::group_by(b[1]) %>%
-      dplyr::summarise(avgALE = mean(value))
-
-    sum[1] <- sapply(sum[1], function(x) as.numeric(as.character(x)))
-
-    sum$avgALE <- as.numeric(sum$avgALE)
-
-    GlobalPD <- sum %>%
+  
+  if (length(unique(b[[feature]])) > 2) {
+    GlobalPD <- b %>%
       ggplot2::ggplot(
-        ggplot2::aes_string(feature, "avgALE")
-      ) +
+        ggplot2::aes(x = .data[[feature]], y = .data$value)
+      )+
       ggplot2::geom_smooth(method = "loess") +
       ggplot2::ylab("Average effect") +
       ggplot2::theme_bw()
-  }
-
-  if (lapply(b[1], is.factor) == TRUE) {
+  } else {
     GlobalPD <- b %>%
       ggplot2::ggplot(
-        ggplot2::aes_string(feature, "value")
+        ggplot2::aes(
+          x = as.factor(.data[[feature]]),
+          y = .data$value
+        )
       ) +
-      ggplot2::geom_boxplot(notch = TRUE) +
+      ggplot2::geom_boxplot() +
+      ggplot2::labs(
+        x = feature,
+        y = "Average effect"
+      ) +
       ggplot2::theme_bw()
   }
-
+  
   list(
     redALEplot,
     GlobalPD
   )
-
 }

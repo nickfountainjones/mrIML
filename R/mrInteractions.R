@@ -64,6 +64,7 @@
 #' mrIML_interactions_rf[[1]]
 #' mrIML_interactions_rf[[2]]
 #' mrIML_interactions_rf[[3]]
+#' 
 #' @export  
 mrInteractions <- function(mrIMLobj,
                            num_bootstrap = 1,
@@ -98,7 +99,7 @@ mrInteractions <- function(mrIMLobj,
     function(p) {
       # prepare sample data
       bootstrap_sample <- yhats[[p$response]]$data
-      if(num_bootstrap > 1) {
+      if (num_bootstrap > 1) {
         bootstrap_sample <- bootstrap_sample %>%
           dplyr::slice(
             sample(1:dplyr::n(), replace = TRUE)
@@ -181,7 +182,7 @@ mrInteractions <- function(mrIMLobj,
     )
   
   p_one_way_filtered <- overall_one_way_df %>%
-    dplyr::filter(response == feature) %>%
+    dplyr::filter(.data$response == feature) %>%
     plot_hstat() +
     ggplot2::labs(
       title = paste0(feature, " interaction contribution"),
@@ -190,7 +191,7 @@ mrInteractions <- function(mrIMLobj,
     )
   
   p_two_way_filtered <- overall_two_way_df %>%
-    dplyr::filter(response == feature) %>%
+    dplyr::filter(.data$response == feature) %>%
     plot_hstat() +
     ggplot2::labs(
       title = paste0(feature, " pairwise interaction strengths"),
@@ -208,6 +209,7 @@ mrInteractions <- function(mrIMLobj,
     h2_pairwise_df = overall_two_way_df
   )
 }
+
 # Helper functions
 h2_to_tibble <- function(h2_score) {
   h2_mat <- h2_score[["M"]]
@@ -217,22 +219,24 @@ h2_to_tibble <- function(h2_score) {
     value = h2_vals
   )
 }
+
 plot_hstat <- function(hstat_df) {
   hstat_df %>%
-    dplyr::group_by(name) %>%
+    dplyr::group_by(.data$name) %>%
     dplyr::summarise(
-      mean_value = mean(value, na.rm = TRUE),
-      ub_value = quantile(value, probs = c(0.95)),
-      lb_value = quantile(value, probs = c(0.05))
+      mean_value = mean(.data$value, na.rm = TRUE),
+      ub_value = quantile(.data$value, probs = 0.95),
+      lb_value = quantile(.data$value, probs = 0.05),
+      .groups = "drop"
     ) %>%
     ggplot2::ggplot(
-      ggplot2::aes(x = reorder(name, -mean_value), y = mean_value)
+      ggplot2::aes(x = reorder(.data$name, -.data$mean_value), y = .data$mean_value)
     ) +
     ggplot2::geom_col() +
     ggplot2::geom_errorbar(
       ggplot2::aes(
-        ymin = lb_value,
-        ymax = ub_value
+        ymin = .data$lb_value,
+        ymax = .data$ub_value
       ),
       width = 0.4
     ) +

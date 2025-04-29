@@ -87,9 +87,14 @@ mrvip(mrIML_rf, taxa = "Plas")
 mrIML_rf_boot <- mrIML_rf \%>\%
   mrBootstrap()
   
-mrvip(
+mrIML_rf_vip <- mrvip(
   mrIML_rf,
   mrBootstrap_obj = mrIML_rf_boot
 )
+
+mrIML_rf_vip
+
+mrIML_rf_vip \%>\%
+ mrVipPCA()
 
 }

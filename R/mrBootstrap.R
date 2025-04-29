@@ -47,6 +47,7 @@
 #'   mrBootstrap(
 #'   num_bootstrap = 50
 #'   )
+#'
 #' @export
 mrBootstrap <- function(mrIMLobj,
                         num_bootstrap = 10,
@@ -55,19 +56,16 @@ mrBootstrap <- function(mrIMLobj,
   yhats <- mrIMLobj$Fits
   Y <- mrIMLobj$Data$Y
   mode <- mrIMLobj$Model$mode
-  #n_response <- length(yhats)
   
   # Set up flashlight functions for mode
-  flashlight_ops <- mrIML_flashlight_setup(
-    mode
-  )
+  flashlight_ops <- mrIML_flashlight_setup(mode)
   
-  # Determine downsampling freq
+  # Determine downsampling frequency
   if (downsample) {
     if (mode == "regression") {
       stop("Downsampling is not suitable for regression models.")
     }
-
+    
     min_class_counts <- lapply(
       seq_along(Y),
       function(k) {
@@ -82,28 +80,28 @@ mrBootstrap <- function(mrIMLobj,
       function(k) NULL
     )
   }
-  # Set up model and data to pass to future_lapply
+  
+  # Set up models and data for future_lapply
   bootstrap_wf <- lapply(
     yhats,
     function(yhat) {
-      data <- yhat$data
-      wf <- yhat$last_mod_fit
       list(
-        data = data,
-        workflow = wf
+        data = yhat$data,
+        workflow = yhat$last_mod_fit
       )
     }
   )
-  # Run bootstraps
-  var_ids <- rep(1:length(bootstrap_wf), each = num_bootstrap)
-  boot_ids <- rep(1:num_bootstrap, length(bootstrap_wf))
   
-  pb <- txtProgressBar(min = 0, max = length(var_ids), style = 3)
+  # Set up bootstrapping
+  var_ids <- rep(seq_along(bootstrap_wf), each = num_bootstrap)
+  boot_ids <- rep(seq_len(num_bootstrap), times = length(bootstrap_wf))
+  
+  pb <- utils::txtProgressBar(min = 0, max = length(var_ids), style = 3)
   
   bootstrap_results <- future.apply::future_lapply(
     seq_along(var_ids),
     function(i, boot_fun) {
-      setTxtProgressBar(pb, i)
+      utils::setTxtProgressBar(pb, i)
       var_id <- var_ids[i]
       boot_id <- boot_ids[i]
       boot_fun(
@@ -111,43 +109,40 @@ mrBootstrap <- function(mrIMLobj,
         bootstrap_wf[[var_id]]$data,
         metrics = flashlight_ops$metrics,
         pred_fun = flashlight_ops$pred_fun,
-        # will be NULL if downsample = FALSE
         downsample_to = min_class_counts[[var_id]],
         response_name = names(yhats)[var_id],
         boot_id = boot_id
       )
     },
-    # Need to parse to workers for time being
     boot_fun = mrIML_internal_bootstrap_fun,
     future.seed = TRUE
   )
   
-  # Organise in a list
+  # Organize bootstraps into a list
   bstraps_pd_list <- lapply(
     yhats,
     function(i) vector("list", num_bootstrap)
   )
+  
   for (i in seq_along(var_ids)) {
     bstraps_pd_list[[var_ids[i]]][[boot_ids[[i]]]] <- bootstrap_results[[i]]
   }
-
+  
   bstraps_pd_list
 }
 
 mrIML_internal_bootstrap_fun <- function(wf,
                                          data,
-                                         downsample,
                                          metrics,
                                          pred_fun,
                                          downsample_to = NULL,
                                          response_name,
-                                         boot_id
-                                         ) {
+                                         boot_id) {
   # Resample data
   if (is.null(downsample_to)) {
     bootstrap_sample <- data %>%
       dplyr::slice(
-        sample(1:nrow(data), replace = TRUE)
+        sample(seq_len(nrow(data)), replace = TRUE)
       )
   } else {
     classes <- unique(data[[1]])
@@ -161,23 +156,25 @@ mrIML_internal_bootstrap_fun <- function(wf,
       }
     ) %>%
       dplyr::bind_rows()
-    if(nrow(bootstrap_sample) < 100) {
+    
+    if (nrow(bootstrap_sample) < 100) {
       warning(
         paste(
           "Downsampling when there are only a few observations of a particular",
           "class can cause issues further down the line in the mrIML workflow.",
-          "We recomend no downsampling by default and removing responses where",
-          "one calss is extreemly rare or common."
+          "We recommend no downsampling by default and removing responses",
+          "where one class is extremely rare or common."
         )
       )
     }
   }
   
-  # Refit model and run flashlight
+  # Refit model and create flashlight
   model_fit <- workflows::fit(
     hardhat::extract_workflow(wf),
     data = bootstrap_sample
   )
+  
   fl <- flashlight::flashlight(
     model = model_fit,
     label = "class",
@@ -202,8 +199,8 @@ mrIML_internal_bootstrap_fun <- function(wf,
         )
     }
   )
+  
   names(pd_list) <- names(bootstrap_sample)[-1]
   
   pd_list
 }
-

@@ -30,7 +30,6 @@ correlation coefficient (MMC), positive predictive value (PPC), specificity,
 and sensitivity are reported.
 }
 \examples{
-
 library(tidymodels)
 
 data <- MRFcov::Bird.parasites
@@ -64,4 +63,5 @@ GN_model_rf <- mrIMLpredicts(
 perf <- mrIMLperformance(GN_model_rf)
 perf[[1]]
 perf[[2]]
+
 }

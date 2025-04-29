@@ -19,10 +19,7 @@
 #' a performance metric over all response models. MMC is used for classification
 #' models and RMSE for regression model.
 #'
-#' @export
-#'
 #' @examples
-#'
 #' library(tidymodels)
 #'
 #' data <- MRFcov::Bird.parasites
@@ -56,20 +53,21 @@
 #' perf <- mrIMLperformance(GN_model_rf)
 #' perf[[1]]
 #' perf[[2]]
-
+#'
+#' @export
 mrIMLperformance <- function(mrIMLobj) {
   yhats <- mrIMLobj$Fits
   Model <- mrIMLobj$Model
   Y <- mrIMLobj$Data$Y
   mode <- mrIMLobj$Model$mode
-
+  
   n_response <- length(yhats)
   mod_perf <- NULL
   bList <- yhats %>%
     purrr::map(
       purrr::pluck("last_mod_fit")
     )
-
+  
   if (mode == "classification") {
     performance_function <- mrIMLperformance_classification
     global_metric <- "mcc"
@@ -78,12 +76,11 @@ mrIMLperformance <- function(mrIMLobj) {
     global_metric <- "rmse"
   } else {
     stop(
-      "mrIMLperfomance() currently only available for class \"regression\" or
-      \"classification\".",
+      "mrIMLperformance() currently only available for class \"regression\" or \"classification\".",
       call. = FALSE
     )
   }
-
+  
   model_perf <- performance_function(
     n_response,
     yhats,
@@ -91,10 +88,10 @@ mrIMLperformance <- function(mrIMLobj) {
     Model,
     bList
   )
-
+  
   global_summary <- model_perf[[global_metric]] %>%
     mean(na.rm = TRUE)
-
+  
   return(
     list(
       model_performance = model_perf,
@@ -117,34 +114,34 @@ mrIMLperformance_classification <- function(n_response,
         roc_AUC = bList[[i]]$.metrics[[1]]$.estimate[2],
         mcc = bList[[i]]$.predictions[[1]] %>%
           yardstick::mcc(
-            truth = class,
-            estimate = .pred_class
+            truth = .data$class,
+            estimate = .data$.pred_class
           ) %>%
-          dplyr::pull(.estimate),
+          dplyr::pull(.data$.estimate),
         sensitivity = bList[[i]]$.predictions[[1]] %>%
           yardstick::sens(
-            truth = class,
-            estimate = .pred_class
+            truth = .data$class,
+            estimate = .data$.pred_class
           ) %>%
-          dplyr::pull(.estimate),
+          dplyr::pull(.data$.estimate),
         ppv = bList[[i]]$.predictions[[1]] %>%
           yardstick::ppv(
-            truth = class,
-            estimate = .pred_class
+            truth = .data$class,
+            estimate = .data$.pred_class
           ) %>%
-          dplyr::pull(.estimate),
+          dplyr::pull(.data$.estimate),
         specificity = bList[[i]]$.predictions[[1]] %>%
           yardstick::spec(
-            truth = class,
-            estimate = .pred_class
+            truth = .data$class,
+            estimate = .data$.pred_class
           ) %>%
-          dplyr::pull(.estimate),
+          dplyr::pull(.data$.estimate),
         prevalence = sum(Y[i]) / nrow(Y)
       )
     }
   ) %>%
     dplyr::bind_rows()
-
+  
   # Handling for NAs in MCC
   if (any(is.na(m_perf$mcc))) {
     warning(
@@ -156,10 +153,10 @@ mrIMLperformance_classification <- function(n_response,
     )
     m_perf <- m_perf %>%
       dplyr::mutate(
-        mcc = ifelse(is.na(mcc), 0, mcc)
+        mcc = ifelse(is.na(.data$mcc), 0, .data$mcc)
       )
   }
-
+  
   m_perf
 }
 

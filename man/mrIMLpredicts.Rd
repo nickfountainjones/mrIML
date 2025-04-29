@@ -126,4 +126,5 @@ GN_model <- mrIMLpredicts(
   prop = 0.7,
   k = 5
 )
+
 }

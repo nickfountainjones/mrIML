@@ -67,9 +67,8 @@
 #' fl %>%
 #'   light_profile2d(c("scale.prop.zos","Plas")) %>%
 #'   plot()
+#'
 #' @export
-
-
 mrFlashlight <- function(mrIMLobj,
                          response = "multi",
                          index = 1,
@@ -89,7 +88,7 @@ mrFlashlight <- function(mrIMLobj,
     predict_function
   )
   
-  # Run flashlight on models...
+  # Run flashlight on models
   if (response == "single") {
     mfl <- flashlight::flashlight(
       model = yhats[[index]]$last_mod_fit,
@@ -139,7 +138,7 @@ mrIML_flashlight_setup <- function(mode, predict_function = NULL) {
           type = "prob"
         )
       pred %>%
-        dplyr::pull(".pred_1")
+        dplyr::pull(.data$.pred_1)
     }
     metrics <- list(
       logloss = MetricsWeighted::logLoss,
@@ -154,7 +153,7 @@ mrIML_flashlight_setup <- function(mode, predict_function = NULL) {
           new_data = dat
         )
       pred %>%
-        dplyr::pull(".pred")
+        dplyr::pull(.data$.pred)
     }
     metrics <- list(
       rmse = MetricsWeighted::rmse,
@@ -163,12 +162,12 @@ mrIML_flashlight_setup <- function(mode, predict_function = NULL) {
   } else {
     stop(
       paste0(
-        "mrFlashlight() is currently only available for mode \"classification\"  
-        or \"regression\"."
+        "mrFlashlight() is currently only available for mode \"classification\" or \"regression\"."
       )
     )
   }
-  # Override pred_fun() if user has supplied one
+  
+  # Override pred_fun() if user supplied one
   if (!is.null(predict_function)) pred_fun <- predict_function
   
   list(
