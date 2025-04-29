@@ -29,6 +29,9 @@ performance criteria are plotted.}
 \item{local_top_var}{The number of top local variables for each response to
 display (default: 5).}
 
+\item{taxa}{A character string identifying which response model should be
+plotted.}
+
 \item{model_perf}{A list object containing model performance metrics output
 by \code{\link[=mrIMLperformance]{mrIMLperformance()}}. If not supplied then \code{\link[=mrIMLperformance]{mrIMLperformance()}} is run
 inside \code{mrvip()} to get performance metrics.}

@@ -2,7 +2,7 @@
 #' dependences and accumulated local effects).
 #' 
 #' @param profileData A data frame generated from [flashlight::light_profile()].
-#' @param 'sdthresh' A numeric value used to filter responses that are not
+#' @param sdthresh A numeric value used to filter responses that are not
 #' changing across the values of the feature (based on standard deviation).
 #'
 #' @details The aim of this function is to plot (1) a reduced set of response

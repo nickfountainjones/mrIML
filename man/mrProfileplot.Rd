@@ -10,7 +10,7 @@ mrProfileplot(profileData, sdthresh = 0.05)
 \arguments{
 \item{profileData}{A data frame generated from \code{\link[flashlight:light_profile]{flashlight::light_profile()}}.}
 
-\item{'sdthresh'}{A numeric value used to filter responses that are not
+\item{sdthresh}{A numeric value used to filter responses that are not
 changing across the values of the feature (based on standard deviation).}
 }
 \description{

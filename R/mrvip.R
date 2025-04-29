@@ -7,9 +7,6 @@
 #'
 #' @param mrIMLobj A list object output by [mrIMLpredicts()].
 #' @param mrBootstrap_obj A list of bootstrap results output by [mrBootstrap()].
-#' @param model_perf A list object containing model performance metrics output
-#' by [mrIMLperformance()]. If not supplied then [mrIMLperformance()] is run
-#' inside `mrvip()` to get performance metrics.
 #' @param threshold The performance threshold for response models (AUC for
 #' classification and $R^2$ for regression). Only response models that meet this
 #' performance criteria are plotted.
@@ -17,6 +14,11 @@
 #' (default: 10).
 #' @param local_top_var The number of top local variables for each response to
 #' display (default: 5).
+#' @param taxa A character string identifying which response model should be
+#' plotted.
+#' @param model_perf A list object containing model performance metrics output
+#' by [mrIMLperformance()]. If not supplied then [mrIMLperformance()] is run
+#' inside `mrvip()` to get performance metrics.
 #' 
 #' @return A list with:
 #' * `$vi_data`: Variable importance data its raw form (including bootstrap
