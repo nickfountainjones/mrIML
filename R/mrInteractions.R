@@ -125,13 +125,13 @@ mrInteractions <- function(mrIMLobj,
         response = p$response,
         boot = p$boot,
         H2 = hstats::h2(s) %>%
-          mrIML:::h2_to_tibble() %>%
+          h2_to_tibble() %>%
           dplyr::mutate(
             response = p$response,
             bstrap = p$boot
           ),
         H2_overall = hstats::h2_overall(s) %>%
-          mrIML:::h2_to_tibble() %>%
+          h2_to_tibble() %>%
           dplyr::mutate(
             response = p$response,
             bstrap = p$boot
@@ -141,7 +141,7 @@ mrInteractions <- function(mrIMLobj,
           normalize = FALSE,
           squared = FALSE
         ) %>%
-          mrIML:::h2_to_tibble() %>%
+          h2_to_tibble() %>%
           dplyr::mutate(
             response = p$response,
             bstrap = p$boot

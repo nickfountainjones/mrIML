@@ -148,7 +148,7 @@ mrIMLpredicts <- function(X,
     future.seed = TRUE,
     # I think I only need to pass this function now because
     # the workers are looking in library() to load packages.
-    fit_fun = mrIML:::mrIML_internal_fit_function,
+    fit_fun = mrIML_internal_fit_function,
     # So that %>% can be used. Since mrIML exports %>%, once
     # package is build I should be able to just attach mrIML
     # and remove the previous line.
