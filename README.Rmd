@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 ![GitHub R package version](https://img.shields.io/github/r-package/v/nickfountainjones/mrIML?logo=github&logoColor=%2300ff37&style=flat-square)
 ![GitHub contributors](https://img.shields.io/github/contributors/nickfountainjones/mrIML?style=flat-square)
 ![GitHub last commit](https://img.shields.io/github/last-commit/nickfountainjones/mrIML?style=flat-square)
-[![R-CMD-check](https://github.com/nickfountainjones/mrIML/workflows/R-CMD-check/badge.svg)](https://github.com/nickfountainjones/mrIML/actions)
+[![R-CMD-check](https://github.com/nickfountainjones/mrIML/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/nickfountainjones/mrIML/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/nickfountainjones/mrIML/graph/badge.svg)](https://app.codecov.io/gh/nickfountainjones/mrIML)
 <!-- badges: end -->
 
