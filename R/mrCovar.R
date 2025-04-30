@@ -10,10 +10,15 @@
 #' @param sdthresh The standard deviation threshold for filtering taxa
 #' (default: 0.05).
 #' 
-#' @return A plot displaying the covariate partial dependence profiles for those
-#' models that meet the `sdthreshold` requirement and another summarizing the
-#' rates of change in probability for the specified variable
-#' (the derivatives of the PD curves).
+#' @return A list of figures:
+#' * `$partial_dep_curves`: The covariate partial dependence profiles for those
+#' models that meet the `sdthreshold` requirement
+#' * `$partial_dep_avg`: The average partial dependence profile for all models.
+#' All indervidual model partial dependence profiles are silhouetted in the
+#' background.
+#' * `$partial_dep_diff`: The distribution of the rates of change in probability
+#' for the specified variable (the derivatives of the PD curves). Useful to
+#' identify key threshold values in the variable.
 #' 
 #' @examples
 #' library(tidymodels)
@@ -70,13 +75,14 @@ mr_Covar <- function(mrIMLobj,
     dplyr::group_by(.data$label) %>%
     dplyr::mutate(
       sd = stats::sd(.data$value),
-      cov_grad = .data$cov_grid + (0.5 * (dplyr::lead(.data$cov_grid) - .data$cov_grid)),
+      cov_grad = .data$cov_grid +
+        (0.5 * (dplyr::lead(.data$cov_grid) - .data$cov_grid)),
       cov_diff = abs(dplyr::lead(.data$value) - .data$value)
-    ) %>%
-    dplyr::filter(.data$sd >= sdthresh)
+    )
   
   # Plot partial dependence
   p_pd <- profiles_df %>%
+    dplyr::filter(.data$sd >= sdthresh) %>%
     ggplot2::ggplot(
       ggplot2::aes(x = .data$cov_grid, y = .data$value, colour = .data$label)
     ) +
@@ -88,6 +94,27 @@ mr_Covar <- function(mrIMLobj,
     ggplot2::labs(colour = "Taxa") +
     ggplot2::ylim(0, 1) +
     ggplot2::xlim(range(profiles_df$cov_grid))
+  
+  # Plot global average
+  p_pd_avg <- ggplot2::ggplot() +
+    ggplot2::geom_line(
+      data = profiles_df,
+      ggplot2::aes(x = .data$cov_grid, y = .data$value, group = .data$label),
+      alpha = 0.2
+    ) +
+    ggplot2::geom_line(
+      data = profiles_df %>%
+        dplyr::group_by(.data$cov_grid) %>%
+        dplyr::summarise(
+          mean = mean(.data$value)
+        ),
+      ggplot2::aes(x = .data$cov_grid, y = .data$mean)
+    ) +
+    ggplot2::labs(
+      x = var,
+      y = "Average effect"
+    ) +
+    ggplot2::theme_bw()
   
   # Plot derivatives
   p_pd_diff <- profiles_df %>%
@@ -102,5 +129,9 @@ mr_Covar <- function(mrIMLobj,
     ggplot2::ylim(0, 1) +
     ggplot2::xlim(range(profiles_df$cov_grid))
   
-  patchwork::wrap_plots(p_pd, p_pd_diff, ncol = 1, axis_titles = "collect")
+  list(
+    p_pd,
+    p_pd_avg,
+    p_pd_diff
+  )
 }
