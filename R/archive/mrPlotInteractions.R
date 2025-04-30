@@ -50,13 +50,13 @@
 #'   feature = "Plas"
 #' )
 #' 
-#' #mrPlot_interactions(
-#' # mrIML_interactions_rf,
-#' # X,
-#' # Y,
-#' # top_ranking = 3,
-#' # top_response = 3
-#' #)
+#' mrPlot_interactions(
+#'  mrIML_interactions_rf,
+#'  X,
+#'  Y,
+#'  top_ranking = 3,
+#'  top_response = 3
+#' )
 #' 
 #' @export 
 mrPlot_interactions <- function(interactions,
@@ -72,7 +72,7 @@ mrPlot_interactions <- function(interactions,
   variable_interactions <- as.data.frame(
     t(utils::combn(n_features, m = 2))
   ) %>% 
-    tidyr::unite('variables', V1:V2, sep='*')
+    tidyr::unite('variables', .data$V1:.data$V2, sep='*')
   
   colnames(interactions) <- names(Y)
   
