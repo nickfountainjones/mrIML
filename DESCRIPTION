@@ -33,7 +33,6 @@ Imports:
     vegan,
     flashlight,
     ggrepel,
-    utils,
     future.apply,
     MetricsWeighted,
     scales,
