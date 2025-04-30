@@ -21,7 +21,7 @@ dependences and accumulated local effects).
 The aim of this function is to plot (1) a reduced set of response
 variables that are responding to the feature of choice (plot 1) and the
 average ALE of partial dependency  for all responses combined (plot 2). When
-there are many responses plot 1 makes interpretation easier by focussing on
+there are many responses plot 1 makes interpretation easier by focusing on
 the responses changing the most with a feature. The feature selected and plot
 type must be specified \code{\link[flashlight:light_profile]{flashlight::light_profile()}} function.
 }
