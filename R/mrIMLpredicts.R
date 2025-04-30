@@ -211,6 +211,25 @@ mrIML_internal_fit_function <- function(i,
   # n-fold cross validation
   data_cv <- rsample::vfold_cv(data_train, v = k)
   
+  # Ensure themis is installed
+  if (balance_data != "no") {
+    if (!requireNamespace("themis", quietly = TRUE)) {
+      message(
+        paste0("The 'themis' package is required if balance_data != 'no'. ",
+               "Would you like to install it? (yes/no)")
+      )
+      response <- readline()
+      if (tolower(response) == "yes") {
+        utils::install.packages("themis")
+      } else {
+        stop(
+          paste0("The 'themis' package is needed for this function. Please ",
+                 "install it to proceed.")
+        )
+      }
+    }
+  }
+  
   if (balance_data == "down") {
     data_recipe <- data_train %>%
       recipes::recipe(class ~ ., data = data_train) %>%

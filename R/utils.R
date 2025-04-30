@@ -156,6 +156,38 @@ readSnpsPed <- function(pedfile, mapfile){
 resist_components <- function (foldername = foldername,
                                p_val = p_val,
                                cl = NULL){
+  # Require the 'vegan' package to be installed
+  if (!requireNamespace("vegan", quietly = TRUE)) {
+    message(
+      paste0("The 'vegan' package is required for this function. Would you ",
+             "like to install it? (yes/no)")
+    )
+    response <- readline()
+    if (tolower(response) == "yes") {
+      utils::install.packages("vegan")
+    } else {
+      stop(
+        paste0("The 'vegan' package is needed for this function. Please ",
+               "install it to proceed.")
+      )
+    }
+  }
+  # Require the 'ape' package to be installed
+  if (!requireNamespace("ape", quietly = TRUE)) {
+    message(
+      paste0("The 'ape' package is required for this function. Would you ",
+             "like to install it? (yes/no)")
+    )
+    response <- readline()
+    if (tolower(response) == "yes") {
+      utils::install.packages("ape")
+    } else {
+      stop(
+        paste0("The 'ape' package is needed for this function. Please ",
+               "install it to proceed.")
+      )
+    }
+  }
   
   files <- list.files(paste(foldername))
   
@@ -215,12 +247,12 @@ resist_components <- function (foldername = foldername,
         title = paste('PCoA', gsub('.csv','', files[i])),
         y = paste0(
           "PCoA-2 (",
-          scales::label_percent()(l2),
+          paste0((l2 * 100), "%"),
           " variance explained)"
         ), 
         x = paste0(
           "PCoA-1 (",
-          scales::label_percent()(l1),
+          paste0((l1 * 100), "%"),
           " variance explained)"
         )
       ) +

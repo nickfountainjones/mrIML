@@ -338,6 +338,24 @@ mrVip_mrIMLobj <- function(mr_iml_obj) {
 #' 
 #' @export
 mrVipPCA <- function(mrVip_obj) {
+  
+  # Require the 'ggrepel' package to be installed
+  if (!requireNamespace("ggrepel", quietly = TRUE)) {
+    message(
+      paste0("The 'ggrepel' package is required for this function. Would you ",
+             "like to install it? (yes/no)")
+    )
+    response <- readline()
+    if (tolower(response) == "yes") {
+      utils::install.packages("ggrepel")
+    } else {
+      stop(
+        paste0("The 'ggrepel' package is needed for this function. Please ",
+               "install it to proceed.")
+      )
+    }
+  }
+  
   vi_tbl <- mrVip_obj[[2]]
   
   # Run PCA
@@ -379,13 +397,10 @@ mrVipPCA <- function(mrVip_obj) {
   # Plot the variability captured by each PC
   p_pc_var_explained <- var_explained %>%
     ggplot2::ggplot(
-      ggplot2::aes(x = .data$PC, y = .data$proportion)
+      ggplot2::aes(x = .data$PC, y = (.data$proportion * 100))
     ) +
     ggplot2::geom_col() +
-    ggplot2::scale_y_continuous(
-      labels = scales::percent_format(),
-      expand = ggplot2::expansion(mult = c(0, 0.01))
-    ) +
+    ggplot2::ylab("Variance explained (%)") +
     ggplot2::theme_bw() 
   
   # Return a list
