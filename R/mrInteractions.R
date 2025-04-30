@@ -177,7 +177,7 @@ mrInteractions <- function(mrIMLobj,
     plot_hstat() +
     ggplot2::labs(
       title = "Overall interactions",
-      x = "Response",
+      x = "Response model",
       y = "Overall"
     )
   
@@ -185,18 +185,18 @@ mrInteractions <- function(mrIMLobj,
     dplyr::filter(.data$response == feature) %>%
     plot_hstat() +
     ggplot2::labs(
-      title = paste0(feature, " interaction contribution"),
+      title = paste0(feature, " one-way interactions"),
       x = "Variable",
-      y = "Overall interaction strength"
+      y = "Interaction importance"
     )
   
   p_two_way_filtered <- overall_two_way_df %>%
     dplyr::filter(.data$response == feature) %>%
     plot_hstat() +
     ggplot2::labs(
-      title = paste0(feature, " pairwise interaction strengths"),
+      title = paste0(feature, " tow-way interactions"),
       x = "Interaction",
-      y = "Interaction strength"
+      y = "Interaction importance"
     )
   
   # Arrange output
