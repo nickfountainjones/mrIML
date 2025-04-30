@@ -86,7 +86,7 @@
 #'
 #' @export
 
-mrCoOccurNet_bootstrap <- function(mrBootstrap_obj) {
+mrCoOccurNet <- function(mrBootstrap_obj) {
   # Expand bootstrap object
   pd_boot_df <- lapply(
     mrBootstrap_obj %>%

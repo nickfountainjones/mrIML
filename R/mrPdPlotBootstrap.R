@@ -6,8 +6,8 @@
 #'
 #' @param mrIML_obj A list object returned by [mrIMLpredicts()].
 #' @param mrBootstrap_obj A list object returned by [mrBootstrap()].
-#' @param vi_obj A list object returned by [mrvip()]. If `vi_obj` is not
-#' provided then it is created inside `mrPD_bootstrap` by running [mrvip()]
+#' @param vi_obj A list object returned by [mrVip()]. If `vi_obj` is not
+#' provided then it is created inside `mrPD_bootstrap` by running [mrVip()]
 #' @param target The target variable for generating plots.
 #' @param global_top_var The number of top variables to consider (default: 2).
 #' 
@@ -44,7 +44,7 @@
 #' mrIML_rf_boot <- mrIML_rf %>%
 #'   mrBootstrap()
 #'   
-#' mrIML_rf_PD <- mrPD_bootstrap(
+#' mrIML_rf_PD <- mrPdPlotBootstrap(
 #'   mrIML_rf,
 #'   mrIML_rf_boot,
 #'   target = "Plas",
@@ -55,7 +55,7 @@
 #' mrIML_rf_PD[[2]]
 #' 
 #' @export
-mrPD_bootstrap <- function(mrIML_obj,
+mrPdPlotBootstrap <- function(mrIML_obj,
                            mrBootstrap_obj,
                            vi_obj = NULL,
                            target,
@@ -64,7 +64,7 @@ mrPD_bootstrap <- function(mrIML_obj,
   Y <- mrIML_obj$Data$Y
   X <- mrIML_obj$Data$X
   if (is.null(vi_obj)) {
-    vi_obj <- mrvip(
+    vi_obj <- mrVip(
       mrIMLobj = mrIML_obj,
       mrBootstrap_obj = mrBootstrap_obj
     )

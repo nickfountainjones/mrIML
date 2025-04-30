@@ -49,10 +49,10 @@
 #' )
 #' 
 #' mrIML_rf %>%
-#'   mr_Covar(var = "scale.prop.zos", sdthresh = 0.05)
+#'   mrCovar(var = "scale.prop.zos", sdthresh = 0.05)
 #' 
 #' @export
-mr_Covar <- function(mrIMLobj,
+mrCovar <- function(mrIMLobj,
                      var, 
                      sdthresh = 0.05) {
   # Unpack mrIMLobj
@@ -120,7 +120,11 @@ mr_Covar <- function(mrIMLobj,
   p_pd_diff <- profiles_df %>%
     dplyr::filter(!is.na(.data$cov_diff)) %>%
     ggplot2::ggplot(
-      ggplot2::aes(x = .data$cov_grad, group = .data$cov_grad, y = .data$cov_diff)
+      ggplot2::aes(
+        x = .data$cov_grad,
+        group = .data$cov_grad,
+        y = .data$cov_diff
+      )
     ) +
     ggplot2::geom_boxplot() +
     ggplot2::theme_bw() +

@@ -55,14 +55,14 @@
 #'   k = 5
 #' )
 #' 
-#' mrvip(mrIML_rf, taxa = "Plas")
+#' mrVip(mrIML_rf, taxa = "Plas")
 #' 
 #' # With bootstrap
 #' 
 #' mrIML_rf_boot <- mrIML_rf %>%
 #'   mrBootstrap()
 #'   
-#' mrIML_rf_vip <- mrvip(
+#' mrIML_rf_vip <- mrVip(
 #'   mrIML_rf,
 #'   mrBootstrap_obj = mrIML_rf_boot
 #' )
@@ -73,7 +73,7 @@
 #'  mrVipPCA()
 #' 
 #' @export
-mrvip <- function(mrIMLobj,
+mrVip <- function(mrIMLobj,
                   mrBootstrap_obj = NULL,
                   threshold = 0.1,
                   global_top_var = 10,
@@ -328,7 +328,7 @@ mrVip_mrIMLobj <- function(mr_iml_obj) {
 
 #' Principle Component Analysis of mrIML variable importance
 #' 
-#' @param mrVip_obj A list returned by [mrvip()].
+#' @param mrVip_obj A list returned by [mrVip()].
 #' 
 #' @returns A list of PCA results:
 #' * $PCA_plot
