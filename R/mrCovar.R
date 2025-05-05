@@ -9,6 +9,7 @@
 #' @param var The variable of interest for calculating the profile.
 #' @param sdthresh The standard deviation threshold for filtering taxa
 #' (default: 0.05).
+#' @param ... Arguments passed to [flashlight::light_profile()]
 #' 
 #' @return A list of figures:
 #' * `$partial_dep_curves`: The covariate partial dependence profiles for those
@@ -53,8 +54,9 @@
 #' 
 #' @export
 mrCovar <- function(mrIMLobj,
-                     var, 
-                     sdthresh = 0.05) {
+                    var, 
+                    sdthresh = 0.05,
+                    ...) {
   # Unpack mrIMLobj
   yhats <- mrIMLobj$Fits
   Y <- mrIMLobj$Data$Y
@@ -67,7 +69,7 @@ mrCovar <- function(mrIMLobj,
     mrIMLobj,
     response = "multi"
   ) %>%
-    flashlight::light_profile(var)
+    flashlight::light_profile(var, ...)
   
   # Filter results and get derivatives
   profiles_df <- profiles_fl$data %>%
