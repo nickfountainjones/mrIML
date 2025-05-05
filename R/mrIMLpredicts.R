@@ -27,7 +27,7 @@
 #' @param k A numeric value. Sets the number of folds in the cross-validation.
 #' 10-fold CV is the default.
 #' @param prop A numeric value between 0 and 1. Defines the training-testing
-#' data proportion to be used, defaults to `prop = 0.5`.
+#' data proportion to be used, defaults to `prop = 0.7`.
 #'
 #' @details
 #' Additional details about two types of model...
@@ -105,7 +105,7 @@ mrIMLpredicts <- function(X,
                           Model,
                           balance_data = "no",
                           dummy = FALSE,
-                          prop = 0.5,
+                          prop = 0.7,
                           tune_grid_size = 10,
                           k = 10,
                           racing = TRUE) {
@@ -129,7 +129,7 @@ mrIMLpredicts <- function(X,
     X = seq(1, n_response),
     FUN = function(i, fit_fun) {
       utils::setTxtProgressBar(pb, i)
-      fit_fun(
+      mrIML_internal_fit_function(
         i,
         .X = X,
         .X1 = X1,
@@ -144,9 +144,7 @@ mrIMLpredicts <- function(X,
         racing = racing
       )
     },
-    future.seed = TRUE,
-    fit_fun = mrIML_internal_fit_function,
-    future.packages = c("magrittr")
+    future.seed = TRUE
   )
   
   names(yhats) <- names(Y)
