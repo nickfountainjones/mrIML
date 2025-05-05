@@ -50,7 +50,8 @@ Suggests:
     parsnip,
     gridExtra,
     future,
-    generics
+    generics,
+    missForest
 License: MIT + file LICENSE
 LazyData: true    
 VignetteBuilder: knitr, rmarkdown
