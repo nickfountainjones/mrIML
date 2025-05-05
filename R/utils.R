@@ -24,8 +24,10 @@ filterRareCommon <- function(X,
   r = nrow(X)
   Xt <- as.data.frame(t(X))
   Xt$Xsum <- rowSums(Xt[1:n,] )
-  FilterNoCommon <- subset(Xt, .data$Xsum < (r * higher)) 
-  FilterNoRare <- subset(FilterNoCommon , .data$Xsum > (r * lower))
+  FilterNoCommon <- Xt %>%
+    dplyr::filter(.data$Xsum < (r * higher))
+  FilterNoRare <- FilterNoCommon %>%
+    dplyr::filter(.data$Xsum > (r * lower))
   #remove 'new' sort column
   FilterNoRare$Xsum <- NULL
   X <- tibble::as_tibble(t(FilterNoRare))
