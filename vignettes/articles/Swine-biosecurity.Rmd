@@ -30,51 +30,38 @@ This is a synthesized dataset to simulate PRRSV infection, biosecurity practices
 Please note that the data included in this package is simulated, and is not a reflection of any real farm, company or state. 
 ```{r load packages, include=FALSE, message=FALSE, results='hide'}
 library(mrIML)
-
-#other packages needed
-pacman::p_load(
-  parsnip, tidymodels, workflows, tidyverse, flashlight, tune, future,
-  devtools, DALEX, plyr, vip, ggsci, ggrepel, breakDown, future.apply, janitor
-)
-```
-
-```{r include=FALSE}
-if (Sys.getenv("NOT_CRAN") == "true") {
-  plan(multisession)  # Use parallel only if not on CRAN
-} else {
-  plan(sequential)  # Force sequential processing on CRAN
-}
+library(tidyverse)
+library(tidymodels)
+library(flashlight)
 ```
 
 ```{r load data, include=TRUE, message=FALSE, results='hide'}
 set.seed(130) #set the seed to ensure consistency
-data <- as.data.frame(mrIML::biosecurity_vignette_data)
+load("biosecurity_data.RData")
+data <- biosecurity_vignette_data
 ```
 
 ```{r, include=FALSE}
-colnames(data)[1] <- "Class"
-data<-data%>%
-  mutate(Class = revalue(Class,
-                 c("Negative"="0", "Positive"="1"))) 
-data$Class<-as.numeric(as.character(data$Class))
+data <- data %>%
+  rename(Class = "Outcome") %>%
+  mutate(
+    Class = ifelse(Class == "Positive", 1, 0)
+  )
 ```
 
 ### Defining your model engine
 This is a random forest model, as used in the classification example. However there are more models available within MrIML and can be found [here](https://www.tidymodels.org/find/). 
 ```{r define model, include=TRUE}
 #split predictor variables and outcome
-Y <- as.data.frame(data %>% select(1))
-X <- data %>% select(-c(1, 44, 45)) #remove class, group and ID
-model1 <- #model used to generate yhat
-  #specify that the model is a random forest
-  rand_forest(trees = 1000,
+Y <- data %>%
+  select(Class)
+X <- data %>%
+  select(-c(1, 44, 45))
+model1 <- rand_forest(trees = 1000,
               mtry = tune(),
               min_n = tune(),
               mode = "classification") %>% 
-  set_engine("randomForest") %>% 
-  # #select the engine/package that underlies the model
-  #must be set to classification for classification problems
-  set_mode("classification")
+  set_engine("randomForest")
 ```
 
 ```{r relevel variables, include=FALSE}
@@ -93,9 +80,7 @@ X <-X[1:4]
 
 MrIML provides uses the flexible future apply functionality to set up multi-core processing. In the example below, we set up a cluster using 4 cores. If you don't set up a cluster, the default settings will be used and the analysis will run sequentially.
 ```{r eval = FALSE}
-# detectCores() #check how many cores you have available. We suggest keeping one core free for internet browsing etc.
-workers <- makeClusterPSOCK(2)
-plan(cluster, workers = workers)
+future::plan("multisession", workers = 2)
 ```
 ### Running the analysis
 
@@ -104,18 +89,11 @@ Now we can train and test our model.
 yhats <- mrIMLpredicts(X=X, #features/predictors 
                        Y=Y, #response data
                        Model=model1, #specify your model
-                       balance_data='no', #chose how to balance your data 
-                       mode='classification', #chose your mode (classification versus regression)
-                       seed = 123,#set seed
                        racing=T) #turn off racing autotuning for now
 ```
 We can then assess our model performance using a number of performance metrics including area under the curve (AUC), sensitivity, specificity and Matthews correlation coefficient (MCC).
 ```{r performance, include=TRUE}
-ModelPerf <- mrIMLperformance(yhats)#,
-                              #Model=model1,
-                              #Y=Y,
-                              #mode='classification')
-
+ModelPerf <- mrIMLperformance(yhats)
 
 ModelPerf[[1]] #predictive performance for individual responses 
 ModelPerf[[2]]#overall predictive performance. r2 for regression and MCC for classification
@@ -126,18 +104,13 @@ Here we can look at the variable importance. This is the dependence between our 
 ```{r variable importance, message=FALSE, error=FALSE, fig.height=9, fig.width=13, prompt=FALSE, eval = FALSE}
 #calculate variable importance
 #still got a bug here to do with the PCA
-impVI <- mrvip(
-  yhats=yhats$Fits,
-  mrBootstrap_obj = NULL,
-  X = X,
-  X1 = NULL,
-  Y = Y,
-  mode = "classification",
+impVI <- mrVip(
+  yhats,
   threshold = 0.1,
   global_top_var = 10,
   local_top_var = 5,
   taxa = NULL,
-  ModelPerf = ModelPerf
+  model_perf = ModelPerf
 )
 
 impVI[[3]] #importance
@@ -145,36 +118,27 @@ impVI[[3]] #importance
 We can explore further and assess the partial dependence of each variable. Here we isolate the dependence of one variable and visualize how this dependence changes over different observed values.
 ```{r pdp, warning=FALSE, message=FALSE}
 #create a flashlight object
-fl <- mrFlashlight(yhats=yhats, X=X, Y=Y, 
+fl <- mrFlashlight(yhats,
                    response="single", 
-                   index=1,
-                   mode='classification') 
+                   index=1) 
 #plot partial dependence profiles
-plot(light_profile(fl, v = "Premises_in_3_miles")) 
+plot(light_profile(fl, v = "Premises_in_3_miles")) +
+  theme_bw()
 ```
 ### Benchmarking: predicted risk
 
 The following function allows you to visualize and compare predicted risk among and within groups 
 ```{r, include=TRUE, warning=FALSE, message=FALSE, eval=F, fig.width=13}
 #apply the trained model to the entire data set to provide risk of predicted outbreak
-fit_bio <- pull_workflow_fit(yhats$Fits[[1]]$last_mod_fit$.workflow[[1]])
+fit_bio <- extract_workflow(yhats$Fits[[1]]$last_mod_fit)
 
-predict(fit_bio,
-        X[, colnames(yhats$Fits[[1]]$data[-1]), drop = FALSE],
-        type = "prob"
-        )$`.pred_1`
+pred_bio <- fit_bio %>%
+  predict(
+    new_data = yhats$Fits[[1]]$data,
+    type = "prob"
+  )
 
-preds_pos <- predict(fit_bio, X, "prob") #this doesnt work
-data$Predicted <- preds_pos$.pred_1
-#process data ready for the function
-data$Class <- as.factor(data$Class)
-data<-data%>%
-  mutate(Class = revalue(Class,
-                         c("1" = "Positive", "0" = "Negative"))) 
-data$Class <- relevel(data$Class, "Positive")
-data1 <- data
-#plot among group comparison of predicted risk
-mrBenchmark(data = "data1", Y = "Class", pred = "Predicted", group = "Group", type = "external") 
+#...
 ```
 
 ```{r, include=TRUE, warning=FALSE, message=FALSE, eval=FALSE}

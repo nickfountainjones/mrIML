@@ -12,6 +12,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -20,11 +21,13 @@ knitr::opts_chunk$set(
 )
 options(rmarkdown.html_vignette.check_title = FALSE)
 ```
+
 MrIML is a R package allows users to generate and interpret multi-response models (i.e., joint species distribution models) leveraging advances in data science and machine learning. MrIML couples the tidymodel infrastructure developed by Max Kuhn and colleagues with model agnostic interpretable machine learning tools to gain insights into multiple response data such as. As such mrIML is flexible and easily extendable allowing users to construct everything from simple linear models to tree-based methods for each response using the same syntax and same way to compare predictive performance. In this vignette we will guide you through how to apply this package to landscape genetics problems but keep in mind any multiple-response data can be interrogated using this package (e.g., species or OTU presence/absence data).
 
 Let's start by loading  the required packages and data. The data we are going to use is from Fountain-Jones etal (2017) and consists of single nucleotide polymorphism (SNP) data from a virus (feline immunodeficiency virus, FIV) infecting bobcats in Southern California.
 
 Features (a.k.a predictor variables) with missing data can be removed or interpolated depending on the nature of the missing data. Here we remove them.
+
 ```{r load-packages, include=FALSE}
 #make sure you have installed devtools previously.
 #Install the most uptodate version from github
@@ -34,29 +37,15 @@ Features (a.k.a predictor variables) with missing data can be removed or interpo
 #   devtools:: install_github('nfj1380/mrIML')
 
 library(mrIML)
+library(tidymodels)
+library(flashlight)
 
-#other package we need:
-pacman::p_load(
-  vip, tidymodels, randomForest, caret, gbm,
-  tidyverse, parallel, doParallel, themis, viridis,
-  janitor, hrbrthemes, xgboost, vegan, flashlight,
-  ggrepel, iml, plyr, future.apply, gridExtra, cowplot, hstats
-)
-#library(LEA) 
-#if (!requireNamespace("BiocManager", quietly = TRUE))
-# install.packages("BiocManager") #LEA requires Biocmanager
-
-#load SNP data
-#Responsedata)
-
-#if you have a plink dataset you can load it in to our pipeline with the following:
-#snps <- readSnpsPed("snp.ped", "snp.map") #NAs in data and interpolated as the mode.
-
-#landscape and host features (or predictors). Note that samples must be rows. 
-str(mrIML::Features) 
+#landscape and host features (or predictors). Note that samples must be rows.
+load("Features.RData")
+str(Features) 
 
 # # remove NAs from the feature/predictor data.
-FeaturesnoNA<-mrIML::Features[complete.cases(mrIML::Features), ]
+FeaturesnoNA <- Features[complete.cases(mrIML::Features), ]
 
 X <- FeaturesnoNA #for simplicity
 
@@ -64,27 +53,14 @@ X <- FeaturesnoNA #for simplicity
 X <- FeaturesnoNA[c(1:3)] #three features only
 ```
 
-```{r include=FALSE}
-if (Sys.getenv("NOT_CRAN") == "") {
-  plan(multisession)  # Use parallel only if not on CRAN
-} else {
-  plan(sequential)  # Force sequential processing on CRAN
-}
-```
-
 When constructing these type of models, SNPs that are common (occur say in >80% of samples) or rare (< 10% of samples) are difficult to model. This cn be a problem for potentially adaptice loci which tend to be rarer We provide down-sampling or up-sampling strategies for dealing with unbalanced data (see below) but filtering out common and rare loci is another option. The more response variables (SNPs) you include the longer the computational time, so for this  example we will trim SNPs occurring in < 40%  and > 70% of individuals. This leaves 29 SNPs remaining. In practice, these filtering steps are stringent so < 20 and > 80 maybe more appropriate.  
-```{r }
+
+```{r}
 #Optional: Filter rare/common SNPs or species. Retaining minor allelle frequncies >0.1 and removing common allelles (occur>0.9)
-fData <- filterRareCommon(mrIML::Responsedata,
+fData <- filterRareCommon(Responsedata,
                            lower=0.4,
                            higher=0.7) 
 Y <- fData #for simplicity when comparing
-
-#another option at this stage is to filter response that are strongly correlated with each other.
-#df2 <- cor(X) #find correlations
-#hc <-  findCorrelation(df2, cutoff=0.5) # put any value as a "cutoff". 
-#hc <-  sort(hc)
-#X <-  X[,-c(hc)] #
 ```
 
 If your feature data consists of landscape resistance data generated from Circuitscape or similar, we provide functionality that can extract each surface from a folder and generate resistance components that can be used in these models (using principal coordinate analysis). This data can be easily merged if needs be with other non-matrix data (e.g., age/sex). There was no resistance surfaces here, but this is what the code looks like:
@@ -107,8 +83,7 @@ model_rf <- rand_forest(trees = 100,
 ```
 
 ```{r eval=FALSE}
-workers <- makeClusterPSOCK(2)
-plan(cluster, workers = workers)
+future::plan("multisession", workers = 2)
 ```
 
 Now we can run the model. Hyper parameter tuning (for algorithms that have hyper parameters) is done automatically by testing how model performance changes across a random grid of 10 parameters and the best performing combination is kept. The only choice to make is to either down/up sample data or leave it as is. As our viral data set is small, we will not do any up or down-sampling (option 'no'). We could also implement parallel processing for larger data sets. 
@@ -116,11 +91,8 @@ Now we can run the model. Hyper parameter tuning (for algorithms that have hyper
 yhats_rf <- mrIMLpredicts(X=X,
                           Y=Y,
                           Model=model_rf,
-                          balance_data='no',
-                          mode='classification',
                           k=5,
-                          tune_grid_size=5, 
-                          seed=123,
+                          tune_grid_size=5,
                           racing=F) ## in MrTidymodels. Balanced data= up upsamples and down downsampled to create a balanced set
 
 # save the model
@@ -128,10 +100,7 @@ yhats_rf <- mrIMLpredicts(X=X,
 ```
 It takes a couple of minutes to run on a laptop and there are warnings that you can ignore (this data set is small). The above code constructs tuned random forest models for the features (Y) you have selected for each response (29 viral SNP in this case). We can then check the performance of each model separately and overall. The performance metrics we provide for classification models are area under curve (roc_AUC),  Mathew's correlation coefficient (MCC - a good metric when data is imbalanced i.e., unequal numbers of 0/1s in each response), specificity (proportion correctly classified not having the mutation at that loci) and sensitivity (proportion correctly classified having the mutation at that loci). We also provide 'prevalence' that tells you how common that SNP was in the population sampled.
 ```{r, message = FALSE, warning = FALSE}
-ModelPerf_rf <- mrIMLperformance(yhats_rf,
-                                 Model=model_rf,
-                                 Y=Y,
-                                 mode='classification')
+ModelPerf_rf <- mrIMLperformance(yhats_rf)
 
 ModelPerf_rf[[1]] #predictive performance for individual responses 
 ModelPerf_rf[[2]]#overall predictive performance
@@ -146,59 +115,47 @@ model_glm <- #model used to generate yhat
 yhats_glm <- mrIMLpredicts(X=X,
                            Y=Y,
                            Model=model_glm,
-                           balance_data='no',
-                           mode='classification',
                            k=5,
                            tune_grid_size=1,
-                           seed = sample.int(1e8, 1),
                            racing=F )#no need for a tuning grid - no paramters to tune for logistic regression
 
 #save(yhats, file='logreg_model')
-ModelPerf_glm <- mrIMLperformance(yhats_glm,
-                                  Model=model_glm,
-                                  Y=Y, mode='classification') #
+ModelPerf_glm <- mrIMLperformance(yhats_glm) #
 ModelPerf_glm[[2]]
 
-plots <- mrPerformancePlot(ModelPerf1=ModelPerf_glm,
-                           ModelPerf2=ModelPerf_rf,
-                           mod_names=c('linear_reg','rand_forest'), mode='classification' ) 
-plots
+perf_comp <- mrPerformancePlot(ModelPerf_glm,
+                           ModelPerf_rf) 
+perf_comp$performance_plot
+perf_comp$performance_diff_plot
 ```
 You can see that the random forests model outperforms the logistic regression in this case.  Once we are happy with the underlying model we can then dive in to see how this model predicts the SNPs. First we can check out variable importance.The first plot is the global importance (what features shape genetic change overall), the second shows the individual models (with an optional importance MCC threshold 'cutoff' value ). The next plot is a PCA plot of the importance scores to highlight SNPs that are potential outliers (predictions are shaped differently by landscape varables).
 ```{r, message = FALSE, warning = FALSE}
 #bootstrap not working on this small data set.
 
-bs_impVI <- mrvip(
-  mrBootstrap_obj = NULL,
-  yhats = yhats_rf,
-  X = X,
-  Y = Y,
-  mode = 'classification',
+bs_impVI <- mrVip(
+  yhats_rf,
   threshold = 0.8,
   global_top_var = 10,
   local_top_var = 5,
   taxa = 'pol_132',
-  ModelPerf = ModelPerf_rf)
+  model_perf = ModelPerf_rf)
 
 bs_impVI[[3]] #importance
-bs_impVI[[4]] #PCA
+
+bs_impVI_PCA <- bs_impVI %>%
+  mrVipPCA()
+bs_impVI_PCA[[1]] #PCA
 ```
 MrIML allows a full suite of model agnostic interpretable machine learning tools to be applied to individual models or the 'global' set. We utilize the R package flashlight which offers an exciting and ever growing tool set to interpret these models: https://cran.r-project.org/web/packages/flashlight/vignettes/flashlight.html
 
 For example, once we create the flashlight objects, we can plot the predicted values of a feature for each response.
 ```{r, message = FALSE, warning = FALSE}
 fl <- mrFlashlight(yhats_rf,
-                   X=X,
-                   Y=Y,
                    response = "single",
-                   index=1,
-                   mode='classification') #index pointing to the SNP of interest (i.e. the first column)
+                   index=1) #index pointing to the SNP of interest (i.e. the first column)
 
 mfl <- mrFlashlight(yhats_rf,
-                    X=X,
-                    Y=Y,
-                    response = "multi",
-                    mode='classification') #the global set
+                    response = "multi") #the global set
 
 plot(light_scatter(fl, v = "Grassland", type = "predicted"))
 ```
@@ -209,27 +166,32 @@ When running this code yourself, you need to change 'v' to the variable of inter
 You could easily compare the plots generated above from our random forest model with the logistic regression model we also calculated.
 
 ```{r, message = FALSE, warning = FALSE}
-profileData_pd <- light_profile(mfl,
-                                v = "Grassland") #partial dependencies
-profileData_ale <- light_profile(mfl,
-                                 v = "Grassland", type = "ale") #acumulated local effects
+profilePlot_pd <- mrCovar(
+  yhats_rf,
+  var = "Grassland",
+  sdthresh = 0.05
+)
+profilePlot_pd[[1]]
 
-mrProfileplot(profileData_pd , sdthresh =0.05) #sdthresh removes responses from the first plot that do not vary with the feature
-mrProfileplot(profileData_ale , sdthresh =0.05)
-#the second plot is the cumulative turnover function
+profilePlot_ale <- mrCovar(
+  yhats_rf,
+  var = "Grassland",
+  sdthresh = 0.05,
+  type = "ale"
+)
+profilePlot_ale[[1]]
 ```
 Finally, we can assess how features interact overall to shape genetic change.
 ```{r, message = FALSE, warning = FALSE}
 
-interactions <-mrInteractions(yhats=yhats_rf,
-                              X=X,
-                              Y=Y,
-                              num_bootstrap = 10,
-                              feature = 'env_41',
-                              top.int = 5) 
+interactions <- mrInteractions(yhats_rf,
+                               num_bootstrap = 50,
+                               feature = 'env_41',
+                               top_int = 5) 
 
-interactions[[1]]
-interactions[[2]]
+interactions[[1]] /
+interactions[[2]] /
+interactions[[3]]
 ```
 With this small data set with three predictors, interaction importance isn't particularly strong (H values > 0.1 on the y axis would indicate that interactions are somewhat important). If you rerun this with the complete set of predictors X there are many more. Also note, that 10 bootstraps is not generally enough -  particularly for small datsets where stochasticity plays more of a role - at least 100 is recommended. 
 

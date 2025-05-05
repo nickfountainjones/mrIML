@@ -36,13 +36,10 @@ We focus on the adaptive SNP loci from GIGANTEA-5 (GI5) gene that has known link
 #devtools:: install_github('nfj1380/mrIML')
 
 library(mrIML)
+library(tidymodels)
+library(flashlight)
 
-#other package we need:
-pacman::p_load(
-  vip, tidymodels, randomForest, gbm, tidyverse, parallel,
-  doParallel, themis, viridis, janitor, hrbrthemes, vegan,
-  flashlight, iml, ggrepel, ranger, future.apply, plyr, gridExtra, cowplot
-)
+load("gfData.RData")
 
 # read in data file with minor allele freqs & env/space variables
 envGF <- mrIML::gfData[,3:13] # get climate & MEM variables
@@ -55,31 +52,21 @@ SNPs_ref <- mrIML::gfData[,grep("REFERENCE",colnames(mrIML::gfData))] # referenc
 GI5 <- mrIML::gfData[,grep("GI5",colnames(mrIML::gfData))] # GIGANTEA-5 (GI5)
 
 Y <- GI5 #for this example we are going to focus on the adaptive SNPs in the GI5 region.
-
-```
-
-```{r include=FALSE}
-if (Sys.getenv("NOT_CRAN") == "true") {
-  plan(multisession)  # Use parallel only if not on CRAN
-} else {
-  plan(sequential)  # Force sequential processing on CRAN
-}
 ```
 
 ###Parallel processing
 
 MrIML provides uses the flexible future apply functionality to set up multi-core processing. In the example below, we set up a cluster using 4 cores. If you don't set up a cluster, the default settings will be used and the analysis will run sequentially.
-```{r, eval = FALSE}
-# detectCores() #check how many cores you have available. We suggest keeping one core free for internet browsing etc.
 
-workers <- makeClusterPSOCK(2)
-plan(cluster, workers = workers)
+```{r eval=FALSE}
+plan(multisession, workers = 2)
 ```
+
 ### Running the analyis
 
 Performing the analysis is very similar to our classification example. Lets start with a constructing a linear model for this data set. We set Model 1 to a linear regression. See https://www.tidymodels.org/find/ for other regression model options Note that 'mode' must be regression and in MrIMLpredicts, model has to be set to 'regression'. 
 
-```{r,  message = FALSE, warning = FALSE  }
+```{r,  message = FALSE, warning = FALSE, results = "hide"}
 model_lm <- #model used to generate yhat
   # specify that the model is a random forest
   linear_reg() %>%
@@ -92,25 +79,17 @@ yhats_lm <- mrIMLpredicts(X=X,
                           Y=Y,
                           X1=NULL,
                           Model=model_lm,
-                          balance_data='no',
-                          mode='regression',
                           prop=0.7,
-                          morans=F,
                           tune_grid_size= 10,
                           k=10,
                           racing=F) ## Balanced data= up updamples and down downsampled to create a balanced set. For regression 'no' has to be selected.
 #racing can't be used for linear models - no parameters to tune
-
-#save(yhats, file='Regression_lm') #always a good idea
 ```
 
 Model performance can be examined the same way as in the classification example, however the metrics are different. We provide root mean square error (rmse) and R2. You can see that the overall R2 is 0.13 but there is substantial variation across loci in predictive performance.
 
 ```{r}
-ModelPerf_lm <- mrIMLperformance(yhats_lm)#,
-                                 #Model=model_lm,
-                                 #Y=Y,
-                                 #mode='regression')
+ModelPerf_lm <- mrIMLperformance(yhats_lm)
 ModelPerf_lm[[1]] #predictive performance for individual responses. 
 ModelPerf_lm[[2]]#overall average r2 
 ```
@@ -126,17 +105,9 @@ model_rf <- rand_forest(trees = 100,
 yhats_rf <- mrIMLpredicts(X=X,
                           Y=Y,
                           Model=model_rf,
-                          balance_data='no',
-                          mode='regression',
-                          tune_grid_size=5,
-                          seed = sample.int(1e8, 1))
+                          tune_grid_size=5)
 
-#save(yhats, file='Regression_rf')
-
-ModelPerf_rf <- mrIMLperformance(yhats_rf)#,
-                                 #Model=model_rf,
-                                 #Y,
-                                 #mode='regression')
+ModelPerf_rf <- mrIMLperformance(yhats_rf)
 
 ModelPerf_rf[[1]] #predictive performance for individual responses. 
 ModelPerf_rf[[2]]#overall average r2 
@@ -144,7 +115,6 @@ ModelPerf_rf[[2]]#overall average r2
 #easier to see with plots
 plots <- mrPerformancePlot(ModelPerf1=ModelPerf_lm,
                            ModelPerf2 = ModelPerf_rf,
-                           #mod_names=c('linear_reg','rand_forest'),
                            mode='regression' ) 
 
 plots[[1]]
@@ -156,19 +126,18 @@ You can see that predictive performance is actually slightly less using random f
 
 ```{r, message = FALSE, warning = FALSE }
 
-VI <- mrvip(yhats=yhats_rf,
+VI <- mrVip(yhats_rf,
             mrBootstrap_obj = NULL,
-            X=X,
-            Y=Y,
-            mode='regression',
             threshold = 0.1,
             global_top_var = 10,
             local_top_var = 5,
-            taxa='CANDIDATE_GI5_9585',
-            ModelPerf=ModelPerf_rf) 
+            taxa='CANDIDATE_GI5_9585') 
 
 VI[[3]] #Importance plot
-VI[[4]] #PCA
+
+VI_PCA <- VI %>%
+  mrVipPCA()
+VI_PCA[[1]]
 ```
 Cutoff reduces the number of individual SNP plots presented in the second plot and 'plot.pca='yes'' enables the variable importance scores to be analysed using principal component analysis (PCA) where SNPs closer in PCA space are shaped by similar combinations of features. You can see that bio_18 (summer precipitation), bio_1 (mean annual temperature) and bio_10 (mean summer temperature) are the most important features overall. Summer precipitation was not as important in Fitzpatrick et al but otherwise these results are similar. The second plot shows the individual models (with an r2 > 0.1, for your data you will need to play around with this threshold) and you can see for some SNPs bio_1 is more important whereas for another MEM.1 is more prominent.The PCA shows that candidate 5119, 9287, 5033 and 108  are shaped similarly by the features we included and may, for example, be product of linked selection.
 
@@ -176,30 +145,22 @@ Note that you can also calculate bootstraps for importance scores (and partial d
 
 Now we can explore the model further my plotting the relationships between our SNPs and a feature in our set. Lets choose bio_1 (mean annual temperature) and plot the individual and global (average of all SNPs) partial dependency (PD) plots. 
 ```{r, warning=FALSE}
-flashlightObj <- mrFlashlight(mrIMLobj = yhats_rf, #yhats=yhats_rf,
-                              #X=X,
-                              #Y=Y,
-                              #mode="regression",
-                              response = "multi")
-                              
-
-profileData_pd <- light_profile(flashlightObj,
-                                v = "bio_1") #partial dependencies
-
-mrProfileplot(profileData_pd,
-              sdthresh =0.01)
+PD_bio1 <- mrCovar(yhats_rf,
+        var = "bio_1",
+        sdthresh = 0.01)
+PD_bio1[[1]]
 ```
 The first plot is a partial dependency for all SNPs that respond to mean annual temperature. What we mean by respond here is that the prediction surface (the line) deviates across the Y axis of the PD plots. We measure this deviation by calculating the standard deviation and use that as a threshold ('sd thresh=0.01' in this case and this will differ by data set) to ease visualization of these relationships.  The second plot is the smoothed average partial dependency of SNPs across a annual temperature gradient. This is very similar to the pattern observed by Fitzpatrick et al except with a slight decline in SNP turnover with mean annual temperatures > 0. Combined,you can see here only  few candidate SNPs are driving this pattern and these may warrant further interrogation. 
 
 Lets compare the PDs to accumulated local effect plots that are less sensitive to correlations among features (see Molnar 2019).
 
 ```{r,warning=FALSE}
-profileData_ale <- light_profile(flashlightObj,
-                                 v = "bio_1",
-                                 type = "ale") #accumulated local effects
+PD_bio_1_ale <- mrCovar(yhats_rf,
+        var = "bio_1",
+        sdthresh = 0.01,
+        type = "ale")
 
-mrProfileplot(profileData_ale,
-              sdthresh =0.01)
+PD_bio_1_ale[[1]]
 ```
 The effect of mean annual temperature on SNP turnover is not as distinct in the global ALE plot. This may mean that correlations between features may be important for the predictions.
 

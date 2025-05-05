@@ -23,19 +23,15 @@ options(rmarkdown.html_vignette.check_title = FALSE)
 In this vignette, we will walk you through how to curate your microbiome data extracted from pipelines such as QIIME 2 into a format suitable for MrIML. The main problem with using the raw data as the ASV names a long character vectors of nucleotide data which will make interpretation impossible. The data set is just 10 ASVs from the ostrich case study in Fountain-Jones et al (2024) to keep things simple. We will check out the data and load the required packages.
 
 ```{r include=FALSE}
-pacman::p_load('MRFcov', 'mrIML', 'tidyverse', 'future.apply','tidymodels', 'finetune',
-               'themis', 'vip', 'flashlight', 'iml', 'vivid', 'igraph', 'ggnetwork', 'network',
-               'gridExtra', 'xgboost', 'brulee', 'fastshap', 'tabnet', 'bonsai',
-               'parsnip','data.table', 'cowplot', 'progress', 'hstats', 'geosphere')
-
+library(mrIML)
+library(tidyverse)
 
 #raw ASV data
-asv_data <- otu_table_ostrich
+load("asv_data.RData")
 str(asv_data)
 
 #corresponding taxa table
-#load("~/MrIML/mrIML/data/asv_taxa_table.rda")
-asv_taxa_table <- taxa_table_ostrich
+load("asv_taxa_table.RData")
 str(asv_taxa_table)
 ```
 
@@ -76,7 +72,6 @@ create_name <- function(row) {
 
 # Create the 'Name' column
 asv_taxa_table$Name <- apply(asv_taxa_table, 1, create_name)
-
 ```
 
 ## Creating names

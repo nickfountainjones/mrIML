@@ -7,16 +7,19 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r, include=FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  warning = FALSE,
+  fig.width = 7,
+  fig.height = 4
 )
 ```
 
 `mrIML` is a package for interpretable machine learning in R, specifically designed for multivariate (multi-response) data. It provides tools for building and interpreting multi-response models using the [`tidymodels`](https://www.tidymodels.org/start/) syntax; making it very useful for applications in community ecology and ecological genomics.
 
-```{r setup}
+```{r setup, results = "hide", message = FALSE}
 library(mrIML)
 library(tidymodels)
 library(flashlight)
@@ -45,7 +48,7 @@ X <- select(data, "scale.prop.zos")
 
 Many of the functions in the `mrIML` wrokflow that follows can be greatly sped up by using parallel processing. To do this, we just need to set up a cluster using the `future` package.
 
-```{r setup-cluster, eval = FALSE}
+```{r setup-cluster, eval=FALSE}
 plan(multisession, workers = 2)
 ```
 
@@ -68,7 +71,7 @@ model_lm <- logistic_reg() %>%
 
 The models can then be fit as multi-response models using `mrIMLpredicts()`, which is the work horse of the `mrIML` package. `mrIMLpredicts()` fits the supplied tidymodel to each response variables. The `X1` argument can be used to supply any response variables that we would like to also use as predictors; which results in a co-ocurance model (in this case we use all the response variables).
 
-```{r fit-mrIML, message = FALSE, echo=FALSE}
+```{r fit-mrIML, results = "hide"}
 mrIML_rf <- mrIMLpredicts(
   X = X,
   Y = Y,
@@ -97,7 +100,7 @@ The resulting fitted `mrIML` model is a list object containing the original tidy
 
 `mrIMLperformance()` is another core function in `mrIML` used to extract performance metrics for each of the fitted response models inside the multi-response `mrIML` model.
 
-```{r performance-mrIML, warning=FALSE}
+```{r performance-mrIML}
 perf_rf <- mrIML_rf %>%
   mrIMLperformance()
 perf_rf$model_performance
@@ -131,7 +134,7 @@ fl_rf$Microfilaria %>%
 
 `mrCovar()` is a wrapper around `mrFlashlight()` and `flashlight::light_profile()` to quickly compare the effect of a predictive covariate across the many response models.
 
-```{r}
+```{r fig.height = 6}
 PD_scale.prop.zos_rf <- mrIML_rf %>%
   mrCovar(var = "scale.prop.zos", sdthresh = 0)
 
@@ -143,7 +146,7 @@ PD_scale.prop.zos_rf[[1]] /
 
 Since PDs are model agnostic we can use them for any kind of predictive model. For example we can compare the random forest model results above directly with the linear model bellow. We could even compare a Neural Net if we had enough data to fit it!
 
-```{r}
+```{r fig.height = 6}
 PD_scale.prop.zos_lm <- mrIML_lm %>%
   mrCovar(var = "scale.prop.zos", sdthresh = 0)
 
@@ -195,7 +198,7 @@ vip_boot_rf[[3]]
 
 Another helpful investigative tool is `mrInteraction()`. This function quickly identifies which response models have strong evidence of interactions between predictors, which predictors have the most interactive effects and which interactions are the strongest.
 
-```{r}
+```{r fig.height = 10}
 interactions_rf <- mrIML_rf %>%
   mrInteractions(feature = "Plas", num_bootstrap = 10)
 
