@@ -1,12 +1,6 @@
 ---
 title: "Microbiome data curation"
-opengraph:
-  image:
-    src: 
-output:
-  rmarkdown::html_vignette: default
-  github_document: default
-  css: extra.css
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Microbiome data curation}
   %\VignetteEngine{knitr::rmarkdown}

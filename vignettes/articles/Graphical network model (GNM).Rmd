@@ -1,12 +1,6 @@
 ---
 title: "Graphical network model (GNM)"
-opengraph:
-  image:
-    src: 
-output:
-  rmarkdown::html_vignette: default
-  github_document: default
-  css: extra.css
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Graphical network model (GNM)}
   %\VignetteEngine{knitr::rmarkdown}

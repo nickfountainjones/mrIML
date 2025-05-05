@@ -1,12 +1,6 @@
 ---
 title: "Swine biosecurity"
-opengraph:
-  image:
-    src: 
-output:
-  rmarkdown::html_vignette: default
-  github_document: default
-  css: extra.css
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Swine biosecurity}
   %\VignetteEngine{knitr::rmarkdown}
