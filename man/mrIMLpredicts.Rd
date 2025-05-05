@@ -11,7 +11,7 @@ mrIMLpredicts(
   Model,
   balance_data = "no",
   dummy = FALSE,
-  prop = 0.5,
+  prop = 0.7,
   tune_grid_size = 10,
   k = 10,
   racing = TRUE
@@ -37,7 +37,7 @@ the response values will be independent conditional on the predictors). See
 included in the data recipe.}
 
 \item{prop}{A numeric value between 0 and 1. Defines the training-testing
-data proportion to be used, defaults to \code{prop = 0.5}.}
+data proportion to be used, defaults to \code{prop = 0.7}.}
 
 \item{tune_grid_size}{A numeric value that sets the grid size for
 hyperparameter tuning. Larger grid sizes increase computational time. Ignored
