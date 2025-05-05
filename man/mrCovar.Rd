@@ -5,7 +5,7 @@
 \title{Investigate partial dependencies of a covariate for mrIML JSDMs (Joint
 species distirbution models)}
 \usage{
-mrCovar(mrIMLobj, var, sdthresh = 0.05)
+mrCovar(mrIMLobj, var, sdthresh = 0.05, ...)
 }
 \arguments{
 \item{mrIMLobj}{A list object output by \code{\link[=mrIMLpredicts]{mrIMLpredicts()}}.}
@@ -14,6 +14,8 @@ mrCovar(mrIMLobj, var, sdthresh = 0.05)
 
 \item{sdthresh}{The standard deviation threshold for filtering taxa
 (default: 0.05).}
+
+\item{...}{Arguments passed to \code{\link[flashlight:light_profile]{flashlight::light_profile()}}}
 }
 \value{
 A list of figures:
