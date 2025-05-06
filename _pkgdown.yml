@@ -3,7 +3,10 @@ url: https://github.com/nickfountainjones/mrIML
 template:
   bootstrap: 5
   light-switch: true
-  bootswatch: flatly
+  bootswatch: litera
+  bslib:
+    primary: "#841566"
+    secondary: "#f3ef75"
 
 authors:
   Nick Fountain-Jones:
