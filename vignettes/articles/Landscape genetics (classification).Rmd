@@ -36,7 +36,6 @@ set.seed(7007)
 #landscape and host features (or predictors). Note that samples must be rows.
 load("Features.RData")
 load("Responsedata.RData")
-str(Features) 
 
 # remove NAs from the feature/predictor data.
 FeaturesnoNA <- Features[complete.cases(Features), ]

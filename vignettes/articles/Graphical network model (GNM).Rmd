@@ -198,6 +198,7 @@ pds <- mrPdPlotBootstrap(
   target='Plas',
   global_top_var=5
 )
+pds[[2]]
 ```
 
 These plots show that, for example, the presence of *Microfilaria* greatly increass the probability of observing *Plasmodium* (from ~0.32 to 0.58 while holding all other variables at their mean value). Note that these are marginal relationships (i.e. isolating the effect of just each predictor). When host abundance is high the probability of detecting *Plasmodium* descreases non-linearly (a threshold of around ~0). The other parasites have less effect.
@@ -208,7 +209,9 @@ If we want to explore the effect of host abundance overall we can use the 'mr_Co
 covar <- mrCovar(yhats_rf,
                   var='scale.prop.zos',
                   sdthresh =0.01) 
-#sdthrsh just plots taxa responding the most.
+covar[[1]] /
+  covar[[2]] /
+  covar[[3]]
 ```
 Note that this isn't bootstrapped now - each line represents a taxon in this case. The second plot shows the community-wide change in occurrence probabilities across host abundance. Note the the occurrence probabilities of all taxa drop an intermediate levels of host abundance (0.75-1.25). 
 
@@ -263,8 +266,8 @@ int_ <- mrInteractions(yhats_rf,
                        top_int=10)
 #10 bootstraps to keep it short. top int focusses on the 10 top interactions (all of them in this case).
 
-int_[[1]] # overall plot
-int_[[2]] # individual plot for the response of choice 
+int_[[1]] /# overall plot
+int_[[2]] /# individual plot for the response of choice 
 int_[[3]] #two way plot
 ```
 The first plot shows that interactions account for on average 27% (bootstrap interval 23-34%) of variation in predictions for *H.killangoi* and less for the other taxa. The second plot shows that interactions involving host abundance impacts predictions of *Plasmodium* the most (but *H.zosteropis* is also important). This trend is similar community-wide. The next plot shows that the interaction between *Haemoproteus* species is the most important 2-way interaction for *Plasmodium* but this isn't true community wide as host abudance and *H.zosteropis* is the strongest interaction overall. Taken together, we can see that interactions between taxa are mediated by host abundance.

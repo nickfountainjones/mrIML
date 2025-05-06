@@ -16,13 +16,14 @@ articles:
   navbar: ~
   contents:
   - mrIML
-  - articles/Common errors in mrIML
-  - articles/Swine biosecurity
   - articles/Landscape genetics (classification)
-  - articles/Graphical network model (GNM)
-  - articles/Landscape genetics
   - articles/Regression
+  - articles/Graphical network model (GNM)
+- title: Other
+  navbar: Other
+  - articles/Common errors in mrIML
   - articles/Microbiome data curation
+  - articles/Swine biosecurity
 
 development:
   mode: auto
