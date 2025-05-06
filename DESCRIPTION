@@ -47,6 +47,7 @@ Suggests:
     ggnetwork,
     igraph,
     tidymodels,
+    tidyverse,
     parsnip,
     gridExtra,
     future,
