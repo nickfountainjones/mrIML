@@ -19,14 +19,13 @@ articles:
   - articles/Landscape genetics (classification)
   - articles/Regression
   - articles/Graphical network model (GNM)
+
 - title: Other
   navbar: Other
+  contents:
   - articles/Common errors in mrIML
   - articles/Microbiome data curation
   - articles/Swine biosecurity
 
 development:
   mode: auto
-
-
-
