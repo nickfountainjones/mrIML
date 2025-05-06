@@ -1,18 +1,22 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# mrIML: Multivariate (multi-response) interpretable machine learning <img src="man/figures/logo.png" align="right" height="120"/></a>
+# mrIML: multi-response (Multivariate) interpretable machine learning <img src="man/figures/logo.png" align="right" height="120"/></a>
 
 <!-- badges: start -->
 
 ![GitHub R package
-version](https://img.shields.io/github/r-package/v/nfj1380/mrIML?logo=github&logoColor=%2300ff37&style=flat-square)
+version](https://img.shields.io/github/r-package/v/nickfountainjones/mrIML?logo=github&logoColor=%2300ff37&style=flat-square)
 ![GitHub
-contributors](https://img.shields.io/github/contributors/nfj1380/mrIML?style=flat-square)
+contributors](https://img.shields.io/github/contributors/nickfountainjones/mrIML?style=flat-square)
 ![GitHub last
-commit](https://img.shields.io/github/last-commit/nfj1380/mrIML?style=flat-square)
-[![R-CMD-check](https://github.com/nfj1380/mrIML/workflows/R-CMD-check/badge.svg)](https://github.com/nfj1380/mrIML/actions)
+commit](https://img.shields.io/github/last-commit/nickfountainjones/mrIML?style=flat-square)
+[![R-CMD-check](https://github.com/nickfountainjones/mrIML/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/nickfountainjones/mrIML/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/nickfountainjones/mrIML/graph/badge.svg)](https://app.codecov.io/gh/nickfountainjones/mrIML)
 <!-- badges: end -->
+
+## Overview
 
 This package aims to enable users to build and interpret multivariate
 machine learning models harnessing the tidyverse (tidy model syntax in
@@ -28,302 +32,90 @@ problem, but was designed to handle data common to community ecology
 (site by species data) and ecological genomics (individual or population
 by SNP loci).
 
-## Installation
+## How to Install
 
-Install the stable version of the package:
+You can install the development version of `mrIML` using `devtools`:
 
 ``` r
-#install.packages("devtools")
-#devtools::install_github('nfj1380/mrIML')
+devtools::install_github('nickfountainjones/mrIML')
+```
+
+## Ursing `mrIML`
+
+To get started, load `mrIML` and `tidymodels`:
+
+``` r
 library(mrIML)
+library(tidymodels)
+#> ── Attaching packages ────────────────────────────────────── tidymodels 1.3.0 ──
+#> ✔ broom        1.0.8     ✔ recipes      1.3.0
+#> ✔ dials        1.4.0     ✔ rsample      1.3.0
+#> ✔ dplyr        1.1.4     ✔ tibble       3.2.1
+#> ✔ ggplot2      3.5.2     ✔ tidyr        1.3.1
+#> ✔ infer        1.0.8     ✔ tune         1.3.0
+#> ✔ modeldata    1.4.0     ✔ workflows    1.2.0
+#> ✔ parsnip      1.3.1     ✔ workflowsets 1.1.0
+#> ✔ purrr        1.0.4     ✔ yardstick    1.3.2
+#> ── Conflicts ───────────────────────────────────────── tidymodels_conflicts() ──
+#> ✖ purrr::discard() masks scales::discard()
+#> ✖ dplyr::filter()  masks stats::filter()
+#> ✖ dplyr::lag()     masks stats::lag()
+#> ✖ recipes::step()  masks stats::step()
 ```
 
-## Quick start
-
-**mrIML** is designed to be used with a single function call or to be
-used in an ad-hoc fashion via individual function calls. In the
-following section we give an overview of the simple use case. For more
-on using each function see the [function
-documentation](https://nfj1380.github.io/mrIML/reference/index.html).
-The core functions for both regression and classification are:
-[`mrIMLpredicts`](https://nfj1380.github.io/mrIML/reference/mrIMLpredicts.html),
-[`mrIMLperformance`](https://nfj1380.github.io/mrIML/reference/mrIMLperformance.html),
-and [`mrvip`](https://nfj1380.github.io/mrIML/reference/mrvip.html),
-[`mrFlashlight`](https://nfj1380.github.io/mrIML/reference/mrFlashlight.html),
-and[`mrProfileplots`](https://nfj1380.github.io/mrIML/reference/mrProfileplots.html).
-
-We also allow users to get bootstrapped estimations of partial
-dependencies and variable importance using
-[`mrBootstrap`](https://nfj1380.github.io/mrIML/reference/mrBootstrap.html).
-
-The first step to using the package is to load it as follows.
-
-## Model component
-
-Now all the data is loaded and ready to go we can formulate the model
-using tidymodel syntax. In this case we have binary data (SNP
-presence/absence at each loci) but the data could also be counts or
-continuous (the set_model argument would be “regression” instead of
-“classification”). The user can specify any model from the ‘tidymodel’
-universe as ‘model 1’ (see <https://www.tidymodels.org/find/> for
-details). However, we have done most of our testing on random forests
-(rf) and glms (generalized linear models). Here we will specify a random
-forest classification model as the model applied to each response.
+Many functions in `mrIML` benefit from parallel processing.
 
 ``` r
-model_rf <-rand_forest(trees = 100,
-              mode = "classification",
-              mtry = tune(),
-              min_n = tune()) %>% #100 trees are set for brevity. Aim to start with 1000
-             set_engine("randomForest")
+future::plan("multisession", workers = 2)
 ```
 
-### [`mrIMLpredicts`](https://nfj1380.github.io/mrIML/reference/mrIMLpredicts.html)
-
-This function represents the core functionality of the package and
-includes results reporting, plotting and optional saving. It requires a
-data frame of X t( the snp data for example) and Y represented by the
-covariates or features.
-
-Load example data (cite) data from `{mrIML}`.
+The core function of `mrIML` is `mrIMLpredicts()`, which is a wrapper
+around the tidymodels workflow that fits a provided model to each
+response variable in a multi-response data set.
 
 ``` r
-fData <- filterRareCommon (Responsedata,
-                           lower=0.4,
-                           higher=0.7) 
-data <- fData[1:20]
-```
+# Load example multi-response data
+data <- MRFcov::Bird.parasites
+# Split into response and predictor data
+Y <- data %>%
+  select(-c("scale.prop.zos"))
+X <- data %>%
+  select(scale.prop.zos)
 
-## Parallel processing
+# Define tidymodel
+model <- rand_forest(
+  trees = 100,
+  mode = "classification",
+  mtry = tune(),
+  min_n = tune()
+) %>%
+  set_engine("randomForest")
 
-MrIML provides uses the flexible future apply functionality to set up
-multi-core processing. In the example below, we set up a cluster using 4
-cores. If you don’t set up a cluster, the default settings will be used
-and the analysis will run sequentially.
-
-``` r
-# detectCores() #check how many cores you have available. We suggest keeping one core free for internet browsing etc.
-
-cl <- parallel::makeCluster(4)
-     plan(cluster,
-     workers=cl)
-```
-
-``` r
-Y <- fData #For simplicity when comparing
-#Define set the outcomes of interest
-str(Features) 
-#> 'data.frame':    20 obs. of  19 variables:
-#>  $ Grassland       : num  0.07 0.0677 0.1845 0.0981 0.1578 ...
-#>  $ Shrub.Scrub     : num  0.557 0.767 0.524 0.786 0.842 ...
-#>  $ Forest          : num  0.01072 0.030588 0.008615 0.000662 0.000616 ...
-#>  $ HighlyDev       : num  0 0 0.00225 0 0 ...
-#>  $ Urban           : num  0 0 0.00159 0 0 ...
-#>  $ Suburban        : num  0.00357 0.13268 0.01325 0.00119 0 ...
-#>  $ Exurban         : num  0.00622 0.03019 0 0.01906 0 ...
-#>  $ Altered         : num  0.441 0.182 0.114 0.12 0 ...
-#>  $ Distance        : num  1.321 0.492 3.231 5.629 4.739 ...
-#>  $ Latitude        : num  33.8 33.8 33.8 33.8 33.8 ...
-#>  $ Longitude       : num  -118 -118 -118 -118 -118 ...
-#>  $ Age             : int  3 0 3 2 3 3 2 3 3 3 ...
-#>  $ Sex             : int  1 1 1 1 0 0 0 1 1 1 ...
-#>  $ Relatedness.PCO1: num  -0.1194 -0.0389 -0.1618 -0.1811 -0.1564 ...
-#>  $ Relatedness.PCO2: num  -0.1947 -0.0525 -0.321 -0.0827 0.1 ...
-#>  $ Relatedness.PCO3: num  -0.191 -0.0874 0.0541 -0.0627 -0.0111 ...
-#>  $ Relatedness.PCO4: num  0.1117 0.2422 0.0974 0.2129 0.2259 ...
-#>  $ Relatedness.PCO5: num  0.06405 0.0706 0.03514 -0.00084 0.0894 ...
-#>  $ Relatedness.PCO6: num  -0.0432 0.0683 -0.0805 0.2247 -0.055 ...
-#Remove NAs from the feature/predictor data.
-FeaturesnoNA<-Features[complete.cases(Features), ]
-X <- FeaturesnoNA #For simplicity
-#For more efficient testing for interactions (more variables more interacting pairs)
-X <- FeaturesnoNA[c(1:3)] #Three features only
-
-
-yhats_rf <- mrIMLpredicts(X=X,Y=Y, #specify which data to use
-                          Model=model_rf, #what model
-                          balance_data='no', #balance the data or not 
-                          mode='classification', #classification or regression
-                          k=5,
-                          tune_grid_size=5, #tuning parameters
-                          seed = 123,
-                          racing=F)  #Set seed
-#>   |                                                                              |                                                                      |   0%  |                                                                              |==                                                                    |   3%  |                                                                              |=====                                                                 |   7%  |                                                                              |=======                                                               |  10%  |                                                                              |==========                                                            |  14%  |                                                                              |============                                                          |  17%  |                                                                              |==============                                                        |  21%  |                                                                              |=================                                                     |  24%  |                                                                              |===================                                                   |  28%  |                                                                              |======================                                                |  31%  |                                                                              |========================                                              |  34%  |                                                                              |===========================                                           |  38%  |                                                                              |=============================                                         |  41%  |                                                                              |===============================                                       |  45%  |                                                                              |==================================                                    |  48%  |                                                                              |====================================                                  |  52%  |                                                                              |=======================================                               |  55%  |                                                                              |=========================================                             |  59%  |                                                                              |===========================================                           |  62%  |                                                                              |==============================================                        |  66%  |                                                                              |================================================                      |  69%  |                                                                              |===================================================                   |  72%  |                                                                              |=====================================================                 |  76%  |                                                                              |========================================================              |  79%  |                                                                              |==========================================================            |  83%  |                                                                              |============================================================          |  86%  |                                                                              |===============================================================       |  90%  |                                                                              |=================================================================     |  93%  |                                                                              |====================================================================  |  97%  |                                                                              |======================================================================| 100%
-
-ModelPerf <- mrIMLperformance(yhats=yhats_rf,
-                              Model=model_rf,
-                              Y=Y,
-                              mode='classification')
-
-ModelPerf[[1]] #Predictive performance for individual responses 
-#>    response  model_name            roc_AUC                mcc       sensitivity
-#> 1   env_131 rand_forest  0.642857142857143  0.327326835353989 0.285714285714286
-#> 2   env_163 rand_forest  0.238095238095238 -0.327326835353989                 0
-#> 3   env_164 rand_forest  0.895833333333333  0.534522483824849               0.5
-#> 4   env_167 rand_forest  0.833333333333333               <NA>                 1
-#> 5   env_169 rand_forest  0.642857142857143  0.327326835353989 0.285714285714286
-#> 6   env_212 rand_forest  0.444444444444444  0.272165526975909                 1
-#> 7    env_23 rand_forest               0.48 -0.333333333333333                 0
-#> 8    env_24 rand_forest               0.28               <NA>                 1
-#> 9    env_41 rand_forest  0.208333333333333 -0.408248290463863 0.333333333333333
-#> 10   env_47 rand_forest               0.86  0.816496580927726                 1
-#> 11   env_59 rand_forest  0.642857142857143  0.327326835353989 0.285714285714286
-#> 12    env_8 rand_forest            0.78125               <NA>                 0
-#> 13   env_84 rand_forest  0.642857142857143  0.327326835353989 0.285714285714286
-#> 14   env_85 rand_forest  0.642857142857143  0.327326835353989 0.285714285714286
-#> 15   env_86 rand_forest             0.4375               <NA>                 1
-#> 16  pol_105 rand_forest  0.854166666666667  0.408248290463863 0.333333333333333
-#> 17  pol_108 rand_forest  0.761904761904762  0.327326835353989 0.285714285714286
-#> 18  pol_111 rand_forest  0.895833333333333  0.534522483824849               0.5
-#> 19  pol_117 rand_forest               0.78  0.654653670707977                 1
-#> 20  pol_132 rand_forest               0.86  0.816496580927726                 1
-#> 21  pol_159 rand_forest               0.28  0.333333333333333                 1
-#> 22  pol_258 rand_forest 0.0833333333333333 -0.356348322549899               0.5
-#> 23   pol_30 rand_forest               0.86  0.816496580927726                 1
-#> 24  pol_340 rand_forest 0.0952380952380952 -0.218217890235992 0.142857142857143
-#> 25  pol_353 rand_forest             0.4375               <NA>                 1
-#> 26  pol_366 rand_forest  0.642857142857143  0.327326835353989 0.285714285714286
-#> 27   pol_87 rand_forest               0.86  0.816496580927726                 1
-#> 28   pol_88 rand_forest               0.86  0.816496580927726                 1
-#> 29   pol_89 rand_forest               0.86  0.816496580927726                 1
-#>                  ppv       specificity        prevalence
-#> 1                  1                 1 0.421052631578947
-#> 2  0.714285714285714                 0 0.631578947368421
-#> 3                  1                 1 0.421052631578947
-#> 4                  0               0.4 0.421052631578947
-#> 5                  1                 1 0.421052631578947
-#> 6  0.444444444444444 0.166666666666667  0.68421052631579
-#> 7                0.8                 0 0.631578947368421
-#> 8                  0               0.5 0.421052631578947
-#> 9               0.25               0.4 0.473684210526316
-#> 10               0.8 0.833333333333333 0.473684210526316
-#> 11                 1                 1 0.421052631578947
-#> 12                 1               NaN 0.473684210526316
-#> 13                 1                 1 0.421052631578947
-#> 14                 1                 1 0.421052631578947
-#> 15                 0               0.4 0.421052631578947
-#> 16                 1                 1 0.473684210526316
-#> 17                 1                 1 0.421052631578947
-#> 18                 1                 1 0.421052631578947
-#> 19               0.6 0.714285714285714 0.473684210526316
-#> 20               0.8 0.833333333333333 0.473684210526316
-#> 21               0.2 0.555555555555556 0.473684210526316
-#> 22 0.166666666666667 0.285714285714286 0.473684210526316
-#> 23               0.8 0.833333333333333 0.473684210526316
-#> 24 0.666666666666667               0.5 0.421052631578947
-#> 25                 0               0.4 0.421052631578947
-#> 26                 1                 1 0.421052631578947
-#> 27               0.8 0.833333333333333 0.473684210526316
-#> 28               0.8 0.833333333333333 0.473684210526316
-#> 29               0.8 0.833333333333333 0.473684210526316
-ModelPerf[[2]]#Overall predictive performance. r2 for regression and MCC for classification
-#> [1] 0.2856634
-```
-
-## Plotting
-
-``` r
-bs_impVI <- mrvip(
-  mrBootstrap_obj = NULL,
-  yhats = yhats_rf,
+# Fit multi-response model
+mrIML_model <- mrIMLpredicts(
   X = X,
   Y = Y,
-  mode = 'classification',
-  threshold = 0.8,
-  global_top_var = 10,
-  local_top_var = 5,
-  taxa = 'pol_132',
-  ModelPerf = ModelPerf)
-#> [1] "here"
-
-bs_impVI[[3]] #importance
+  Model = model,
+  prop = 0.7,
+  k = 5
+)
+#>   |                                                                              |                                                                      |   0%  |                                                                              |==================                                                    |  25%  |                                                                              |===================================                                   |  50%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================================| 100%
 ```
 
-![](man/figures/unnamed-chunk-8-1.png)<!-- -->
+The object `mrIML_model` can be investigated using: -
+`mrIMLperformance()` to get performance metrics for each response
+variable, - `mrvip()` to get variable importance for each response
+variable, - `mrFlashlight()` to get partial dependence plots for each
+response variable, - `mrCovar()` to get covariate importance for each
+predictor variable, and - `mrInteractions()` to get interaction
+importance for each predictor variable in the response models.
 
-``` r
-bs_impVI[[4]] #PCA
-```
+Two multi-response models can be compared using `mrPerformance()`.
 
-![](man/figures/unnamed-chunk-8-2.png)<!-- --> \## Effect of a feature
-on genetic change
-
-We also wrap some flashlight functionality to visualize the marginal
-(i.e. partial dependencies) or conditional (accumulated local effects)
-effect of a feature on genetic change. Partial dependencies take longer
-to calculate and are more sensitive to correlated features
-
-``` r
-flashlightObj <- mrFlashlight(yhats_rf,
-                              X=X,
-                              Y=Y,
-                              response = "single",
-                              index=1,
-                              mode='classification')
-
-#plot prediction scatter for all responses. Gets busy with 
-plot(light_scatter(flashlightObj,
-                   v = "Forest",
-                   type = "predicted"))
-```
-
-![](man/figures/unnamed-chunk-9-1.png)<!-- -->
-
-``` r
-
-#plots everything on one plot (partial dependency, ALE, scatter)
-plot(light_effects(flashlightObj,
-                   v = "Grassland"),
-                   use = "all")
-```
-
-![](man/figures/unnamed-chunk-9-2.png)<!-- -->
-
-``` r
-
-profileData_ale <- light_profile(flashlightObj,
-                                 v = "Grassland",
-                                 type = "ale") #accumulated local effects
-
-mrProfileplot(profileData_ale,
-              sdthresh =0.01)
-```
-
-![](man/figures/unnamed-chunk-9-3.png)<!-- -->
-
-    #>  Press [enter] to continue to the global summary plot
-
-![](man/figures/unnamed-chunk-9-4.png)<!-- -->
-
-``` r
-#the second plot is the cumulative turnover function
-```
-
-## Interacting predictors or features
-
-Finally, we can assess how features interact overall to shape genetic
-change. Be warned this is memory intensive. Future updates to this
-package will enable users to visualize these interactions and explore
-them in more detail using 2D ALE plots for example.
-
-``` r
-int_ <- mrInteractions(yhats=yhats_rf,
-                       X,
-                       Y,
-                       num_bootstrap=10,
-                       feature = 'Plas', 
-                       top.int=10)
-#10 bootstraps to keep it short. top int focusses on the 10 top interactions (all of them in this case).
-
-int_[[1]] # overall plot
-```
-
-![](man/figures/unnamed-chunk-10-1.png)<!-- -->
-
-``` r
-#int_[[2]] # individual plot for the response of choice 
-#int_[[3]] # two way plot
-```
+Bootstrapping can be implemented using `mrBootstrap()`, which can then
+be used quantify uncertainty around partial dependence plots,
+`mrPdPlotBootstrap()`, and variable importance, `mrvipBootstrap()`, as
+well as build co-occurrence networks using `mrCoOccurNet()`.
 
 ## Recent mrIML publications
 

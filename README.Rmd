@@ -9,6 +9,7 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/"
 )
 ```
+
 # mrIML: multi-response (Multivariate) interpretable machine learning <img src="man/figures/logo.png" align="right" height="120"/></a>
 
 <!-- badges: start -->
@@ -27,169 +28,67 @@ This package can be of use for any multi-response machine learning problem, but 
 
 ## How to Install
 
-You can intall the development version of `mrIML` using `devtools`:
+You can install the development version of `mrIML` using `devtools`:
 
 ```{r, eval = FALSE}
 devtools::install_github('nickfountainjones/mrIML')
 ```
 
-## Quick start
+## Ursing `mrIML`
 
-**mrIML** is designed to be used with a single function call or to be used in an ad-hoc fashion via individual function calls. In the following section we give an overview of the simple use case. For more on using each function see the [function documentation](https://nickfountainjones.github.io/mrIML/reference/index.html). The core functions for both regression and classification are: [`mrIMLpredicts`](https://nickfountainjones.github.io/mrIML/reference/mrIMLpredicts.html),
-[`mrIMLperformance`](https://nickfountainjones.github.io/mrIML/reference/mrIMLperformance.html), and 
-[`mrvip`](https://nickfountainjones.github.io/mrIML/reference/mrvip.html), [`mrFlashlight`](https://nickfountainjones.github.io/mrIML/reference/mrFlashlight.html), and[`mrProfileplots`](https://nickfountainjones.github.io/mrIML/reference/mrProfileplots.html).
+To get started, load `mrIML` and `tidymodels`:
 
-We also allow users to get bootstrapped estimations of partial dependencies and variable importance using [`mrBootstrap`](https://nickfountainjones.github.io/mrIML/reference/mrBootstrap.html). 
-
-The first step to using the package is to load it as follows.
-```{r, message = FALSE, message = FALSE, warning = FALSE, include=FALSE}
-pacman::p_load(
-  vip, tidymodels, randomForest, caret, gbm,
-  tidyverse, parallel, doParallel, themis, viridis,
-  janitor, hrbrthemes, xgboost, vegan, flashlight,
-  ggrepel, iml, plyr, future.apply, gridExtra, cowplot, mrIML, hstats
-)
+```{r}
+library(mrIML)
+library(tidymodels)
 ```
-## Model component
-Now all the data is loaded and ready to go we can formulate the model using tidymodel syntax. In this case we have binary data (SNP presence/absence at each loci) but the data could also be counts or continuous (the set_model argument would be "regression" instead of "classification"). The user can specify any model from the 'tidymodel' universe as 'model 1' (see https://www.tidymodels.org/find/ for details). However, we have done most of our testing on random forests (rf) and glms (generalized linear models). Here we will specify a random forest classification model as the model applied to each response.
-```{r }
-model_rf <- rand_forest(
+
+Many functions in `mrIML` benefit from parallel processing.
+
+```{r eval = FALSE}
+future::plan("multisession", workers = 2)
+```
+
+The core function of `mrIML` is `mrIMLpredicts()`, which is a wrapper around the tidymodels workflow that fits a provided model to each response variable in a multi-response data set.
+
+```{r}
+# Load example multi-response data
+data <- MRFcov::Bird.parasites
+# Split into response and predictor data
+Y <- data %>%
+  select(-c("scale.prop.zos"))
+X <- data %>%
+  select(scale.prop.zos)
+
+# Define tidymodel
+model <- rand_forest(
   trees = 100,
   mode = "classification",
   mtry = tune(),
   min_n = tune()
-) %>% # 100 trees are set for brevity. Aim to start with 1000
+) %>%
   set_engine("randomForest")
-```
-### [`mrIMLpredicts`](https://nickfountainjones.github.io/mrIML/reference/mrIMLpredicts.html)
 
-This function represents the core functionality of the package and
-includes results reporting, plotting and optional saving.  It requires a
-data frame of X t( the snp data for example) and Y represented by the covariates or features.
-
-Load example data (cite) data from `{mrIML}`.
-``` {r}
-fData <- filterRareCommon(Responsedata,
-  lower = 0.4,
-  higher = 0.7
-)
-data <- fData[1:20]
-```
-## Parallel processing
-
-MrIML provides uses the flexible future apply functionality to set up multi-core processing. In the example below, we set up a cluster using 4 cores. If you don't set up a cluster, the default settings will be used and the analysis will run sequentially.
-```{r, eval = FALSE}
-# detectCores() #check how many cores you have available. We suggest keeping one core free for internet browsing etc.
-
-cl <- parallel::makeCluster(4)
-plan(cluster,
-  workers = cl
-)
-```
-``` {r message = FALSE, warning = FALSE}
-Y <- fData # For simplicity when comparing
-# Define set the outcomes of interest
-str(Features)
-# Remove NAs from the feature/predictor data.
-FeaturesnoNA <- Features[complete.cases(Features), ]
-X <- FeaturesnoNA # For simplicity
-# For more efficient testing for interactions (more variables more interacting pairs)
-X <- FeaturesnoNA[c(1:3)] # Three features only
-
-
-yhats_rf <- mrIMLpredicts(
-  X = X, Y = Y, # specify which data to use
-  Model = model_rf, # what model
-  balance_data = "no", # balance the data or not
-  mode = "classification", # classification or regression
-  k = 5,
-  tune_grid_size = 5, # tuning parameters
-  seed = 123,
-  racing = F
-) # Set seed
-
-ModelPerf <- mrIMLperformance(
-  yhats = yhats_rf,
-  Model = model_rf,
-  Y = Y,
-  mode = "classification"
-)
-
-ModelPerf[[1]] # Predictive performance for individual responses
-ModelPerf[[2]] # Overall predictive performance. r2 for regression and MCC for classification
-```
-## Plotting
-```{r message = FALSE, warning = FALSE}
-bs_impVI <- mrvip(
-  mrBootstrap_obj = NULL,
-  yhats = yhats_rf,
+# Fit multi-response model
+mrIML_model <- mrIMLpredicts(
   X = X,
   Y = Y,
-  mode = "classification",
-  threshold = 0.8,
-  global_top_var = 10,
-  local_top_var = 5,
-  taxa = "pol_132",
-  ModelPerf = ModelPerf
+  Model = model,
+  prop = 0.7,
+  k = 5
 )
-
-bs_impVI[[3]] # importance
-bs_impVI[[4]] # PCA
 ```
-## Effect of a feature on genetic change
 
-We also wrap some flashlight functionality to visualize the marginal (i.e. partial dependencies) or conditional (accumulated local effects) effect of a feature on genetic change. Partial dependencies take longer to calculate and are more sensitive to correlated features
-```{r message = FALSE, warning = FALSE}
-flashlightObj <- mrFlashlight(yhats_rf,
-  X = X,
-  Y = Y,
-  response = "single",
-  index = 1,
-  mode = "classification"
-)
+The object `mrIML_model` can be investigated using:
+- `mrIMLperformance()` to get performance metrics for each response variable,
+- `mrvip()` to get variable importance for each response variable,
+- `mrFlashlight()` to get partial dependence plots for each response variable,
+- `mrCovar()` to get covariate importance for each predictor variable, and
+- `mrInteractions()` to get interaction importance for each predictor variable in the response models.
 
-# plot prediction scatter for all responses. Gets busy with
-plot(light_scatter(flashlightObj,
-  v = "Forest",
-  type = "predicted"
-))
+Two multi-response models can be compared using `mrPerformance()`.
 
-# plots everything on one plot (partial dependency, ALE, scatter)
-plot(
-  light_effects(flashlightObj,
-    v = "Grassland"
-  ),
-  use = "all"
-)
-
-profileData_ale <- light_profile(flashlightObj,
-  v = "Grassland",
-  type = "ale"
-) # accumulated local effects
-
-mrProfileplot(profileData_ale,
-  sdthresh = 0.01
-)
-# the second plot is the cumulative turnover function
-```
-## Interacting predictors or features
-
-Finally, we can assess how features interact overall to shape genetic change. Be warned this is memory intensive. Future updates to this package will enable users to visualize these interactions and explore them in more detail using 2D ALE plots for example.
-```{r message = FALSE, warning = FALSE}
-int_ <- mrInteractions(
-  yhats = yhats_rf,
-  X,
-  Y,
-  num_bootstrap = 10,
-  feature = "Plas",
-  top.int = 10
-)
-# 10 bootstraps to keep it short. top int focusses on the 10 top interactions (all of them in this case).
-
-int_[[1]] # overall plot
-# int_[[2]] # individual plot for the response of choice
-# int_[[3]] # two way plot
-```
+Bootstrapping can be implemented using `mrBootstrap()`, which can then be used quantify uncertainty around partial dependence plots, `mrPdPlotBootstrap()`, and variable importance, `mrvipBootstrap()`, as well as build co-occurrence networks using `mrCoOccurNet()`.
 
 ## Recent mrIML publications
 1. Fountain-Jones, N. M., Kozakiewicz, C. P., Forester, B. R., Landguth, E. L., Carver, S., Charleston, M., Gagne, R. B., Greenwell, B., Kraberger, S., Trumbo, D. R., Mayer, M., Clark, N. J., & Machado, G. (2021). MrIML: Multi-response interpretable machine learning to model genomic landscapes. Molecular Ecology Resources, 21, 2766– 2781. https://doi.org/10.1111/1755-0998.13495
