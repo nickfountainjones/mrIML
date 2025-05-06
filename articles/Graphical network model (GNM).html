@@ -6,13 +6,12 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Graphical network model (GNM) • mrIML</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
-<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
-<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
-<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
-<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
+<script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -22,7 +21,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="inverse" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="../index.html">mrIML</a>
 
@@ -35,23 +34,36 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="../index.html"><span class="fa fas fa-home fa-lg"></span></a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/mrIML.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/Common%20errors%20in%20mrIML.html">Common errors in mrIML</a></li>
-    <li><a class="dropdown-item" href="../articles/Swine%20biosecurity.html">Swine Biosecurity working example</a></li>
-    <li><a class="dropdown-item" href="../articles/Landscape%20genetics%20(classification).html">Classification working example</a></li>
-    <li><a class="dropdown-item" href="../articles/Regression.html">Regression working example</a></li>
-    <li><a class="dropdown-item" href="../articles/Landscape%20genetics.html">Landscape genetics</a></li>
+<li><a class="dropdown-item" href="../articles/Landscape%20genetics%20(classification).html">Landscape genetics (classification)</a></li>
+    <li><a class="dropdown-item" href="../articles/Regression.html">Regression</a></li>
     <li><a class="dropdown-item" href="../articles/Graphical%20network%20model%20(GNM).html">Graphical network model (GNM)</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Other</h6></li>
+    <li><a class="dropdown-item" href="../articles/Common%20errors%20in%20mrIML.html">Common errors in mrIML</a></li>
     <li><a class="dropdown-item" href="../articles/Microbiome%20data%20curation.html">Microbiome data curation</a></li>
+    <li><a class="dropdown-item" href="../articles/Swine%20biosecurity.html">Swine biosecurity</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
-<li class="nav-item"><a class="nav-link" href="https://github.com/nickfountainjones/mrIML"><span class="fa fa-github"></span></a></li>
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
+</form></li>
+<li class="nav-item"><a class="nav-link" href="https://github.com/nickfountainjones/mrIML/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
+  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
+<li><button class="dropdown-item" data-bs-theme-value="light"><span class="fa fa-sun"></span> Light</button></li>
+    <li><button class="dropdown-item" data-bs-theme-value="dark"><span class="fa fa-moon"></span> Dark</button></li>
+    <li><button class="dropdown-item" data-bs-theme-value="auto"><span class="fa fa-adjust"></span> Auto</button></li>
+  </ul>
+</li>
       </ul>
 </div>
 
@@ -67,7 +79,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Graphical network model (GNM)</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/nfj1380/mrIML/blob/master/vignettes/Graphical%20network%20model%20(GNM).Rmd" class="external-link"><code>vignettes/Graphical network model (GNM).Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/nickfountainjones/mrIML/blob/master/vignettes/articles/Graphical%20network%20model%20(GNM).Rmd"><code>vignettes/articles/Graphical network model (GNM).Rmd</code></a></small>
       <div class="d-none name"><code>Graphical network model (GNM).Rmd</code></div>
     </div>
 
@@ -92,18 +104,27 @@ species. A single continuous covariate is also included
 (scale.prop.zos), which reflects the relative abundance of
 <em>Zosterops</em> species among different sample sites.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Bird.parasites</span>,</span>
-<span>                   <span class="op">-</span><span class="va">scale.prop.zos</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="co">#response variables eg. SNPs, pathogens, species....</span></span>
-<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Bird.parasites</span>,</span>
-<span>                   <span class="va">scale.prop.zos</span><span class="op">)</span> <span class="co"># feature set</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nickfountainjones/mrIML">mrIML</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mayer79/flashlight" class="external-link">flashlight</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r.igraph.org/" class="external-link">igraph</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/briatte/ggnetwork" class="external-link">ggnetwork</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://statnet.org/" class="external-link">network</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">X1</span> <span class="op">&lt;-</span> <span class="va">Y</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">7007</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">MRFcov</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MRFcov/man/Bird.parasites.html" class="external-link">Bird.parasites</a></span></span>
+<span><span class="va">Y</span> <span class="op">&lt;-</span>  <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span></span>
+<span>    <span class="op">-</span><span class="va">scale.prop.zos</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">everything</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">X1_fact</span> <span class="op">&lt;-</span> <span class="va">X1</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate_all.html" class="external-link">mutate_all</a></span><span class="op">(</span><span class="va">as.factor</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate_all.html" class="external-link">mutate_all</a></span><span class="op">(</span><span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">.</span> <span class="op">==</span> <span class="fl">0</span>, <span class="st">"absent"</span>, <span class="st">"present"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span></span>
+<span>    <span class="va">scale.prop.zos</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
 <p>Note that the inclusion of ‘X1’ converts MrIML into a JSDM by
 directly adding of the presence/absence patterns of the other taxa into
 the model (as well as environmental/host covariates). Note, the order of
@@ -117,20 +138,16 @@ are going to set up two models to compare: a random forest model (RF)
 and a logistic regression (lm). MrIML takes advantage of multi-core
 processing so we set that up here to run on 5 cores. These steps are the
 same as in MrIML 1.0.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_rf</span> <span class="op">&lt;-</span><span class="fu">rand_forest</span><span class="op">(</span>trees <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>                       mode <span class="op">=</span> <span class="st">"classification"</span>,</span>
 <span>                       mtry <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>,</span>
-<span>                       min_n <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="co">#100 trees are set for brevity. Aim to start with 1000</span></span>
+<span>                       min_n <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="co">#100 trees are set for brevity. Aim to start with 1000</span></span>
 <span>          <span class="fu">set_engine</span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">model_lm</span> <span class="op">&lt;-</span> <span class="co">#model used to generate yhat</span></span>
-<span>  <span class="fu">logistic_reg</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"glm"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span> <span class="co">#just for your response</span></span>
-<span></span>
-<span><span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu">parallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/parallel/makeCluster.html" class="external-link">makeCluster</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span></span>
-<span><span class="fu">plan</span><span class="op">(</span><span class="va">cluster</span>, workers<span class="op">=</span><span class="va">cl</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">model_lm</span> <span class="op">&lt;-</span> <span class="fu">logistic_reg</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"glm"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="running-the-models">Running the models<a class="anchor" aria-label="anchor" href="#running-the-models"></a>
@@ -143,38 +160,35 @@ not improve fit using a repeated measure ANOVA model. Turning racing to
 ‘FALSE’ goes back to a grid search if you want to manually set the
 tuning grid size. For the logistic regression there are no parameters to
 tune so set to ‘FALSE’.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#random forest</span></span>
-<span><span class="va">yhats_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLpredicts.html">mrIMLpredicts</a></span><span class="op">(</span>X<span class="op">=</span><span class="va">X</span>, Y<span class="op">=</span><span class="va">Y</span>,</span>
-<span>                          X1<span class="op">=</span><span class="va">X1</span>,</span>
-<span>                          Model<span class="op">=</span><span class="va">model_rf</span>,</span>
-<span>                          balance_data<span class="op">=</span><span class="st">'no'</span>,</span>
-<span>                          mode<span class="op">=</span><span class="st">'classification'</span>,</span>
-<span>                          seed <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample.int</a></span><span class="op">(</span><span class="fl">1e8</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>                          morans<span class="op">=</span><span class="cn">F</span>,</span>
-<span>                          prop<span class="op">=</span><span class="fl">0.7</span>, k<span class="op">=</span><span class="fl">5</span>, racing<span class="op">=</span><span class="cn">T</span><span class="op">)</span></span>
+<span><span class="va">yhats_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLpredicts.html">mrIMLpredicts</a></span><span class="op">(</span></span>
+<span>  X <span class="op">=</span> <span class="va">X</span>,</span>
+<span>  Y <span class="op">=</span> <span class="va">Y</span>,</span>
+<span>  X1 <span class="op">=</span> <span class="va">Y</span>,</span>
+<span>  Model <span class="op">=</span> <span class="va">model_rf</span>,</span>
+<span>  prop <span class="op">=</span> <span class="fl">0.7</span>,</span>
+<span>  k <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  racing <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |==================                                                    |  25%  |                                                                              |===================================                                   |  50%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================================| 100%</span></span>
 <span></span>
 <span><span class="co">#linear model</span></span>
-<span><span class="va">yhats_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLpredicts.html">mrIMLpredicts</a></span><span class="op">(</span>X<span class="op">=</span><span class="va">X</span>,Y<span class="op">=</span><span class="va">Y</span>,</span>
-<span>                            X1<span class="op">=</span><span class="va">X1_fact</span>,</span>
-<span>                            Model<span class="op">=</span><span class="va">model_lm</span> , </span>
-<span>                            balance_data<span class="op">=</span><span class="st">'no'</span>,</span>
-<span>                            mode<span class="op">=</span><span class="st">'classification'</span>,</span>
-<span>                            seed <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample.int</a></span><span class="op">(</span><span class="fl">1e8</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>                            prop<span class="op">=</span><span class="fl">0.6</span>, racing<span class="op">=</span><span class="cn">F</span>, k<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |==================                                                    |  25%</span></span>
-<span><span class="co">#&gt; Warning: No tuning parameters have been detected, performance will be evaluated</span></span>
-<span><span class="co">#&gt; using the resamples with no tuning. Did you want to [tune()] parameters?</span></span>
-<span><span class="co">#&gt;   |                                                                              |===================================                                   |  50%</span></span>
-<span><span class="co">#&gt; Warning: No tuning parameters have been detected, performance will be evaluated</span></span>
-<span><span class="co">#&gt; using the resamples with no tuning. Did you want to [tune()] parameters?</span></span>
-<span><span class="co">#&gt;   |                                                                              |====================================================                  |  75%</span></span>
-<span><span class="co">#&gt; Warning: No tuning parameters have been detected, performance will be evaluated</span></span>
-<span><span class="co">#&gt; using the resamples with no tuning. Did you want to [tune()] parameters?</span></span>
-<span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Warning: No tuning parameters have been detected, performance will be evaluated</span></span>
-<span><span class="co">#&gt; using the resamples with no tuning. Did you want to [tune()] parameters?</span></span></code></pre></div>
+<span><span class="va">yhats_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLpredicts.html">mrIMLpredicts</a></span><span class="op">(</span></span>
+<span>  X <span class="op">=</span> <span class="va">X</span>,</span>
+<span>  Y <span class="op">=</span> <span class="va">Y</span>,</span>
+<span>  X1 <span class="op">=</span> <span class="va">Y</span>,</span>
+<span>  Model <span class="op">=</span> <span class="va">model_lm</span> , </span>
+<span>  balance_data <span class="op">=</span> <span class="st">'no'</span>,</span>
+<span>  prop <span class="op">=</span> <span class="fl">0.6</span>,</span>
+<span>  k <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  racing <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |==================                                                    |  25%  |                                                                              |===================================                                   |  50%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================================| 100%</span></span>
+<span><span class="co">#&gt; Warning: No tuning parameters have been detected, performance will be evaluated using the resamples with no tuning. Did you want to [tune()] parameters?</span></span>
+<span><span class="co">#&gt; No tuning parameters have been detected, performance will be evaluated using the resamples with no tuning. Did you want to [tune()] parameters?</span></span>
+<span><span class="co">#&gt; No tuning parameters have been detected, performance will be evaluated using the resamples with no tuning. Did you want to [tune()] parameters?</span></span>
+<span><span class="co">#&gt; No tuning parameters have been detected, performance will be evaluated using the resamples with no tuning. Did you want to [tune()] parameters?</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="comparing-performance">Comparing performance<a class="anchor" aria-label="anchor" href="#comparing-performance"></a>
@@ -182,63 +196,56 @@ tune so set to ‘FALSE’.</p>
 <p>It’s important to compare if there are any advantages to using a
 random forest approach. Interpreation would be easier overall if
 logistic regression gave similar predictive performance.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ModelPerf_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLperformance.html">mrIMLperformance</a></span><span class="op">(</span><span class="va">yhats_rf</span>,</span>
-<span>                                 Model<span class="op">=</span><span class="va">model_rf</span>,</span>
-<span>                                 Y<span class="op">=</span><span class="va">Y</span>,</span>
-<span>                                 mode<span class="op">=</span><span class="st">'classification'</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ModelPerf_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLperformance.html">mrIMLperformance</a></span><span class="op">(</span><span class="va">yhats_rf</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: NAs produced when calculating MCC. This is common when there is a</span></span>
+<span><span class="co">#&gt; class imbalance. Substituting NA values with zero.</span></span>
 <span></span>
 <span><span class="va">ModelPerf_rf</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="co">#across all parasites</span></span>
-<span><span class="co">#&gt;       response  model_name           roc_AUC               mcc</span></span>
-<span><span class="co">#&gt; 1   Hkillangoi rand_forest 0.900997899159664              &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 2  Hzosteropis rand_forest 0.947137280416396 0.718241208825566</span></span>
-<span><span class="co">#&gt; 3 Microfilaria rand_forest 0.938008130081301 0.490051113465351</span></span>
-<span><span class="co">#&gt; 4         Plas rand_forest 0.850388143966126 0.413664335080416</span></span>
-<span><span class="co">#&gt;         sensitivity               ppv       specificity         prevalence</span></span>
-<span><span class="co">#&gt; 1                 1                 0 0.881481481481482  0.115812917594655</span></span>
-<span><span class="co">#&gt; 2 0.933962264150943 0.793103448275862 0.942857142857143  0.265033407572383</span></span>
-<span><span class="co">#&gt; 3 0.991869918699187 0.333333333333333 0.938461538461538 0.0979955456570156</span></span>
-<span><span class="co">#&gt; 4 0.963302752293578 0.346153846153846 0.860655737704918  0.195991091314031</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
+<span><span class="co">#&gt;   response     model_name roc_AUC   mcc sensitivity   ppv specificity prevalence</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.951 0.714       0.941 0.923       0.758     0.265 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.790 0.218       0.918 0.926       0.308     0.116 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.902 0.438       0.955 0.875       0.4       0.196 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.905 0           1     0.896       0         0.098<span style="text-decoration: underline;">0</span></span></span>
 <span><span class="va">ModelPerf_rf</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="co">#overall</span></span>
-<span><span class="co">#&gt; [1] 0.4054892</span></span>
+<span><span class="co">#&gt; [1] 0.3426539</span></span>
 <span></span>
-<span><span class="va">ModelPerf_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLperformance.html">mrIMLperformance</a></span><span class="op">(</span><span class="va">yhats_lm</span>,</span>
-<span>                                 Model<span class="op">=</span><span class="va">model_lm</span>,</span>
-<span>                                 Y<span class="op">=</span><span class="va">Y</span>, mode<span class="op">=</span><span class="st">'classification'</span><span class="op">)</span></span>
+<span><span class="va">ModelPerf_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLperformance.html">mrIMLperformance</a></span><span class="op">(</span><span class="va">yhats_lm</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ModelPerf_lm</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="co">#&gt;       response   model_name           roc_AUC               mcc</span></span>
-<span><span class="co">#&gt; 1   Hkillangoi logistic_reg 0.803326474622771              &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 2  Hzosteropis logistic_reg 0.815781274341798   0.4040224605406</span></span>
-<span><span class="co">#&gt; 3 Microfilaria logistic_reg  0.91820987654321 0.433340830644394</span></span>
-<span><span class="co">#&gt; 4         Plas logistic_reg 0.777072192513369 0.240820814553862</span></span>
-<span><span class="co">#&gt;         sensitivity               ppv       specificity         prevalence</span></span>
-<span><span class="co">#&gt; 1                 1                 0               0.9  0.115812917594655</span></span>
-<span><span class="co">#&gt; 2 0.946564885496183  0.36734693877551               0.8  0.265033407572383</span></span>
-<span><span class="co">#&gt; 3 0.981481481481482 0.333333333333333 0.929824561403509 0.0979955456570156</span></span>
-<span><span class="co">#&gt; 4 0.963235294117647 0.181818181818182 0.784431137724551  0.195991091314031</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
+<span><span class="co">#&gt;   response    model_name roc_AUC    mcc sensitivity   ppv specificity prevalence</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis logistic_…   0.810 0.335        0.922 0.776      0.346      0.265 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi  logistic_…   0.657 0.052<span style="text-decoration: underline;">0</span>       0.975 0.897      0.052<span style="text-decoration: underline;">6</span>     0.116 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas        logistic_…   0.774 0.119        0.972 0.815      0.085<span style="text-decoration: underline;">7</span>     0.196 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilar… logistic_…   0.878 0.362        0.975 0.930      0.294      0.098<span style="text-decoration: underline;">0</span></span></span>
 <span><span class="va">ModelPerf_lm</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="co">#&gt; [1] 0.269546</span></span>
+<span><span class="co">#&gt; [1] 0.2169666</span></span>
 <span></span>
 <span><span class="va">plots</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrPerformancePlot.html">mrPerformancePlot</a></span><span class="op">(</span>ModelPerf1<span class="op">=</span><span class="va">ModelPerf_lm</span>,</span>
 <span>                           ModelPerf2<span class="op">=</span><span class="va">ModelPerf_rf</span>,</span>
-<span>                           mod_names<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'linear_reg'</span>,<span class="st">'rand_forest'</span><span class="op">)</span>,</span>
-<span>                           mode<span class="op">=</span><span class="st">'classification'</span> <span class="op">)</span> </span>
-<span><span class="va">plots</span></span>
-<span><span class="co">#&gt; [[1]]</span></span></code></pre></div>
+<span>                           mode<span class="op">=</span><span class="st">'classification'</span> <span class="op">)</span></span>
+<span></span>
+<span><span class="va">plots</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
 <p><img src="Graphical%20network%20model%20(GNM)_files/figure-html/unnamed-chunk-4-1.png" width="768" style="display: block; margin: auto;"></p>
-<pre><code><span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[2]]</span></span></code></pre>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">plots</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
 <p><img src="Graphical%20network%20model%20(GNM)_files/figure-html/unnamed-chunk-4-2.png" width="768" style="display: block; margin: auto;"></p>
-<pre><code><span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[3]]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 5</span></span></span>
-<span><span class="co">#&gt;   response     outlier logistic_reg rand_forest diff_mod1_2</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hkillangoi   <span style="color: #BB0000;">NA</span>             0           0          0     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hzosteropis  <span style="color: #BB0000;">NA</span>             0.404       0.718      0.314 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Microfilaria <span style="color: #BB0000;">NA</span>             0.433       0.490      0.056<span style="text-decoration: underline;">7</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Plas         <span style="color: #BB0000;">NA</span>             0.241       0.414      0.173</span></span></code></pre>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">plots</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 6</span></span></span>
+<span><span class="co">#&gt;   response  metric_metric_logist…¹ metric_metric_rand_f…² outlier_outlier_logi…³</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>                 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzostero…                 0.335                   0.714 <span style="color: #BB0000;">NA</span>                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillang…                 0.052<span style="text-decoration: underline;">0</span>                  0.218 <span style="color: #BB0000;">NA</span>                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas                      0.119                   0.438 <span style="color: #BB0000;">NA</span>                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfil…                 0.362                   0     <span style="color: #BB0000;">NA</span>                    </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ abbreviated names: ¹​metric_metric_logistic_reg, ²​metric_metric_rand_forest,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   ³​outlier_outlier_logistic_reg</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: outlier_outlier_rand_forest &lt;lgl&gt;, diff_mod1_2 &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>If we just look at the overall AUC values, it looks like model
 performance is quite similar (0.86 for the rf and 0.81 for the lm).
 However, when we look a the Mathew’s correlation coefficient (MCC) for
@@ -251,46 +258,35 @@ will interrogate the rf model further.</p>
 <p>We will now ask if including putative associations between taxa
 improves model performance overall or in the relationship between the
 parasites or is host relative abundance enough.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">yhats_rf_noAssoc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLpredicts.html">mrIMLpredicts</a></span><span class="op">(</span>X<span class="op">=</span><span class="va">X</span>,</span>
-<span>                                  Y<span class="op">=</span><span class="va">Y</span>,</span>
-<span>                                  X1<span class="op">=</span><span class="cn">NULL</span>, <span class="co">#no associations for this one</span></span>
-<span>                                  Model<span class="op">=</span><span class="va">model_rf</span>,</span>
-<span>                                  balance_data<span class="op">=</span><span class="st">'no'</span>,</span>
-<span>                                  mode<span class="op">=</span><span class="st">'classification'</span>,</span>
-<span>                                  seed <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample.int</a></span><span class="op">(</span><span class="fl">1e8</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">yhats_rf_noAssoc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLpredicts.html">mrIMLpredicts</a></span><span class="op">(</span>X <span class="op">=</span> <span class="va">X</span>,</span>
+<span>                                  Y <span class="op">=</span> <span class="va">Y</span>,</span>
+<span>                                  Model <span class="op">=</span> <span class="va">model_rf</span>,</span>
 <span>                                  prop<span class="op">=</span><span class="fl">0.7</span>,</span>
 <span>                                  k<span class="op">=</span><span class="fl">5</span>,</span>
 <span>                                  racing<span class="op">=</span><span class="cn">T</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |==================                                                    |  25%  |                                                                              |===================================                                   |  50%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================================| 100%</span></span>
 <span></span>
-<span><span class="va">ModelPerf_rf_noAssoc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLperformance.html">mrIMLperformance</a></span><span class="op">(</span><span class="va">yhats_rf_noAssoc</span>,</span>
-<span>                                         Model<span class="op">=</span><span class="va">model_rf</span>,</span>
-<span>                                         Y<span class="op">=</span><span class="va">Y</span>,</span>
-<span>                                         mode<span class="op">=</span><span class="st">'classification'</span><span class="op">)</span></span>
+<span><span class="va">ModelPerf_rf_noAssoc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLperformance.html">mrIMLperformance</a></span><span class="op">(</span><span class="va">yhats_rf_noAssoc</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: NAs produced when calculating MCC. This is common when there is a</span></span>
+<span><span class="co">#&gt; class imbalance. Substituting NA values with zero.</span></span>
 <span></span>
 <span><span class="va">ModelPerf_rf_noAssoc</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="co">#&gt;       response  model_name           roc_AUC               mcc</span></span>
-<span><span class="co">#&gt; 1   Hkillangoi rand_forest 0.553418803418803              &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 2  Hzosteropis rand_forest 0.786066424494032 0.494420277562475</span></span>
-<span><span class="co">#&gt; 3 Microfilaria rand_forest 0.720674486803519 0.371709945158283</span></span>
-<span><span class="co">#&gt; 4         Plas rand_forest  0.79818244170096 0.531490262029645</span></span>
-<span><span class="co">#&gt;         sensitivity               ppv       specificity         prevalence</span></span>
-<span><span class="co">#&gt; 1                 1                 0 0.866666666666667  0.115812917594655</span></span>
-<span><span class="co">#&gt; 2 0.936170212765957  0.48780487804878 0.807339449541284  0.265033407572383</span></span>
-<span><span class="co">#&gt; 3 0.983870967741935 0.272727272727273 0.938461538461538 0.0979955456570156</span></span>
-<span><span class="co">#&gt; 4 0.935185185185185 0.555555555555556 0.893805309734513  0.195991091314031</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
+<span><span class="co">#&gt;   response     model_name roc_AUC   mcc sensitivity   ppv specificity prevalence</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.869 0.544       0.891 0.882       0.647     0.265 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.678 0           1     0.948       0         0.116 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.746 0.475       0.889 0.897       0.593     0.196 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.801 0.459       1     0.947       0.222     0.098<span style="text-decoration: underline;">0</span></span></span>
 <span><span class="va">ModelPerf_rf</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="co">#performance including associations</span></span>
-<span><span class="co">#&gt;       response  model_name           roc_AUC               mcc</span></span>
-<span><span class="co">#&gt; 1   Hkillangoi rand_forest 0.900997899159664              &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 2  Hzosteropis rand_forest 0.947137280416396 0.718241208825566</span></span>
-<span><span class="co">#&gt; 3 Microfilaria rand_forest 0.938008130081301 0.490051113465351</span></span>
-<span><span class="co">#&gt; 4         Plas rand_forest 0.850388143966126 0.413664335080416</span></span>
-<span><span class="co">#&gt;         sensitivity               ppv       specificity         prevalence</span></span>
-<span><span class="co">#&gt; 1                 1                 0 0.881481481481482  0.115812917594655</span></span>
-<span><span class="co">#&gt; 2 0.933962264150943 0.793103448275862 0.942857142857143  0.265033407572383</span></span>
-<span><span class="co">#&gt; 3 0.991869918699187 0.333333333333333 0.938461538461538 0.0979955456570156</span></span>
-<span><span class="co">#&gt; 4 0.963302752293578 0.346153846153846 0.860655737704918  0.195991091314031</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
+<span><span class="co">#&gt;   response     model_name roc_AUC   mcc sensitivity   ppv specificity prevalence</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.951 0.714       0.941 0.923       0.758     0.265 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.790 0.218       0.918 0.926       0.308     0.116 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.902 0.438       0.955 0.875       0.4       0.196 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.905 0           1     0.896       0         0.098<span style="text-decoration: underline;">0</span></span></span></code></pre></div>
 <p>You can see that overall including associations improved model
 performance overall but particularly in predicting <em>H.killangoi</em>
 and <em>Microfilaria</em>. Using MCC to compare models is problematic as
@@ -309,35 +305,27 @@ these taxa are false.</p>
 in predicting our two rarer taxa? Up sampling is possible but in this
 case we’ll try down sampling to see if correcting for class imbalance
 improves our model fit.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">yhats_rf_downSamp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLpredicts.html">mrIMLpredicts</a></span><span class="op">(</span>X<span class="op">=</span><span class="va">X</span>,</span>
 <span>                                   Y<span class="op">=</span><span class="va">Y</span>,</span>
-<span>                                   X1<span class="op">=</span><span class="va">X1</span>,</span>
+<span>                                   X1<span class="op">=</span><span class="va">Y</span>,</span>
 <span>                                   Model<span class="op">=</span><span class="va">model_rf</span>,</span>
 <span>                                   balance_data<span class="op">=</span><span class="st">'down'</span>, <span class="co">#down sampling</span></span>
-<span>                                   mode<span class="op">=</span><span class="st">'classification'</span>,</span>
-<span>                                   seed <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample.int</a></span><span class="op">(</span><span class="fl">1e8</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>                                   prop<span class="op">=</span><span class="fl">0.75</span>,</span>
 <span>                                   k<span class="op">=</span><span class="fl">5</span>,</span>
 <span>                                   racing<span class="op">=</span><span class="cn">T</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |==================                                                    |  25%  |                                                                              |===================================                                   |  50%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================================| 100%</span></span>
 <span></span>
-<span><span class="va">ModelPerf_rf_downSamp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLperformance.html">mrIMLperformance</a></span><span class="op">(</span><span class="va">yhats_rf_downSamp</span>,</span>
-<span>                                          Model<span class="op">=</span><span class="va">model_rf</span>,</span>
-<span>                                          Y<span class="op">=</span><span class="va">Y</span>,</span>
-<span>                                          mode<span class="op">=</span><span class="st">'classification'</span><span class="op">)</span></span>
+<span><span class="va">ModelPerf_rf_downSamp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLperformance.html">mrIMLperformance</a></span><span class="op">(</span><span class="va">yhats_rf_downSamp</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ModelPerf_rf_downSamp</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="co">#&gt;       response  model_name           roc_AUC               mcc</span></span>
-<span><span class="co">#&gt; 1   Hkillangoi rand_forest 0.833762886597938 0.267095944140539</span></span>
-<span><span class="co">#&gt; 2  Hzosteropis rand_forest  0.90970695970696 0.592991655046589</span></span>
-<span><span class="co">#&gt; 3 Microfilaria rand_forest 0.974757281553398 0.437744019107847</span></span>
-<span><span class="co">#&gt; 4         Plas rand_forest 0.829468599033816 0.483042726671642</span></span>
-<span><span class="co">#&gt;         sensitivity               ppv       specificity         prevalence</span></span>
-<span><span class="co">#&gt; 1 0.731958762886598             0.625 0.922077922077922  0.115812917594655</span></span>
-<span><span class="co">#&gt; 2 0.858974358974359 0.742857142857143 0.881578947368421  0.265033407572383</span></span>
-<span><span class="co">#&gt; 3 0.728155339805825                 1                 1 0.0979955456570156</span></span>
-<span><span class="co">#&gt; 4 0.811111111111111 0.739130434782609 0.924050632911392  0.195991091314031</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
+<span><span class="co">#&gt;   response     model_name roc_AUC   mcc sensitivity   ppv specificity prevalence</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.903 0.600       0.802 0.929       0.844     0.265 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.901 0.430       0.740 1           1         0.116 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.863 0.525       0.739 0.956       0.88      0.196 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.942 0.448       0.760 1           1         0.098<span style="text-decoration: underline;">0</span></span></span></code></pre></div>
 <p>Look at those PPV values now - much better. Our false positive rate
 is down to ~ &lt; 15% overall. Now that we are happy with the
 performance of the model, now we can interrogate further.</p>
@@ -359,38 +347,29 @@ regression models (see Cook et al., 2021).</p>
 interpretable machine learning tools, and uses these estimates to
 construct marginalized co-occurrence networks. First, lets do the
 bootstrapping and calculate variable importance.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu">parallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/parallel/makeCluster.html" class="external-link">makeCluster</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span> <span class="co">#can increase the number of cores as needed.</span></span>
-<span><span class="fu">plan</span><span class="op">(</span><span class="va">cluster</span>, workers<span class="op">=</span><span class="va">cl</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">cluster</span>, workers<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#do bootstraps.</span></span>
+<span><span class="va">bs_malaria</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrBootstrap.html">mrBootstrap</a></span><span class="op">(</span><span class="va">yhats_rf</span>,</span>
+<span>                          num_bootstrap <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>                          downsample <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |=                                                                     |   1%  |                                                                              |=                                                                     |   2%  |                                                                              |==                                                                    |   2%  |                                                                              |==                                                                    |   3%  |                                                                              |==                                                                    |   4%  |                                                                              |===                                                                   |   4%  |                                                                              |===                                                                   |   5%  |                                                                              |====                                                                  |   5%  |                                                                              |====                                                                  |   6%  |                                                                              |=====                                                                 |   6%  |                                                                              |=====                                                                 |   7%  |                                                                              |=====                                                                 |   8%  |                                                                              |======                                                                |   8%  |                                                                              |======                                                                |   9%  |                                                                              |=======                                                               |  10%  |                                                                              |========                                                              |  11%  |                                                                              |========                                                              |  12%  |                                                                              |=========                                                             |  12%  |                                                                              |=========                                                             |  13%  |                                                                              |=========                                                             |  14%  |                                                                              |==========                                                            |  14%  |                                                                              |==========                                                            |  15%  |                                                                              |===========                                                           |  15%  |                                                                              |===========                                                           |  16%  |                                                                              |============                                                          |  16%  |                                                                              |============                                                          |  17%  |                                                                              |============                                                          |  18%  |                                                                              |=============                                                         |  18%  |                                                                              |=============                                                         |  19%  |                                                                              |==============                                                        |  20%  |                                                                              |===============                                                       |  21%  |                                                                              |===============                                                       |  22%  |                                                                              |================                                                      |  22%  |                                                                              |================                                                      |  23%  |                                                                              |================                                                      |  24%  |                                                                              |=================                                                     |  24%  |                                                                              |=================                                                     |  25%  |                                                                              |==================                                                    |  25%  |                                                                              |==================                                                    |  26%  |                                                                              |===================                                                   |  26%  |                                                                              |===================                                                   |  27%  |                                                                              |===================                                                   |  28%  |                                                                              |====================                                                  |  28%  |                                                                              |====================                                                  |  29%  |                                                                              |=====================                                                 |  30%  |                                                                              |======================                                                |  31%  |                                                                              |======================                                                |  32%  |                                                                              |=======================                                               |  32%  |                                                                              |=======================                                               |  33%  |                                                                              |=======================                                               |  34%  |                                                                              |========================                                              |  34%  |                                                                              |========================                                              |  35%  |                                                                              |=========================                                             |  35%  |                                                                              |=========================                                             |  36%  |                                                                              |==========================                                            |  36%  |                                                                              |==========================                                            |  37%  |                                                                              |==========================                                            |  38%  |                                                                              |===========================                                           |  38%  |                                                                              |===========================                                           |  39%  |                                                                              |============================                                          |  40%  |                                                                              |=============================                                         |  41%  |                                                                              |=============================                                         |  42%  |                                                                              |==============================                                        |  42%  |                                                                              |==============================                                        |  43%  |                                                                              |==============================                                        |  44%  |                                                                              |===============================                                       |  44%  |                                                                              |===============================                                       |  45%  |                                                                              |================================                                      |  45%  |                                                                              |================================                                      |  46%  |                                                                              |=================================                                     |  46%  |                                                                              |=================================                                     |  47%  |                                                                              |=================================                                     |  48%  |                                                                              |==================================                                    |  48%  |                                                                              |==================================                                    |  49%  |                                                                              |===================================                                   |  50%  |                                                                              |====================================                                  |  51%  |                                                                              |====================================                                  |  52%  |                                                                              |=====================================                                 |  52%  |                                                                              |=====================================                                 |  53%  |                                                                              |=====================================                                 |  54%  |                                                                              |======================================                                |  54%  |                                                                              |======================================                                |  55%  |                                                                              |=======================================                               |  55%  |                                                                              |=======================================                               |  56%  |                                                                              |========================================                              |  56%  |                                                                              |========================================                              |  57%  |                                                                              |========================================                              |  58%  |                                                                              |=========================================                             |  58%  |                                                                              |=========================================                             |  59%  |                                                                              |==========================================                            |  60%  |                                                                              |===========================================                           |  61%  |                                                                              |===========================================                           |  62%  |                                                                              |============================================                          |  62%  |                                                                              |============================================                          |  63%  |                                                                              |============================================                          |  64%  |                                                                              |=============================================                         |  64%  |                                                                              |=============================================                         |  65%  |                                                                              |==============================================                        |  65%  |                                                                              |==============================================                        |  66%  |                                                                              |===============================================                       |  66%  |                                                                              |===============================================                       |  67%  |                                                                              |===============================================                       |  68%  |                                                                              |================================================                      |  68%  |                                                                              |================================================                      |  69%  |                                                                              |=================================================                     |  70%  |                                                                              |==================================================                    |  71%  |                                                                              |==================================================                    |  72%  |                                                                              |===================================================                   |  72%  |                                                                              |===================================================                   |  73%  |                                                                              |===================================================                   |  74%  |                                                                              |====================================================                  |  74%  |                                                                              |====================================================                  |  75%  |                                                                              |=====================================================                 |  75%  |                                                                              |=====================================================                 |  76%  |                                                                              |======================================================                |  76%  |                                                                              |======================================================                |  77%  |                                                                              |======================================================                |  78%  |                                                                              |=======================================================               |  78%  |                                                                              |=======================================================               |  79%  |                                                                              |========================================================              |  80%  |                                                                              |=========================================================             |  81%  |                                                                              |=========================================================             |  82%  |                                                                              |==========================================================            |  82%  |                                                                              |==========================================================            |  83%  |                                                                              |==========================================================            |  84%  |                                                                              |===========================================================           |  84%  |                                                                              |===========================================================           |  85%  |                                                                              |============================================================          |  85%  |                                                                              |============================================================          |  86%  |                                                                              |=============================================================         |  86%  |                                                                              |=============================================================         |  87%  |                                                                              |=============================================================         |  88%  |                                                                              |==============================================================        |  88%  |                                                                              |==============================================================        |  89%  |                                                                              |===============================================================       |  90%  |                                                                              |================================================================      |  91%  |                                                                              |================================================================      |  92%  |                                                                              |=================================================================     |  92%  |                                                                              |=================================================================     |  93%  |                                                                              |=================================================================     |  94%  |                                                                              |==================================================================    |  94%  |                                                                              |==================================================================    |  95%  |                                                                              |===================================================================   |  95%  |                                                                              |===================================================================   |  96%  |                                                                              |====================================================================  |  96%  |                                                                              |====================================================================  |  97%  |                                                                              |====================================================================  |  98%  |                                                                              |===================================================================== |  98%  |                                                                              |===================================================================== |  99%  |                                                                              |======================================================================| 100%</span></span>
 <span></span>
-<span><span class="co">#do bootstraps.</span></span>
-<span><span class="va">bs_malaria</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrBootstrap.html">mrBootstrap</a></span><span class="op">(</span>yhats<span class="op">=</span><span class="va">yhats_rf</span>,</span>
-<span>                          Y<span class="op">=</span><span class="va">Y</span>, </span>
-<span>                          num_bootstrap <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>                          downsample <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                          mode<span class="op">=</span><span class="st">'classification'</span><span class="op">)</span> </span>
-<span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |==================                                                    |  25%  |                                                                              |===================================                                   |  50%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================================| 100%</span></span>
 <span><span class="co">#make sure downsample=TRUE as this did improve performance</span></span>
 <span><span class="co">#just 10 bootstraps to keep this short. We suggest using more for a final analysis (100 is reasonable but depends on how big the data is)</span></span>
 <span></span>
 <span><span class="co">#up to here -not working properly</span></span>
-<span><span class="va">bs_impVI</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrVip.html">mrvip</a></span><span class="op">(</span></span>
+<span><span class="va">bs_impVI</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrVip.html">mrVip</a></span><span class="op">(</span></span>
+<span>  mrIMLobj <span class="op">=</span> <span class="va">yhats_rf</span>,</span>
 <span>  mrBootstrap_obj <span class="op">=</span> <span class="va">bs_malaria</span>,</span>
-<span>  yhats <span class="op">=</span> <span class="va">yhats_rf_downSamp</span>,</span>
-<span>  X <span class="op">=</span> <span class="va">X</span>,</span>
-<span>  X1 <span class="op">=</span> <span class="va">X1</span>,</span>
-<span>  Y <span class="op">=</span> <span class="va">Y</span>,</span>
-<span>  mode <span class="op">=</span> <span class="st">'classification'</span>,</span>
-<span>  threshold <span class="op">=</span> <span class="fl">0.0</span>,</span>
-<span>  global_top_var <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  local_top_var <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  taxa <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  ModelPerf <span class="op">=</span> <span class="va">ModelPerf_rf_downSamp</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "here"</span></span>
+<span>  model_perf <span class="op">=</span> <span class="va">ModelPerf_rf</span>,</span>
+<span>  taxa <span class="op">=</span> <span class="st">"Plas"</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">bs_impVI</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span>  <span class="co">#importance plot. There are plenty of other insights possible</span></span></code></pre></div>
-<p><img src="Graphical%20network%20model%20(GNM)_files/figure-html/unnamed-chunk-7-1.png" width="768" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<p><img src="Graphical%20network%20model%20(GNM)_files/figure-html/unnamed-chunk-8-1.png" width="768" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#the 'global_top_var' provides a limit to how many predictors are included in the community-wide plot. 'local_top_var provides a limit to the number of individual taxa plots. The threshold excludes plotting individual importance plots for taxa not well predicted by the model.</span></span></code></pre></div>
 <p>You can see that host abundance is the most important predictor of
 this parasite community (followed by <em>H.zosteropsis</em>) . However,
@@ -405,15 +384,17 @@ sc..) is less important.</p>
 <p>To look at the the relationship between each variable and community
 structure, MrIML 2.0 has a convenient wrapper to plot bootsrapped
 partial dependencies for a taxa of interest.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrPD_bootstrap.html">mrPD_bootstrap</a></span><span class="op">(</span>mrBootstrap_obj<span class="op">=</span><span class="va">bs_malaria</span>,</span>
-<span>                      vi_obj<span class="op">=</span><span class="va">bs_impVI</span>,</span>
-<span>                      <span class="va">X</span>,</span>
-<span>                      <span class="va">Y</span>,</span>
-<span>                      target<span class="op">=</span><span class="st">'Plas'</span>,</span>
-<span>                      global_top_var<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Graphical%20network%20model%20(GNM)_files/figure-html/unnamed-chunk-8-1.png" width="768" style="display: block; margin: auto;">
-These plots show that, for example, the presence of
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrPdPlotBootstrap.html">mrPdPlotBootstrap</a></span><span class="op">(</span></span>
+<span>  <span class="va">yhats_rf</span>,</span>
+<span>  mrBootstrap_obj<span class="op">=</span><span class="va">bs_malaria</span>,</span>
+<span>  vi_obj<span class="op">=</span><span class="va">bs_impVI</span>,</span>
+<span>  target<span class="op">=</span><span class="st">'Plas'</span>,</span>
+<span>  global_top_var<span class="op">=</span><span class="fl">5</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">pds</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<p><img src="Graphical%20network%20model%20(GNM)_files/figure-html/unnamed-chunk-9-1.png" width="768" style="display: block; margin: auto;"></p>
+<p>These plots show that, for example, the presence of
 <em>Microfilaria</em> greatly increass the probability of observing
 <em>Plasmodium</em> (from ~0.32 to 0.58 while holding all other
 variables at their mean value). Note that these are marginal
@@ -423,19 +404,17 @@ descreases non-linearly (a threshold of around ~0). The other parasites
 have less effect.</p>
 <p>If we want to explore the effect of host abundance overall we can use
 the ‘mr_Covar’ function.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">covar</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mr_Covar.html">mr_Covar</a></span><span class="op">(</span>yhats<span class="op">=</span><span class="va">yhats_rf_downSamp</span>,</span>
-<span>                  X<span class="op">=</span><span class="va">X</span>,</span>
-<span>                  X1<span class="op">=</span><span class="va">X1</span>,</span>
-<span>                  Y<span class="op">=</span><span class="va">Y</span>,</span>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">covar</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrCovar.html">mrCovar</a></span><span class="op">(</span><span class="va">yhats_rf</span>,</span>
 <span>                  var<span class="op">=</span><span class="st">'scale.prop.zos'</span>,</span>
-<span>                  sdthresh <span class="op">=</span><span class="fl">0.01</span><span class="op">)</span> </span></code></pre></div>
-<p><img src="Graphical%20network%20model%20(GNM)_files/figure-html/unnamed-chunk-9-1.png" width="768" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#sdthrsh just plots taxa responding the most.</span></span></code></pre></div>
-<p>Note that this isn’t bootstrapped now - each line represents a taxon
-in this case. The second plot shows the community-wide change in
-occurrence probabilities across host abundance. Note the the occurrence
+<span>                  sdthresh <span class="op">=</span><span class="fl">0.01</span><span class="op">)</span> </span>
+<span><span class="va">covar</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">/</span></span>
+<span>  <span class="va">covar</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">/</span></span>
+<span>  <span class="va">covar</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<p><img src="Graphical%20network%20model%20(GNM)_files/figure-html/unnamed-chunk-10-1.png" width="768" style="display: block; margin: auto;">
+Note that this isn’t bootstrapped now - each line represents a taxon in
+this case. The second plot shows the community-wide change in occurrence
+probabilities across host abundance. Note the the occurrence
 probabilities of all taxa drop an intermediate levels of host abundance
 (0.75-1.25).</p>
 </div>
@@ -450,65 +429,58 @@ prediction. Red are positive associations (the predicted occurrence of
 the taxa increases with the presence of the other) and blue are negative
 (the predicted occurrence of the taxa decreases with the presence of the
 other).</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">assoc_net</span><span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrCoOccurNet_bootstrap.html">mrCoOccurNet_bootstrap</a></span> <span class="op">(</span>mrPD_obj<span class="op">=</span><span class="va">pds</span>,</span>
-<span>                                    Y<span class="op">=</span><span class="va">Y</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">assoc_net</span><span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrCoOccurNet.html">mrCoOccurNet</a></span><span class="op">(</span><span class="va">bs_malaria</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">assoc_net_filtered</span> <span class="op">&lt;-</span>  <span class="va">assoc_net</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">mean_strength</span> <span class="op">&gt;</span> <span class="fl">0.1</span><span class="op">)</span></span>
+<span><span class="va">assoc_net_filtered</span> <span class="op">&lt;-</span>  <span class="va">assoc_net</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">mean_strength</span> <span class="op">&gt;</span> <span class="fl">0.05</span><span class="op">)</span></span>
 <span><span class="co">#based on our simulations the following rule of thumb for associations. Any association  &lt; 0.05  for mean strength is included.</span></span>
 <span></span>
 <span><span class="co">#convert to igraph</span></span>
-<span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu">graph_from_data_frame</span><span class="op">(</span><span class="va">assoc_net_filtered</span>,</span>
+<span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r.igraph.org/reference/graph_from_data_frame.html" class="external-link">graph_from_data_frame</a></span><span class="op">(</span><span class="va">assoc_net_filtered</span>,</span>
 <span>                           directed<span class="op">=</span><span class="cn">TRUE</span>,</span>
 <span>                           vertices<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span><span class="op">)</span> <span class="co">#matching Y data</span></span>
 <span></span>
-<span><span class="fu">E</span><span class="op">(</span><span class="va">g</span><span class="op">)</span><span class="op">$</span><span class="va">Value</span> <span class="op">&lt;-</span> <span class="va">assoc_net_filtered</span><span class="op">$</span><span class="va">mean_strength</span></span>
+<span><span class="fu"><a href="https://r.igraph.org/reference/E.html" class="external-link">E</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span><span class="op">$</span><span class="va">Value</span> <span class="op">&lt;-</span> <span class="va">assoc_net_filtered</span><span class="op">$</span><span class="va">mean_strength</span></span>
 <span></span>
-<span><span class="fu">E</span><span class="op">(</span><span class="va">g</span><span class="op">)</span><span class="op">$</span><span class="va">Color</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">assoc_net_filtered</span><span class="op">$</span><span class="va">direction</span> <span class="op">==</span> <span class="st">"negative"</span>, <span class="st">"blue"</span>, <span class="st">"red"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://r.igraph.org/reference/E.html" class="external-link">E</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span><span class="op">$</span><span class="va">Color</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">assoc_net_filtered</span><span class="op">$</span><span class="va">direction</span> <span class="op">==</span> <span class="st">"negative"</span>, <span class="st">"blue"</span>, <span class="st">"red"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Convert the igraph object to a ggplot object with NMDS layout</span></span>
-<span><span class="va">gg</span> <span class="op">&lt;-</span> <span class="fu">ggnetwork</span><span class="op">(</span><span class="va">g</span><span class="op">)</span></span>
+<span><span class="va">gg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ggnetwork/man/ggnetwork.html" class="external-link">ggnetwork</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Plot the graph</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">gg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span>, xend <span class="op">=</span> <span class="va">xend</span>, yend <span class="op">=</span> <span class="va">yend</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_edges</span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="va">Color</span>, linewidth <span class="op">=</span> <span class="op">(</span><span class="va">Value</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/ggnetwork/man/geom_edges.html" class="external-link">geom_edges</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="va">Color</span>, linewidth <span class="op">=</span> <span class="op">(</span><span class="va">Value</span><span class="op">)</span><span class="op">)</span>, </span>
 <span>             curvature <span class="op">=</span> <span class="fl">0.2</span>,</span>
 <span>             arrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/arrow.html" class="external-link">arrow</a></span><span class="op">(</span>length <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html" class="external-link">unit</a></span><span class="op">(</span><span class="fl">5</span>, <span class="st">"pt"</span><span class="op">)</span>,</span>
 <span>                           type <span class="op">=</span> <span class="st">"closed"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu">geom_nodes</span><span class="op">(</span>color <span class="op">=</span> <span class="st">"gray"</span>, size <span class="op">=</span> <span class="fu">degree</span><span class="op">(</span><span class="va">g</span>, mode <span class="op">=</span> <span class="st">"out"</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/ggnetwork/man/geom_nodes.html" class="external-link">geom_nodes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"gray"</span>, size <span class="op">=</span> <span class="fu"><a href="https://r.igraph.org/reference/degree.html" class="external-link">degree</a></span><span class="op">(</span><span class="va">g</span>, mode <span class="op">=</span> <span class="st">"out"</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_identity.html" class="external-link">scale_color_identity</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_void</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span>  <span class="op">+</span></span>
-<span>  <span class="fu">geom_nodelabel_repel</span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="va">name</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/ggnetwork/man/geom_nodetext_repel.html" class="external-link">geom_nodelabel_repel</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="va">name</span><span class="op">)</span>,</span>
 <span>                       box.padding <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html" class="external-link">unit</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="st">"lines"</span><span class="op">)</span>,</span>
 <span>                       data <span class="op">=</span> <span class="va">gg</span>,</span>
 <span>                       size<span class="op">=</span><span class="fl">2</span>,</span>
 <span>                       segment.colour <span class="op">=</span> <span class="st">"black"</span>,</span>
 <span>                       colour <span class="op">=</span> <span class="st">"white"</span>, fill <span class="op">=</span> <span class="st">"grey36"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Graphical%20network%20model%20(GNM)_files/figure-html/unnamed-chunk-10-1.png" width="768" style="display: block; margin: auto;">
+<p><img src="Graphical%20network%20model%20(GNM)_files/figure-html/unnamed-chunk-11-1.png" width="768" style="display: block; margin: auto;">
 ## 1 way, 2 way and 3 way interactions</p>
 <p>Finally, we can quantify the importance of interactions overall as
 well as one and two-way interaction importance using the same bootstrap
 approach.See <a href="https://github.com/mayer79/hstats" class="external-link uri">https://github.com/mayer79/hstats</a> for more details about
 the method.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">int_</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrInteractions.html">mrInteractions</a></span><span class="op">(</span>yhats<span class="op">=</span><span class="va">yhats_rf</span>,</span>
-<span>                       <span class="va">X</span>,</span>
-<span>                       <span class="va">Y</span>,</span>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">int_</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrInteractions.html">mrInteractions</a></span><span class="op">(</span><span class="va">yhats_rf</span>,</span>
 <span>                       num_bootstrap<span class="op">=</span><span class="fl">10</span>,</span>
 <span>                       feature <span class="op">=</span> <span class="st">'Plas'</span>,</span>
-<span>                       top.int<span class="op">=</span><span class="fl">10</span><span class="op">)</span></span>
+<span>                       top_int<span class="op">=</span><span class="fl">10</span><span class="op">)</span></span>
 <span><span class="co">#10 bootstraps to keep it short. top int focusses on the 10 top interactions (all of them in this case).</span></span>
 <span></span>
-<span><span class="va">int_</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="co"># overall plot</span></span></code></pre></div>
-<p><img src="Graphical%20network%20model%20(GNM)_files/figure-html/unnamed-chunk-11-1.png" width="768" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">int_</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="co"># individual plot for the response of choice </span></span></code></pre></div>
-<p><img src="Graphical%20network%20model%20(GNM)_files/figure-html/unnamed-chunk-11-2.png" width="768" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">int_</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span> <span class="co">#two way plot</span></span></code></pre></div>
-<p><img src="Graphical%20network%20model%20(GNM)_files/figure-html/unnamed-chunk-11-3.png" width="768" style="display: block; margin: auto;">
+<span><span class="va">int_</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">/</span><span class="co"># overall plot</span></span>
+<span><span class="va">int_</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">/</span><span class="co"># individual plot for the response of choice </span></span>
+<span><span class="va">int_</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span> <span class="co">#two way plot</span></span></code></pre></div>
+<p><img src="Graphical%20network%20model%20(GNM)_files/figure-html/unnamed-chunk-12-1.png" width="768" style="display: block; margin: auto;">
 The first plot shows that interactions account for on average 27%
 (bootstrap interval 23-34%) of variation in predictions for
 <em>H.killangoi</em> and less for the other taxa. The second plot shows
@@ -524,17 +496,15 @@ interactions between taxa are mediated by host abundance.</p>
 partial dependence plots. In case we choose the one of the more
 important 2-way interactions impacting the probability of detetcting
 <em>Plasmodium</em>.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrFlashlight.html">mrFlashlight</a></span><span class="op">(</span>yhats<span class="op">=</span><span class="va">yhats_rf_downSamp</span>,</span>
-<span>                   X<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span><span class="op">)</span>,</span>
-<span>                   Y<span class="op">=</span><span class="va">Y</span>,</span>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrFlashlight.html">mrFlashlight</a></span><span class="op">(</span><span class="va">yhats_rf_downSamp</span>,</span>
 <span>                   response <span class="op">=</span> <span class="st">"single"</span>,</span>
-<span>                   index<span class="op">=</span><span class="fl">4</span>,</span>
-<span>                   mode<span class="op">=</span><span class="st">'classification'</span><span class="op">)</span> <span class="co">#index=4 selects Plasmodium</span></span>
+<span>                   index<span class="op">=</span><span class="fl">4</span><span class="op">)</span> <span class="co">#index=4 selects Plasmodium</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">light_profile2d</span><span class="op">(</span><span class="va">fl</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"scale.prop.zos"</span>,<span class="st">"Hzosteropis"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/flashlight/man/light_profile2d.html" class="external-link">light_profile2d</a></span><span class="op">(</span><span class="va">fl</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"scale.prop.zos"</span>,<span class="st">"Hzosteropis"</span><span class="op">)</span>, <span class="va">data</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Graphical%20network%20model%20(GNM)_files/figure-html/unnamed-chunk-12-1.png" width="768" style="display: block; margin: auto;">
+<p><img src="Graphical%20network%20model%20(GNM)_files/figure-html/unnamed-chunk-13-1.png" width="768" style="display: block; margin: auto;">
 So if <em>H.zosteropsis</em> is not present and the relative abundance
 of <em>Zosterops</em> species is low the probability of observing
 <em>Plasmodium</em> is high (~&gt;0.7).</p>
@@ -556,7 +526,7 @@ et al(2021): <a href="https://doi.org/10.1111/1755-0998.13495" class="external-l
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
 </div>
 
     </footer>

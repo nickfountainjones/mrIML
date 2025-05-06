@@ -6,13 +6,12 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Swine biosecurity • mrIML</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
-<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
-<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
-<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
-<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
+<script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -22,7 +21,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="inverse" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="../index.html">mrIML</a>
 
@@ -35,23 +34,36 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="../index.html"><span class="fa fas fa-home fa-lg"></span></a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/mrIML.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/Common%20errors%20in%20mrIML.html">Common errors in mrIML</a></li>
-    <li><a class="dropdown-item" href="../articles/Swine%20biosecurity.html">Swine Biosecurity working example</a></li>
-    <li><a class="dropdown-item" href="../articles/Landscape%20genetics%20(classification).html">Classification working example</a></li>
-    <li><a class="dropdown-item" href="../articles/Regression.html">Regression working example</a></li>
-    <li><a class="dropdown-item" href="../articles/Landscape%20genetics.html">Landscape genetics</a></li>
+<li><a class="dropdown-item" href="../articles/Landscape%20genetics%20(classification).html">Landscape genetics (classification)</a></li>
+    <li><a class="dropdown-item" href="../articles/Regression.html">Regression</a></li>
     <li><a class="dropdown-item" href="../articles/Graphical%20network%20model%20(GNM).html">Graphical network model (GNM)</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Other</h6></li>
+    <li><a class="dropdown-item" href="../articles/Common%20errors%20in%20mrIML.html">Common errors in mrIML</a></li>
     <li><a class="dropdown-item" href="../articles/Microbiome%20data%20curation.html">Microbiome data curation</a></li>
+    <li><a class="dropdown-item" href="../articles/Swine%20biosecurity.html">Swine biosecurity</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
-<li class="nav-item"><a class="nav-link" href="https://github.com/nickfountainjones/mrIML"><span class="fa fa-github"></span></a></li>
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
+</form></li>
+<li class="nav-item"><a class="nav-link" href="https://github.com/nickfountainjones/mrIML/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
+  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
+<li><button class="dropdown-item" data-bs-theme-value="light"><span class="fa fa-sun"></span> Light</button></li>
+    <li><button class="dropdown-item" data-bs-theme-value="dark"><span class="fa fa-moon"></span> Dark</button></li>
+    <li><button class="dropdown-item" data-bs-theme-value="auto"><span class="fa fa-adjust"></span> Auto</button></li>
+  </ul>
+</li>
       </ul>
 </div>
 
@@ -67,7 +79,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Swine biosecurity</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/nfj1380/mrIML/blob/master/vignettes/Swine%20biosecurity.Rmd" class="external-link"><code>vignettes/Swine biosecurity.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/nickfountainjones/mrIML/blob/master/vignettes/articles/Swine%20biosecurity.Rmd"><code>vignettes/articles/Swine biosecurity.Rmd</code></a></small>
       <div class="d-none name"><code>Swine biosecurity.Rmd</code></div>
     </div>
 
@@ -97,7 +109,8 @@ simulated, and is not a reflection of any real farm, company or
 state.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">130</span><span class="op">)</span> <span class="co">#set the seed to ensure consistency</span></span>
-<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu">mrIML</span><span class="fu">::</span><span class="va">biosecurity_vignette_data</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"biosecurity_data.RData"</span><span class="op">)</span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">biosecurity_vignette_data</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="defining-your-model-engine">Defining your model engine<a class="anchor" aria-label="anchor" href="#defining-your-model-engine"></a>
@@ -106,18 +119,15 @@ state.</p>
 However there are more models available within MrIML and can be found <a href="https://www.tidymodels.org/find/" class="external-link">here</a>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#split predictor variables and outcome</span></span>
-<span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">44</span>, <span class="fl">45</span><span class="op">)</span><span class="op">)</span> <span class="co">#remove class, group and ID</span></span>
-<span><span class="va">model1</span> <span class="op">&lt;-</span> <span class="co">#model used to generate yhat</span></span>
-<span>  <span class="co">#specify that the model is a random forest</span></span>
-<span>  <span class="fu">rand_forest</span><span class="op">(</span>trees <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Class</span><span class="op">)</span></span>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">44</span>, <span class="fl">45</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">model1</span> <span class="op">&lt;-</span> <span class="fu">rand_forest</span><span class="op">(</span>trees <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>              mtry <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>,</span>
 <span>              min_n <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>,</span>
-<span>              mode <span class="op">=</span> <span class="st">"classification"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="co"># #select the engine/package that underlies the model</span></span>
-<span>  <span class="co">#must be set to classification for classification problems</span></span>
-<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span></span></code></pre></div>
+<span>              mode <span class="op">=</span> <span class="st">"classification"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="parallel-processing">Parallel processing<a class="anchor" aria-label="anchor" href="#parallel-processing"></a>
@@ -127,9 +137,7 @@ multi-core processing. In the example below, we set up a cluster using 4
 cores. If you don’t set up a cluster, the default settings will be used
 and the analysis will run sequentially.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># detectCores() #check how many cores you have available. We suggest keeping one core free for internet browsing etc.</span></span>
-<span><span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu">parallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/parallel/makeCluster.html" class="external-link">makeCluster</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
-<span><span class="fu">plan</span><span class="op">(</span><span class="va">cluster</span>, workers<span class="op">=</span><span class="va">cl</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="st">"multisession"</span>, workers <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="running-the-analysis">Running the analysis<a class="anchor" aria-label="anchor" href="#running-the-analysis"></a>
@@ -139,28 +147,21 @@ and the analysis will run sequentially.</p>
 <code class="sourceCode R"><span><span class="va">yhats</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLpredicts.html">mrIMLpredicts</a></span><span class="op">(</span>X<span class="op">=</span><span class="va">X</span>, <span class="co">#features/predictors </span></span>
 <span>                       Y<span class="op">=</span><span class="va">Y</span>, <span class="co">#response data</span></span>
 <span>                       Model<span class="op">=</span><span class="va">model1</span>, <span class="co">#specify your model</span></span>
-<span>                       balance_data<span class="op">=</span><span class="st">'no'</span>, <span class="co">#chose how to balance your data </span></span>
-<span>                       mode<span class="op">=</span><span class="st">'classification'</span>, <span class="co">#chose your mode (classification versus regression)</span></span>
-<span>                       seed <span class="op">=</span> <span class="fl">123</span>,<span class="co">#set seed</span></span>
 <span>                       racing<span class="op">=</span><span class="cn">T</span><span class="op">)</span> <span class="co">#turn off racing autotuning for now</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span></code></pre></div>
 <p>We can then assess our model performance using a number of
 performance metrics including area under the curve (AUC), sensitivity,
 specificity and Matthews correlation coefficient (MCC).</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ModelPerf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLperformance.html">mrIMLperformance</a></span><span class="op">(</span>yhats<span class="op">=</span><span class="va">yhats</span>,</span>
-<span>                              Model<span class="op">=</span><span class="va">model1</span>,</span>
-<span>                              Y<span class="op">=</span><span class="va">Y</span>,</span>
-<span>                              mode<span class="op">=</span><span class="st">'classification'</span><span class="op">)</span></span>
-<span></span>
+<code class="sourceCode R"><span><span class="va">ModelPerf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLperformance.html">mrIMLperformance</a></span><span class="op">(</span><span class="va">yhats</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ModelPerf</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="co">#predictive performance for individual responses </span></span>
-<span><span class="co">#&gt;   response  model_name           roc_AUC                mcc       sensitivity</span></span>
-<span><span class="co">#&gt; 1    Class rand_forest 0.576765188834154 0.0988646638511132 0.666666666666667</span></span>
-<span><span class="co">#&gt;                 ppv       specificity prevalence</span></span>
-<span><span class="co">#&gt; 1 0.431034482758621 0.459016393442623        0.5</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
+<span><span class="co">#&gt;   response model_name  roc_AUC    mcc sensitivity   ppv specificity prevalence</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Class    rand_forest   0.573 0.029<span style="text-decoration: underline;">2</span>       0.581 0.529       0.448        0.5</span></span>
 <span><span class="va">ModelPerf</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="co">#overall predictive performance. r2 for regression and MCC for classification</span></span>
-<span><span class="co">#&gt; [1] 0.09886466</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.02916536</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="benchmarking-global-importance">Benchmarking: global importance<a class="anchor" aria-label="anchor" href="#benchmarking-global-importance"></a>
@@ -170,18 +171,13 @@ between our outcome and biosecurity variables.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#calculate variable importance</span></span>
 <span><span class="co">#still got a bug here to do with the PCA</span></span>
-<span><span class="va">impVI</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrVip.html">mrvip</a></span><span class="op">(</span></span>
-<span>  yhats<span class="op">=</span><span class="va">yhats</span>,</span>
-<span>  mrBootstrap_obj <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  X <span class="op">=</span> <span class="va">X</span>,</span>
-<span>  X1 <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  Y <span class="op">=</span> <span class="va">Y</span>,</span>
-<span>  mode <span class="op">=</span> <span class="st">"classification"</span>,</span>
+<span><span class="va">impVI</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrVip.html">mrVip</a></span><span class="op">(</span></span>
+<span>  <span class="va">yhats</span>,</span>
 <span>  threshold <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>  global_top_var <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  local_top_var <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  taxa <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  ModelPerf <span class="op">=</span> <span class="va">ModelPerf</span></span>
+<span>  model_perf <span class="op">=</span> <span class="va">ModelPerf</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">impVI</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span> <span class="co">#importance</span></span></code></pre></div>
@@ -190,40 +186,30 @@ variable. Here we isolate the dependence of one variable and visualize
 how this dependence changes over different observed values.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#create a flashlight object</span></span>
-<span><span class="va">fl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrFlashlight.html">mrFlashlight</a></span><span class="op">(</span>yhats<span class="op">=</span><span class="va">yhats</span>, X<span class="op">=</span><span class="va">X</span>, Y<span class="op">=</span><span class="va">Y</span>, </span>
+<span><span class="va">fl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrFlashlight.html">mrFlashlight</a></span><span class="op">(</span><span class="va">yhats</span>,</span>
 <span>                   response<span class="op">=</span><span class="st">"single"</span>, </span>
-<span>                   index<span class="op">=</span><span class="fl">1</span>,</span>
-<span>                   mode<span class="op">=</span><span class="st">'classification'</span><span class="op">)</span> </span>
+<span>                   index<span class="op">=</span><span class="fl">1</span><span class="op">)</span> </span>
 <span><span class="co">#plot partial dependence profiles</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">light_profile</span><span class="op">(</span><span class="va">fl</span>, v <span class="op">=</span> <span class="st">"Premises_in_3_miles"</span><span class="op">)</span><span class="op">)</span> </span></code></pre></div>
-<p><img src="..%2F..%2F..%2F..%2F..%2F..%2Ftmp%2FRtmpaHPEC5%2Fvignettes%2Fman%2Ffigures%2Fpdp-1.png" width="768" style="display: block; margin: auto;">
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/flashlight/man/light_profile.html" class="external-link">light_profile</a></span><span class="op">(</span><span class="va">fl</span>, v <span class="op">=</span> <span class="st">"Premises_in_3_miles"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="../../../../../../../tmp/RtmpgXrmOh/articles/reference/figures/pdp-1.png" width="768" style="display: block; margin: auto;">
 ### Benchmarking: predicted risk</p>
 <p>The following function allows you to visualize and compare predicted
 risk among and within groups</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#apply the trained model to the entire data set to provide risk of predicted outbreak</span></span>
-<span><span class="va">fit_bio</span> <span class="op">&lt;-</span> <span class="fu">pull_workflow_fit</span><span class="op">(</span><span class="va">yhats</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">mod1_k</span><span class="op">)</span></span>
+<span><span class="va">fit_bio</span> <span class="op">&lt;-</span> <span class="fu">extract_workflow</span><span class="op">(</span><span class="va">yhats</span><span class="op">$</span><span class="va">Fits</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">last_mod_fit</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_bio</span>,</span>
-<span>        <span class="va">X</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">yhats</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">data</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>        drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span>,</span>
-<span>        type <span class="op">=</span> <span class="st">"prob"</span></span>
-<span>        <span class="op">)</span><span class="op">$</span><span class="va">`.pred_1`</span></span>
+<span><span class="va">pred_bio</span> <span class="op">&lt;-</span> <span class="va">fit_bio</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span></span>
+<span>    new_data <span class="op">=</span> <span class="va">yhats</span><span class="op">$</span><span class="va">Fits</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">data</span>,</span>
+<span>    type <span class="op">=</span> <span class="st">"prob"</span></span>
+<span>  <span class="op">)</span></span>
 <span></span>
-<span><span class="va">preds_pos</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_bio</span>, <span class="va">X</span>, <span class="st">"prob"</span><span class="op">)</span> <span class="co">#this doesnt work</span></span>
-<span><span class="va">data</span><span class="op">$</span><span class="va">Predicted</span> <span class="op">&lt;-</span> <span class="va">preds_pos</span><span class="op">$</span><span class="va">.pred_1</span></span>
-<span><span class="co">#process data ready for the function</span></span>
-<span><span class="va">data</span><span class="op">$</span><span class="va">Class</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">Class</span><span class="op">)</span></span>
-<span><span class="va">data</span><span class="op">&lt;-</span><span class="va">data</span><span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Class <span class="op">=</span> <span class="fu">revalue</span><span class="op">(</span><span class="va">Class</span>,</span>
-<span>                         <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span> <span class="op">=</span> <span class="st">"Positive"</span>, <span class="st">"0"</span> <span class="op">=</span> <span class="st">"Negative"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> </span>
-<span><span class="va">data</span><span class="op">$</span><span class="va">Class</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/relevel.html" class="external-link">relevel</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">Class</span>, <span class="st">"Positive"</span><span class="op">)</span></span>
-<span><span class="va">data1</span> <span class="op">&lt;-</span> <span class="va">data</span></span>
-<span><span class="co">#plot among group comparison of predicted risk</span></span>
-<span><span class="fu"><a href="../reference/mrBenchmark.html">mrBenchmark</a></span><span class="op">(</span>data <span class="op">=</span> <span class="st">"data1"</span>, Y <span class="op">=</span> <span class="st">"Class"</span>, pred <span class="op">=</span> <span class="st">"Predicted"</span>, group <span class="op">=</span> <span class="st">"Group"</span>, type <span class="op">=</span> <span class="st">"external"</span><span class="op">)</span> </span></code></pre></div>
+<span><span class="co">#...</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#plot within group comparison of predicted risk</span></span>
-<span><span class="fu"><a href="../reference/mrBenchmark.html">mrBenchmark</a></span><span class="op">(</span>data <span class="op">=</span> <span class="st">"data1"</span>,</span>
+<span><span class="fu">mrBenchmark</span><span class="op">(</span>data <span class="op">=</span> <span class="st">"data1"</span>,</span>
 <span>            Y <span class="op">=</span> <span class="st">"Class"</span>,</span>
 <span>            pred <span class="op">=</span> <span class="st">"Predicted"</span>,</span>
 <span>            group <span class="op">=</span> <span class="st">"Group"</span>,</span>
@@ -242,12 +228,12 @@ predicted PRRSV outbreak risk, while variables with a phi &lt; 0
 contribute to a decrease in predicted outbreak risk.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#Use this function to implement the local explainer </span></span>
-<span><span class="va">data</span><span class="op">&lt;-</span><span class="va">data</span><span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="va">data</span><span class="op">&lt;-</span><span class="va">data</span><span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Class <span class="op">=</span> <span class="fu">revalue</span><span class="op">(</span><span class="va">Class</span>,</span>
 <span>                <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span> <span class="op">=</span> <span class="st">"Positive"</span>, <span class="st">"0"</span> <span class="op">=</span> <span class="st">"Negative"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> </span>
 <span><span class="va">data</span><span class="op">$</span><span class="va">Class</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/relevel.html" class="external-link">relevel</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">Class</span>, <span class="st">"Positive"</span><span class="op">)</span></span>
 <span><span class="va">X1</span> <span class="op">&lt;-</span> <span class="va">X</span></span>
-<span><span class="fu"><a href="../reference/mrLocalExplainer.html">mrLocalExplainer</a></span><span class="op">(</span>X <span class="op">=</span> <span class="va">X1</span>,</span>
+<span><span class="fu">mrLocalExplainer</span><span class="op">(</span>X <span class="op">=</span> <span class="va">X1</span>,</span>
 <span>                 Model <span class="op">=</span> <span class="va">yhats</span>,</span>
 <span>                 Y <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Class</span><span class="op">)</span></span></code></pre></div>
 <p>Individual plots are produced in the list object
@@ -278,7 +264,7 @@ of Food and Agriculture.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
 </div>
 
     </footer>

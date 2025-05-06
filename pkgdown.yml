@@ -1,15 +1,15 @@
 pandoc: 3.1.11
-pkgdown: 2.1.1
+pkgdown: 2.1.2
 pkgdown_sha: ~
 articles:
-  Common errors in mrIML: Common errors in mrIML.html
-  Graphical network model (GNM): Graphical network model (GNM).html
-  Landscape genetics (classification): Landscape genetics (classification).html
-  Landscape genetics: Landscape genetics.html
-  Microbiome data curation: Microbiome data curation.html
-  Regression: Regression.html
-  Swine biosecurity: Swine biosecurity.html
-last_built: 2025-03-27T02:51Z
+  articles/Common errors in mrIML: Common errors in mrIML.html
+  articles/Graphical network model (GNM): Graphical network model (GNM).html
+  articles/Landscape genetics (classification): Landscape genetics (classification).html
+  articles/Microbiome data curation: Microbiome data curation.html
+  mrIML: mrIML.html
+  articles/Regression: Regression.html
+  articles/Swine biosecurity: Swine biosecurity.html
+last_built: 2025-05-06T02:55Z
 urls:
   reference: https://github.com/nickfountainjones/mrIML/reference
   article: https://github.com/nickfountainjones/mrIML/articles
