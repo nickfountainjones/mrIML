@@ -76,247 +76,80 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header">
-<img src="logo.png" class="logo" alt=""><h1 id="mriml-multivariate-multi-response-interpretable-machine-learning-">mrIML: Multivariate (multi-response) interpretable machine learning <a class="anchor" aria-label="anchor" href="#mriml-multivariate-multi-response-interpretable-machine-learning-"></a>
+<img src="logo.png" class="logo" alt=""><h1 id="mriml-multi-response-multivariate-interpretable-machine-learning-">mrIML: multi-response (Multivariate) interpretable machine learning <a class="anchor" aria-label="anchor" href="#mriml-multi-response-multivariate-interpretable-machine-learning-"></a>
 </h1>
 </div>
 <!-- badges: start -->
 
+<div class="section level2">
+<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+</h2>
 <p>This package aims to enable users to build and interpret multivariate machine learning models harnessing the tidyverse (tidy model syntax in particular). This package builds off ideas from Gradient Forests <a href="https://esajournals-onlinelibrary-wiley-com.prox.lib.ncsu.edu/doi/full/10.1890/11-0252.1" class="external-link">Ellis et al 2012</a>), ecological genomic approaches <a href="https://onlinelibrary.wiley.com/doi/abs/10.1111/ele.12376" class="external-link">Fitzpatrick and Keller, 2014</a> and multi-response stacking algorithms [Xing et al 2019].</p>
 <p>This package can be of use for any multi-response machine learning problem, but was designed to handle data common to community ecology (site by species data) and ecological genomics (individual or population by SNP loci).</p>
+</div>
 <div class="section level2">
-<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+<h2 id="how-to-install">How to Install<a class="anchor" aria-label="anchor" href="#how-to-install"></a>
 </h2>
-<p>Install the stable version of the package:</p>
+<p>You can install the development version of <code>mrIML</code> using <code>devtools</code>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#install.packages("devtools")</span></span>
-<span><span class="co">#devtools::install_github('nfj1380/mrIML')</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nickfountainjones/mrIML">mrIML</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">'nickfountainjones/mrIML'</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
+<h2 id="ursing-mriml">Ursing <code>mrIML</code>
+<a class="anchor" aria-label="anchor" href="#ursing-mriml"></a>
 </h2>
-<p><strong>mrIML</strong> is designed to be used with a single function call or to be used in an ad-hoc fashion via individual function calls. In the following section we give an overview of the simple use case. For more on using each function see the <a href="https://nfj1380.github.io/mrIML/reference/index.html" class="external-link">function documentation</a>. The core functions for both regression and classification are: <a href="https://nfj1380.github.io/mrIML/reference/mrIMLpredicts.html" class="external-link"><code>mrIMLpredicts</code></a>, <a href="https://nfj1380.github.io/mrIML/reference/mrIMLperformance.html" class="external-link"><code>mrIMLperformance</code></a>, and <a href="https://nfj1380.github.io/mrIML/reference/mrvip.html" class="external-link"><code>mrvip</code></a>, <a href="https://nfj1380.github.io/mrIML/reference/mrFlashlight.html" class="external-link"><code>mrFlashlight</code></a>, and<a href="https://nfj1380.github.io/mrIML/reference/mrProfileplots.html" class="external-link"><code>mrProfileplots</code></a>.</p>
-<p>We also allow users to get bootstrapped estimations of partial dependencies and variable importance using <a href="https://nfj1380.github.io/mrIML/reference/mrBootstrap.html" class="external-link"><code>mrBootstrap</code></a>.</p>
-<p>The first step to using the package is to load it as follows.</p>
-</div>
-<div class="section level2">
-<h2 id="model-component">Model component<a class="anchor" aria-label="anchor" href="#model-component"></a>
-</h2>
-<p>Now all the data is loaded and ready to go we can formulate the model using tidymodel syntax. In this case we have binary data (SNP presence/absence at each loci) but the data could also be counts or continuous (the set_model argument would be “regression” instead of “classification”). The user can specify any model from the ‘tidymodel’ universe as ‘model 1’ (see <a href="https://www.tidymodels.org/find/" class="external-link uri">https://www.tidymodels.org/find/</a> for details). However, we have done most of our testing on random forests (rf) and glms (generalized linear models). Here we will specify a random forest classification model as the model applied to each response.</p>
+<p>To get started, load <code>mrIML</code> and <code>tidymodels</code>:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">model_rf</span> <span class="op">&lt;-</span><span class="fu">rand_forest</span><span class="op">(</span>trees <span class="op">=</span> <span class="fl">100</span>,</span>
-<span>              mode <span class="op">=</span> <span class="st">"classification"</span>,</span>
-<span>              mtry <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>,</span>
-<span>              min_n <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> <span class="co">#100 trees are set for brevity. Aim to start with 1000</span></span>
-<span>             <span class="fu">set_engine</span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="mrimlpredicts">
-<a href="https://nfj1380.github.io/mrIML/reference/mrIMLpredicts.html" class="external-link"><code>mrIMLpredicts</code></a><a class="anchor" aria-label="anchor" href="#mrimlpredicts"></a>
-</h3>
-<p>This function represents the core functionality of the package and includes results reporting, plotting and optional saving. It requires a data frame of X t( the snp data for example) and Y represented by the covariates or features.</p>
-<p>Load example data (cite) data from <a href="https://github.com/nickfountainjones/mrIML">mrIML</a>.</p>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nickfountainjones/mrIML">mrIML</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; ── Attaching packages ────────────────────────────────────── tidymodels 1.3.0 ──</span></span>
+<span><span class="co">#&gt; ✔ broom        1.0.8     ✔ recipes      1.3.0</span></span>
+<span><span class="co">#&gt; ✔ dials        1.4.0     ✔ rsample      1.3.0</span></span>
+<span><span class="co">#&gt; ✔ dplyr        1.1.4     ✔ tibble       3.2.1</span></span>
+<span><span class="co">#&gt; ✔ ggplot2      3.5.2     ✔ tidyr        1.3.1</span></span>
+<span><span class="co">#&gt; ✔ infer        1.0.8     ✔ tune         1.3.0</span></span>
+<span><span class="co">#&gt; ✔ modeldata    1.4.0     ✔ workflows    1.2.0</span></span>
+<span><span class="co">#&gt; ✔ parsnip      1.3.1     ✔ workflowsets 1.1.0</span></span>
+<span><span class="co">#&gt; ✔ purrr        1.0.4     ✔ yardstick    1.3.2</span></span>
+<span><span class="co">#&gt; ── Conflicts ───────────────────────────────────────── tidymodels_conflicts() ──</span></span>
+<span><span class="co">#&gt; ✖ purrr::discard() masks scales::discard()</span></span>
+<span><span class="co">#&gt; ✖ dplyr::filter()  masks stats::filter()</span></span>
+<span><span class="co">#&gt; ✖ dplyr::lag()     masks stats::lag()</span></span>
+<span><span class="co">#&gt; ✖ recipes::step()  masks stats::step()</span></span></code></pre></div>
+<p>Many functions in <code>mrIML</code> benefit from parallel processing.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fData</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/filterRareCommon.html">filterRareCommon</a></span> <span class="op">(</span><span class="va">Responsedata</span>,</span>
-<span>                           lower<span class="op">=</span><span class="fl">0.4</span>,</span>
-<span>                           higher<span class="op">=</span><span class="fl">0.7</span><span class="op">)</span> </span>
-<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">fData</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">]</span></span></code></pre></div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="parallel-processing">Parallel processing<a class="anchor" aria-label="anchor" href="#parallel-processing"></a>
-</h2>
-<p>MrIML provides uses the flexible future apply functionality to set up multi-core processing. In the example below, we set up a cluster using 4 cores. If you don’t set up a cluster, the default settings will be used and the analysis will run sequentially.</p>
+<code class="sourceCode R"><span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="st">"multisession"</span>, workers <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<p>The core function of <code>mrIML</code> is <code><a href="reference/mrIMLpredicts.html">mrIMLpredicts()</a></code>, which is a wrapper around the tidymodels workflow that fits a provided model to each response variable in a multi-response data set.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># detectCores() #check how many cores you have available. We suggest keeping one core free for internet browsing etc.</span></span>
+<code class="sourceCode R"><span><span class="co"># Load example multi-response data</span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">MRFcov</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MRFcov/man/Bird.parasites.html" class="external-link">Bird.parasites</a></span></span>
+<span><span class="co"># Split into response and predictor data</span></span>
+<span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"scale.prop.zos"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">scale.prop.zos</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu">parallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/parallel/makeCluster.html" class="external-link">makeCluster</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
-<span>     <span class="fu">plan</span><span class="op">(</span><span class="va">cluster</span>,</span>
-<span>     workers<span class="op">=</span><span class="va">cl</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="va">fData</span> <span class="co">#For simplicity when comparing</span></span>
-<span><span class="co">#Define set the outcomes of interest</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">Features</span><span class="op">)</span> </span>
-<span><span class="co">#&gt; 'data.frame':    20 obs. of  19 variables:</span></span>
-<span><span class="co">#&gt;  $ Grassland       : num  0.07 0.0677 0.1845 0.0981 0.1578 ...</span></span>
-<span><span class="co">#&gt;  $ Shrub.Scrub     : num  0.557 0.767 0.524 0.786 0.842 ...</span></span>
-<span><span class="co">#&gt;  $ Forest          : num  0.01072 0.030588 0.008615 0.000662 0.000616 ...</span></span>
-<span><span class="co">#&gt;  $ HighlyDev       : num  0 0 0.00225 0 0 ...</span></span>
-<span><span class="co">#&gt;  $ Urban           : num  0 0 0.00159 0 0 ...</span></span>
-<span><span class="co">#&gt;  $ Suburban        : num  0.00357 0.13268 0.01325 0.00119 0 ...</span></span>
-<span><span class="co">#&gt;  $ Exurban         : num  0.00622 0.03019 0 0.01906 0 ...</span></span>
-<span><span class="co">#&gt;  $ Altered         : num  0.441 0.182 0.114 0.12 0 ...</span></span>
-<span><span class="co">#&gt;  $ Distance        : num  1.321 0.492 3.231 5.629 4.739 ...</span></span>
-<span><span class="co">#&gt;  $ Latitude        : num  33.8 33.8 33.8 33.8 33.8 ...</span></span>
-<span><span class="co">#&gt;  $ Longitude       : num  -118 -118 -118 -118 -118 ...</span></span>
-<span><span class="co">#&gt;  $ Age             : int  3 0 3 2 3 3 2 3 3 3 ...</span></span>
-<span><span class="co">#&gt;  $ Sex             : int  1 1 1 1 0 0 0 1 1 1 ...</span></span>
-<span><span class="co">#&gt;  $ Relatedness.PCO1: num  -0.1194 -0.0389 -0.1618 -0.1811 -0.1564 ...</span></span>
-<span><span class="co">#&gt;  $ Relatedness.PCO2: num  -0.1947 -0.0525 -0.321 -0.0827 0.1 ...</span></span>
-<span><span class="co">#&gt;  $ Relatedness.PCO3: num  -0.191 -0.0874 0.0541 -0.0627 -0.0111 ...</span></span>
-<span><span class="co">#&gt;  $ Relatedness.PCO4: num  0.1117 0.2422 0.0974 0.2129 0.2259 ...</span></span>
-<span><span class="co">#&gt;  $ Relatedness.PCO5: num  0.06405 0.0706 0.03514 -0.00084 0.0894 ...</span></span>
-<span><span class="co">#&gt;  $ Relatedness.PCO6: num  -0.0432 0.0683 -0.0805 0.2247 -0.055 ...</span></span>
-<span><span class="co">#Remove NAs from the feature/predictor data.</span></span>
-<span><span class="va">FeaturesnoNA</span><span class="op">&lt;-</span><span class="va">Features</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/stats/complete.cases.html" class="external-link">complete.cases</a></span><span class="op">(</span><span class="va">Features</span><span class="op">)</span>, <span class="op">]</span></span>
-<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="va">FeaturesnoNA</span> <span class="co">#For simplicity</span></span>
-<span><span class="co">#For more efficient testing for interactions (more variables more interacting pairs)</span></span>
-<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="va">FeaturesnoNA</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span><span class="op">]</span> <span class="co">#Three features only</span></span>
+<span><span class="co"># Define tidymodel</span></span>
+<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">rand_forest</span><span class="op">(</span></span>
+<span>  trees <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  mode <span class="op">=</span> <span class="st">"classification"</span>,</span>
+<span>  mtry <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  min_n <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span>
 <span></span>
-<span></span>
-<span><span class="va">yhats_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/mrIMLpredicts.html">mrIMLpredicts</a></span><span class="op">(</span>X<span class="op">=</span><span class="va">X</span>,Y<span class="op">=</span><span class="va">Y</span>, <span class="co">#specify which data to use</span></span>
-<span>                          Model<span class="op">=</span><span class="va">model_rf</span>, <span class="co">#what model</span></span>
-<span>                          balance_data<span class="op">=</span><span class="st">'no'</span>, <span class="co">#balance the data or not </span></span>
-<span>                          mode<span class="op">=</span><span class="st">'classification'</span>, <span class="co">#classification or regression</span></span>
-<span>                          k<span class="op">=</span><span class="fl">5</span>,</span>
-<span>                          tune_grid_size<span class="op">=</span><span class="fl">5</span>, <span class="co">#tuning parameters</span></span>
-<span>                          seed <span class="op">=</span> <span class="fl">123</span>,</span>
-<span>                          racing<span class="op">=</span><span class="cn">F</span><span class="op">)</span>  <span class="co">#Set seed</span></span>
-<span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |==                                                                    |   3%  |                                                                              |=====                                                                 |   7%  |                                                                              |=======                                                               |  10%  |                                                                              |==========                                                            |  14%  |                                                                              |============                                                          |  17%  |                                                                              |==============                                                        |  21%  |                                                                              |=================                                                     |  24%  |                                                                              |===================                                                   |  28%  |                                                                              |======================                                                |  31%  |                                                                              |========================                                              |  34%  |                                                                              |===========================                                           |  38%  |                                                                              |=============================                                         |  41%  |                                                                              |===============================                                       |  45%  |                                                                              |==================================                                    |  48%  |                                                                              |====================================                                  |  52%  |                                                                              |=======================================                               |  55%  |                                                                              |=========================================                             |  59%  |                                                                              |===========================================                           |  62%  |                                                                              |==============================================                        |  66%  |                                                                              |================================================                      |  69%  |                                                                              |===================================================                   |  72%  |                                                                              |=====================================================                 |  76%  |                                                                              |========================================================              |  79%  |                                                                              |==========================================================            |  83%  |                                                                              |============================================================          |  86%  |                                                                              |===============================================================       |  90%  |                                                                              |=================================================================     |  93%  |                                                                              |====================================================================  |  97%  |                                                                              |======================================================================| 100%</span></span>
-<span></span>
-<span><span class="va">ModelPerf</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/mrIMLperformance.html">mrIMLperformance</a></span><span class="op">(</span>yhats<span class="op">=</span><span class="va">yhats_rf</span>,</span>
-<span>                              Model<span class="op">=</span><span class="va">model_rf</span>,</span>
-<span>                              Y<span class="op">=</span><span class="va">Y</span>,</span>
-<span>                              mode<span class="op">=</span><span class="st">'classification'</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">ModelPerf</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="co">#Predictive performance for individual responses </span></span>
-<span><span class="co">#&gt;    response  model_name            roc_AUC                mcc       sensitivity</span></span>
-<span><span class="co">#&gt; 1   env_131 rand_forest  0.642857142857143  0.327326835353989 0.285714285714286</span></span>
-<span><span class="co">#&gt; 2   env_163 rand_forest  0.238095238095238 -0.327326835353989                 0</span></span>
-<span><span class="co">#&gt; 3   env_164 rand_forest  0.895833333333333  0.534522483824849               0.5</span></span>
-<span><span class="co">#&gt; 4   env_167 rand_forest  0.833333333333333               &lt;NA&gt;                 1</span></span>
-<span><span class="co">#&gt; 5   env_169 rand_forest  0.642857142857143  0.327326835353989 0.285714285714286</span></span>
-<span><span class="co">#&gt; 6   env_212 rand_forest  0.444444444444444  0.272165526975909                 1</span></span>
-<span><span class="co">#&gt; 7    env_23 rand_forest               0.48 -0.333333333333333                 0</span></span>
-<span><span class="co">#&gt; 8    env_24 rand_forest               0.28               &lt;NA&gt;                 1</span></span>
-<span><span class="co">#&gt; 9    env_41 rand_forest  0.208333333333333 -0.408248290463863 0.333333333333333</span></span>
-<span><span class="co">#&gt; 10   env_47 rand_forest               0.86  0.816496580927726                 1</span></span>
-<span><span class="co">#&gt; 11   env_59 rand_forest  0.642857142857143  0.327326835353989 0.285714285714286</span></span>
-<span><span class="co">#&gt; 12    env_8 rand_forest            0.78125               &lt;NA&gt;                 0</span></span>
-<span><span class="co">#&gt; 13   env_84 rand_forest  0.642857142857143  0.327326835353989 0.285714285714286</span></span>
-<span><span class="co">#&gt; 14   env_85 rand_forest  0.642857142857143  0.327326835353989 0.285714285714286</span></span>
-<span><span class="co">#&gt; 15   env_86 rand_forest             0.4375               &lt;NA&gt;                 1</span></span>
-<span><span class="co">#&gt; 16  pol_105 rand_forest  0.854166666666667  0.408248290463863 0.333333333333333</span></span>
-<span><span class="co">#&gt; 17  pol_108 rand_forest  0.761904761904762  0.327326835353989 0.285714285714286</span></span>
-<span><span class="co">#&gt; 18  pol_111 rand_forest  0.895833333333333  0.534522483824849               0.5</span></span>
-<span><span class="co">#&gt; 19  pol_117 rand_forest               0.78  0.654653670707977                 1</span></span>
-<span><span class="co">#&gt; 20  pol_132 rand_forest               0.86  0.816496580927726                 1</span></span>
-<span><span class="co">#&gt; 21  pol_159 rand_forest               0.28  0.333333333333333                 1</span></span>
-<span><span class="co">#&gt; 22  pol_258 rand_forest 0.0833333333333333 -0.356348322549899               0.5</span></span>
-<span><span class="co">#&gt; 23   pol_30 rand_forest               0.86  0.816496580927726                 1</span></span>
-<span><span class="co">#&gt; 24  pol_340 rand_forest 0.0952380952380952 -0.218217890235992 0.142857142857143</span></span>
-<span><span class="co">#&gt; 25  pol_353 rand_forest             0.4375               &lt;NA&gt;                 1</span></span>
-<span><span class="co">#&gt; 26  pol_366 rand_forest  0.642857142857143  0.327326835353989 0.285714285714286</span></span>
-<span><span class="co">#&gt; 27   pol_87 rand_forest               0.86  0.816496580927726                 1</span></span>
-<span><span class="co">#&gt; 28   pol_88 rand_forest               0.86  0.816496580927726                 1</span></span>
-<span><span class="co">#&gt; 29   pol_89 rand_forest               0.86  0.816496580927726                 1</span></span>
-<span><span class="co">#&gt;                  ppv       specificity        prevalence</span></span>
-<span><span class="co">#&gt; 1                  1                 1 0.421052631578947</span></span>
-<span><span class="co">#&gt; 2  0.714285714285714                 0 0.631578947368421</span></span>
-<span><span class="co">#&gt; 3                  1                 1 0.421052631578947</span></span>
-<span><span class="co">#&gt; 4                  0               0.4 0.421052631578947</span></span>
-<span><span class="co">#&gt; 5                  1                 1 0.421052631578947</span></span>
-<span><span class="co">#&gt; 6  0.444444444444444 0.166666666666667  0.68421052631579</span></span>
-<span><span class="co">#&gt; 7                0.8                 0 0.631578947368421</span></span>
-<span><span class="co">#&gt; 8                  0               0.5 0.421052631578947</span></span>
-<span><span class="co">#&gt; 9               0.25               0.4 0.473684210526316</span></span>
-<span><span class="co">#&gt; 10               0.8 0.833333333333333 0.473684210526316</span></span>
-<span><span class="co">#&gt; 11                 1                 1 0.421052631578947</span></span>
-<span><span class="co">#&gt; 12                 1               NaN 0.473684210526316</span></span>
-<span><span class="co">#&gt; 13                 1                 1 0.421052631578947</span></span>
-<span><span class="co">#&gt; 14                 1                 1 0.421052631578947</span></span>
-<span><span class="co">#&gt; 15                 0               0.4 0.421052631578947</span></span>
-<span><span class="co">#&gt; 16                 1                 1 0.473684210526316</span></span>
-<span><span class="co">#&gt; 17                 1                 1 0.421052631578947</span></span>
-<span><span class="co">#&gt; 18                 1                 1 0.421052631578947</span></span>
-<span><span class="co">#&gt; 19               0.6 0.714285714285714 0.473684210526316</span></span>
-<span><span class="co">#&gt; 20               0.8 0.833333333333333 0.473684210526316</span></span>
-<span><span class="co">#&gt; 21               0.2 0.555555555555556 0.473684210526316</span></span>
-<span><span class="co">#&gt; 22 0.166666666666667 0.285714285714286 0.473684210526316</span></span>
-<span><span class="co">#&gt; 23               0.8 0.833333333333333 0.473684210526316</span></span>
-<span><span class="co">#&gt; 24 0.666666666666667               0.5 0.421052631578947</span></span>
-<span><span class="co">#&gt; 25                 0               0.4 0.421052631578947</span></span>
-<span><span class="co">#&gt; 26                 1                 1 0.421052631578947</span></span>
-<span><span class="co">#&gt; 27               0.8 0.833333333333333 0.473684210526316</span></span>
-<span><span class="co">#&gt; 28               0.8 0.833333333333333 0.473684210526316</span></span>
-<span><span class="co">#&gt; 29               0.8 0.833333333333333 0.473684210526316</span></span>
-<span><span class="va">ModelPerf</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="co">#Overall predictive performance. r2 for regression and MCC for classification</span></span>
-<span><span class="co">#&gt; [1] 0.2856634</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="plotting">Plotting<a class="anchor" aria-label="anchor" href="#plotting"></a>
-</h2>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">bs_impVI</span> <span class="op">&lt;-</span> <span class="fu">mrvip</span><span class="op">(</span></span>
-<span>  mrBootstrap_obj <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  yhats <span class="op">=</span> <span class="va">yhats_rf</span>,</span>
+<span><span class="co"># Fit multi-response model</span></span>
+<span><span class="va">mrIML_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/mrIMLpredicts.html">mrIMLpredicts</a></span><span class="op">(</span></span>
 <span>  X <span class="op">=</span> <span class="va">X</span>,</span>
 <span>  Y <span class="op">=</span> <span class="va">Y</span>,</span>
-<span>  mode <span class="op">=</span> <span class="st">'classification'</span>,</span>
-<span>  threshold <span class="op">=</span> <span class="fl">0.8</span>,</span>
-<span>  global_top_var <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  local_top_var <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  taxa <span class="op">=</span> <span class="st">'pol_132'</span>,</span>
-<span>  ModelPerf <span class="op">=</span> <span class="va">ModelPerf</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "here"</span></span>
-<span></span>
-<span><span class="va">bs_impVI</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span> <span class="co">#importance</span></span></code></pre></div>
-<p><img src="reference/figures/unnamed-chunk-8-1.png"><!-- --></p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">bs_impVI</span><span class="op">[[</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span> <span class="co">#PCA</span></span></code></pre></div>
-<p><img src="reference/figures/unnamed-chunk-8-2.png"><!-- --> ## Effect of a feature on genetic change</p>
-<p>We also wrap some flashlight functionality to visualize the marginal (i.e. partial dependencies) or conditional (accumulated local effects) effect of a feature on genetic change. Partial dependencies take longer to calculate and are more sensitive to correlated features</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">flashlightObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/mrFlashlight.html">mrFlashlight</a></span><span class="op">(</span><span class="va">yhats_rf</span>,</span>
-<span>                              X<span class="op">=</span><span class="va">X</span>,</span>
-<span>                              Y<span class="op">=</span><span class="va">Y</span>,</span>
-<span>                              response <span class="op">=</span> <span class="st">"single"</span>,</span>
-<span>                              index<span class="op">=</span><span class="fl">1</span>,</span>
-<span>                              mode<span class="op">=</span><span class="st">'classification'</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">#plot prediction scatter for all responses. Gets busy with </span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">light_scatter</span><span class="op">(</span><span class="va">flashlightObj</span>,</span>
-<span>                   v <span class="op">=</span> <span class="st">"Forest"</span>,</span>
-<span>                   type <span class="op">=</span> <span class="st">"predicted"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/unnamed-chunk-9-1.png"><!-- --></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="co">#plots everything on one plot (partial dependency, ALE, scatter)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">light_effects</span><span class="op">(</span><span class="va">flashlightObj</span>,</span>
-<span>                   v <span class="op">=</span> <span class="st">"Grassland"</span><span class="op">)</span>,</span>
-<span>                   use <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/unnamed-chunk-9-2.png"><!-- --></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">profileData_ale</span> <span class="op">&lt;-</span> <span class="fu">light_profile</span><span class="op">(</span><span class="va">flashlightObj</span>,</span>
-<span>                                 v <span class="op">=</span> <span class="st">"Grassland"</span>,</span>
-<span>                                 type <span class="op">=</span> <span class="st">"ale"</span><span class="op">)</span> <span class="co">#accumulated local effects</span></span>
-<span></span>
-<span><span class="fu">mrProfileplot</span><span class="op">(</span><span class="va">profileData_ale</span>,</span>
-<span>              sdthresh <span class="op">=</span><span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/unnamed-chunk-9-3.png"><!-- --></p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co">#&gt;  Press [enter] to continue to the global summary plot</span></span></code></pre></div>
-<p><img src="reference/figures/unnamed-chunk-9-4.png"><!-- --></p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#the second plot is the cumulative turnover function</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="interacting-predictors-or-features">Interacting predictors or features<a class="anchor" aria-label="anchor" href="#interacting-predictors-or-features"></a>
-</h2>
-<p>Finally, we can assess how features interact overall to shape genetic change. Be warned this is memory intensive. Future updates to this package will enable users to visualize these interactions and explore them in more detail using 2D ALE plots for example.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">int_</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/mrInteractions.html">mrInteractions</a></span><span class="op">(</span>yhats<span class="op">=</span><span class="va">yhats_rf</span>,</span>
-<span>                       <span class="va">X</span>,</span>
-<span>                       <span class="va">Y</span>,</span>
-<span>                       num_bootstrap<span class="op">=</span><span class="fl">10</span>,</span>
-<span>                       feature <span class="op">=</span> <span class="st">'Plas'</span>, </span>
-<span>                       top.int<span class="op">=</span><span class="fl">10</span><span class="op">)</span></span>
-<span><span class="co">#10 bootstraps to keep it short. top int focusses on the 10 top interactions (all of them in this case).</span></span>
-<span></span>
-<span><span class="va">int_</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="co"># overall plot</span></span></code></pre></div>
-<p><img src="reference/figures/unnamed-chunk-10-1.png"><!-- --></p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#int_[[2]] # individual plot for the response of choice </span></span>
-<span><span class="co">#int_[[3]] # two way plot</span></span></code></pre></div>
+<span>  Model <span class="op">=</span> <span class="va">model</span>,</span>
+<span>  prop <span class="op">=</span> <span class="fl">0.7</span>,</span>
+<span>  k <span class="op">=</span> <span class="fl">5</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |==================                                                    |  25%  |                                                                              |===================================                                   |  50%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================================| 100%</span></span></code></pre></div>
+<p>The object <code>mrIML_model</code> can be investigated using: - <code><a href="reference/mrIMLperformance.html">mrIMLperformance()</a></code> to get performance metrics for each response variable, - <code>mrvip()</code> to get variable importance for each response variable, - <code><a href="reference/mrFlashlight.html">mrFlashlight()</a></code> to get partial dependence plots for each response variable, - <code><a href="reference/mrCovar.html">mrCovar()</a></code> to get covariate importance for each predictor variable, and - <code><a href="reference/mrInteractions.html">mrInteractions()</a></code> to get interaction importance for each predictor variable in the response models.</p>
+<p>Two multi-response models can be compared using <code>mrPerformance()</code>.</p>
+<p>Bootstrapping can be implemented using <code><a href="reference/mrBootstrap.html">mrBootstrap()</a></code>, which can then be used quantify uncertainty around partial dependence plots, <code><a href="reference/mrPdPlotBootstrap.html">mrPdPlotBootstrap()</a></code>, and variable importance, <code>mrvipBootstrap()</code>, as well as build co-occurrence networks using <code><a href="reference/mrCoOccurNet.html">mrCoOccurNet()</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="recent-mriml-publications">Recent mrIML publications<a class="anchor" aria-label="anchor" href="#recent-mriml-publications"></a>
@@ -363,6 +196,7 @@
 <ul class="list-unstyled">
 <li>
 <a href="https://discover.utas.edu.au/Nick.FountainJones" class="external-link">Nick Fountain-Jones</a> <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0001-9248-8493" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>Ryan Leadbetter <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-1942-3121" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 <li>
 <a href="https://machado-lab.github.io/" class="external-link">Gustavo Machado</a> <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0001-7552-6144" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 <li>Chris Kozakiewicz <br><small class="roles"> Author </small>   </li>
@@ -377,7 +211,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by <a href="https://discover.utas.edu.au/Nick.FountainJones" class="external-link">Nick Fountain-Jones</a>, <a href="https://machado-lab.github.io/" class="external-link">Gustavo Machado</a>, Chris Kozakiewicz, Nick Clark.</p>
+  <p>Developed by <a href="https://discover.utas.edu.au/Nick.FountainJones" class="external-link">Nick Fountain-Jones</a>, Ryan Leadbetter, <a href="https://machado-lab.github.io/" class="external-link">Gustavo Machado</a>, Chris Kozakiewicz, Nick Clark.</p>
 </div>
 
 <div class="pkgdown-footer-right">
