@@ -11,6 +11,9 @@ readSnpsPed(pedfile, mapfile)
 
 \item{mapfile}{A file location.}
 }
+\value{
+A tibble.
+}
 \description{
 Conversion to single column per locus from plink file via LEA functionality
 }
@@ -21,8 +24,8 @@ Currently if there is missing data (NAs) it either imputes them as the mode
 or leaves them. A histogram is also produced of the missing data.
 }
 \examples{
-\dontrun{
- snps <- readSnpsPed("bobcat.plink.ped", "bobcat.plink.map.map")
- X <- filterRareCommon(snps, lower = 0.4, higher = 0.7) 
-}
+\dontshow{if (FALSE) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+snps <- readSnpsPed("FILE_NAME.plink.ped", "FILE_NAME.plink.map.map")
+X <- filterRareCommon(snps, lower = 0.4, higher = 0.7) 
+\dontshow{\}) # examplesIf}
 }

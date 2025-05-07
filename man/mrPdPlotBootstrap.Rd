@@ -25,8 +25,9 @@ provided then it is created inside \code{mrPD_bootstrap} by running \code{\link[
 \item{global_top_var}{The number of top variables to consider (default: 2).}
 }
 \value{
-A list containing the partial dependence plots for each response
-variable and a combined plot???
+A list with two elements:
+*\verb{[[1]]} A data frame of the partial dependence grid for each response model, predictor variable, and bootstrap
+*\verb{[[2]]} A list of partial dependence plots for each predictor variable in the \code{target} response model.
 }
 \description{
 This function bootstraps model predictions and generates partial dependence

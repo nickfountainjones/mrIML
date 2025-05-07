@@ -17,6 +17,9 @@ analysis. In effect this filters out axes that don't explain variance.}
 \item{cl}{A parallel argument to be passed to \code{\link[vegan:dbrda]{vegan::capscale()}} if parallel
 compute is wanted.}
 }
+\value{
+A data frame.
+}
 \description{
 Calculates resistance components from a list of pairwise resistance surfaces
 }
@@ -26,7 +29,7 @@ matrix in the target folder. These data can be combined with non-pairwise
 matrix data.
 }
 \examples{
-\dontrun{
-  Y <- res. st_components(filename = 'Bobcat_cs_matrices', p_val = 0.01)
-}
+\dontshow{if (FALSE) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+Y <- resist_components(filename = 'FILE_PATH', p_val = 0.01)
+\dontshow{\}) # examplesIf}
 }

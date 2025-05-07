@@ -155,7 +155,7 @@ readSnpsPed <- function(pedfile, mapfile){
 #' @returns A data frame.
 #' 
 #' @examplesIf FALSE
-#' Y <- res. st_components(filename = 'FILE_PATH', p_val = 0.01)
+#' Y <- resist_components(filename = 'FILE_PATH', p_val = 0.01)
 #'
 #' @export 
 

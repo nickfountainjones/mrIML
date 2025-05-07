@@ -12,12 +12,46 @@ mrVipPCA(mrVip_obj)
 \value{
 A list of PCA results:
 \itemize{
-\item $PCA_plot
-\item $PC_outlires
-\item $eigenvalues
-\item $PC_scores
+\item \verb{$PCA_plot}: Side-by-side plots of the diferent response models on the first two PCs and a Scree plot.
+\item \verb{$PC_outlires}: A list the models flagged as outliers on at least one of the PCs.
+\item \verb{$eigenvalues}: The Eigenvalues.
+\item \verb{$PC_scores}: The PC scores of each response model
 }
 }
 \description{
 Principle Component Analysis of mrIML variable importance
+}
+\examples{
+library(tidymodels)
+
+# Without bootstrap
+data <- MRFcov::Bird.parasites
+Y <- data \%>\%
+  select(-scale.prop.zos) \%>\%
+  select(order(everything()))
+X <- data \%>\%
+  select(scale.prop.zos)
+
+model_rf <- rand_forest(
+  trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+  mode = "classification",
+  mtry = tune(),
+  min_n = tune()
+) \%>\%
+  set_engine("randomForest")
+
+mrIML_rf <- mrIMLpredicts(
+  X = X,
+  Y = Y,
+  X1 = Y,
+  Model = model_rf,
+  prop = 0.7,
+  k = 5
+)
+
+mrIML_rf_vip <- mrVip(mrIML_rf, taxa = "Plas")
+
+mrIML_rf_vip \%>\%
+ mrVipPCA()
+
 }

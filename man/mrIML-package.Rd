@@ -4,25 +4,26 @@
 \name{mrIML-package}
 \alias{mrIML}
 \alias{mrIML-package}
-\title{mrIML: Multi Response Interpretable Machine Learning}
+\title{mrIML: Multi-Response (Multivariate) Interpretable Machine Learning}
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-This package aims to enable users to build and interpret multivariate machine learning models harnessing the tidyverse (tidy model syntax in particular). This package builds off ideas from Gradient Forests (Ellis et al 2012), ecological genomic approaches (Fitzpatrick and Keller, 2014) and multi-response stacking algorithms (Xing et al 2019).
+Builds and interprets multi-response machine learning models using 'tidymodels' syntax. Users can supply a tidy model, and 'mrIML' automates the process of fitting multiple response models to multivariate data and applying interpretable machine learning techniques across them. For more details see Fountain-Jones et al.n (2021) \doi{https://doi.org/10.1111/1755-0998.13495} and Fountain-Jones et al. (2024) \doi{https://doi.org/10.22541/au.172676147.77148600/v1}.
 }
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/nfj1380/mrIML}
-  \item Report bugs at \url{https://github.com/nfj1380/mrIML/issues}
+  \item \url{https://github.com/nickfountainjones/mrIML}
+  \item Report bugs at \url{https://github.com/nickfountainjones/mrIML/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Nick Fountain-Jones \email{nfountainjones@gmail.com} (\href{https://orcid.org/0000-0001-9248-8493}{ORCID})
+\strong{Maintainer}: Nick Fountain-Jones \email{nfountainjones@gmail.com} (\href{https://orcid.org/0000-0001-9248-8493}{ORCID}) [copyright holder]
 
 Authors:
 \itemize{
+  \item Ryan Leadbetter \email{ryan.leadbetter@utas.edu.au} (\href{https://orcid.org/0000-0002-1942-3121}{ORCID})
   \item Gustavo Machado \email{gmachad@ncsu.edu} (\href{https://orcid.org/0000-0001-7552-6144}{ORCID})
   \item Chris Kozakiewicz
   \item Nick Clark
