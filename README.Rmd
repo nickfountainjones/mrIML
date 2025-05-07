@@ -80,6 +80,7 @@ mrIML_model <- mrIMLpredicts(
 ```
 
 The object `mrIML_model` can be investigated using:
+
 - `mrIMLperformance()` to get performance metrics for each response variable,
 - `mrvip()` to get variable importance for each response variable,
 - `mrFlashlight()` to get partial dependence plots for each response variable,

@@ -102,13 +102,17 @@ mrIML_model <- mrIMLpredicts(
 #>   |                                                                              |                                                                      |   0%  |                                                                              |==================                                                    |  25%  |                                                                              |===================================                                   |  50%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================================| 100%
 ```
 
-The object `mrIML_model` can be investigated using: -
-`mrIMLperformance()` to get performance metrics for each response
-variable, - `mrvip()` to get variable importance for each response
-variable, - `mrFlashlight()` to get partial dependence plots for each
-response variable, - `mrCovar()` to get covariate importance for each
-predictor variable, and - `mrInteractions()` to get interaction
-importance for each predictor variable in the response models.
+The object `mrIML_model` can be investigated using:
+
+- `mrIMLperformance()` to get performance metrics for each response
+  variable,
+- `mrvip()` to get variable importance for each response variable,
+- `mrFlashlight()` to get partial dependence plots for each response
+  variable,
+- `mrCovar()` to get covariate importance for each predictor variable,
+  and
+- `mrInteractions()` to get interaction importance for each predictor
+  variable in the response models.
 
 Two multi-response models can be compared using `mrPerformance()`.
 
