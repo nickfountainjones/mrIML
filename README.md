@@ -37,6 +37,9 @@ by SNP loci).
 You can install the development version of `mrIML` using `devtools`:
 
 ``` r
+install.packages("mrIML")
+
+# Install developement version
 devtools::install_github('nickfountainjones/mrIML')
 ```
 
