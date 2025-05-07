@@ -11,10 +11,11 @@
 #' @param higher is the upper threshold value  in which response varialkes are
 #' removed from the data.frame.
 #' 
-#' @examples
-#' \dontrun{ 
-#'   X <- filterRareCommon(Responsedata, lower = 0.4, higher = 0.7)
-#' }
+#' @returns A filtered tibble.
+#' 
+#' @examplesIf FALSE
+#' X <- filterRareCommon(Responsedata, lower = 0.4, higher = 0.7)
+#' 
 #' @export
 
 filterRareCommon <- function(X,
@@ -44,11 +45,12 @@ filterRareCommon <- function(X,
 #' @param pedfile A file location.
 #' @param mapfile A file location.
 #' 
-#' @examples
-#' \dontrun{
-#'  snps <- readSnpsPed("bobcat.plink.ped", "bobcat.plink.map.map")
-#'  X <- filterRareCommon(snps, lower = 0.4, higher = 0.7) 
-#' }
+#' @returns A tibble.
+#' 
+#' @examplesIf FALSE
+#' snps <- readSnpsPed("FILE_NAME.plink.ped", "FILE_NAME.plink.map.map")
+#' X <- filterRareCommon(snps, lower = 0.4, higher = 0.7) 
+#' 
 #' @export 
 readSnpsPed <- function(pedfile, mapfile){
   
@@ -131,7 +133,8 @@ readSnpsPed <- function(pedfile, mapfile){
     }
   }
   
-  data.frame(snpobj, rownames.force = TRUE)
+  data.frame(snpobj, rownames.force = TRUE) %>%
+    tibble::as_tibble()
   
 }
 
@@ -149,10 +152,11 @@ readSnpsPed <- function(pedfile, mapfile){
 #' @param cl A parallel argument to be passed to [vegan::capscale()] if parallel
 #' compute is wanted.
 #' 
-#' @examples
-#' \dontrun{
-#'   Y <- res. st_components(filename = 'Bobcat_cs_matrices', p_val = 0.01)
-#' }
+#' @returns A data frame.
+#' 
+#' @examplesIf FALSE
+#' Y <- res. st_components(filename = 'FILE_PATH', p_val = 0.01)
+#'
 #' @export 
 
 resist_components <- function (foldername = foldername,

@@ -13,7 +13,6 @@ Authors@R: c(
     person("Nick", "Clark", role = "aut")
   )
 Description: Builds and interprets multi-response machine learning models using tidy model syntax. Users can supply a tidy model, and mrIML automates the process of fitting multiple response models to multivariate data and applying interpretable machine learning techniques across them.
-
 Depends: R (>= 3.5.0)
 Imports:
     dplyr,

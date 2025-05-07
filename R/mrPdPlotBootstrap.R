@@ -11,8 +11,9 @@
 #' @param target The target variable for generating plots.
 #' @param global_top_var The number of top variables to consider (default: 2).
 #' 
-#' @return A list containing the partial dependence plots for each response
-#' variable and a combined plot???
+#' @return A list with two elements:
+#' *`[[1]]` A data frame of the partial dependence grid for each response model, predictor variable, and bootstrap
+#' *`[[2]]` A list of partial dependence plots for each predictor variable in the `target` response model.
 #'
 #' @examples
 #' library(tidymodels)
