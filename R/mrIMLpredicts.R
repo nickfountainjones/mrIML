@@ -290,7 +290,7 @@ mrIML_internal_fit_function <- function(i,
     yhatT <- stats::predict(mod1_k, new_data = data_test, type = "class") %>%
       dplyr::bind_cols(
         data_test %>%
-          dplyr::select(.data$class)
+          dplyr::select("class")
       )
     
     truth <- as.numeric(as.character(data$class))
