@@ -13,3 +13,4 @@
 ^README\.Rmd$
 ^data/archived-data$
 ^vignettes/articles$
+^cran-comments\.md$
