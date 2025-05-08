@@ -17,13 +17,12 @@ knitr::opts_chunk$set(
 )
 ```
 
-`mrIML` is a package for interpretable machine learning in R, specifically designed for multivariate (multi-response) data. It provides tools for building and interpreting multi-response models using the [`tidymodels`](https://www.tidymodels.org/start/) syntax; making it very useful for applications in community ecology and ecological genomics.
+`mrIML` is a package for interpretable machine learning in R, specifically designed for multivariate (or multi-response) data. It provides tools for building and interpreting multi-response models using the [`tidymodels`](https://www.tidymodels.org/start/) syntax; making it very useful for applications in community ecology and ecological genomics.
 
 ```{r setup, results = "hide", message = FALSE}
 library(mrIML)
 library(tidymodels)
 library(flashlight)
-library(future)
 library(ggplot2)
 library(patchwork)
 
@@ -49,7 +48,7 @@ X <- select(data, "scale.prop.zos")
 Many of the functions in the `mrIML` wrokflow that follows can be greatly sped up by using parallel processing. To do this, we just need to set up a cluster using the `future` package.
 
 ```{r setup-cluster, eval=FALSE}
-plan(multisession, workers = 2)
+future::plan(multisession, workers = 2)
 ```
 
 # Fitting a mrIML model
@@ -94,7 +93,7 @@ mrIML_lm <- mrIMLpredicts(
 )
 ```
 
-The resulting fitted `mrIML` model is a list object containing the original tidymodel, the data, and the fitted response models. The remainder of the functions in the `mrIML` package are aimed at interrogating, explaining, and comparing these fitted `mrIML` models.
+The resulting fitted `mrIML` model is a list object containing the original tidy model, the data, and the fitted response models. The remainder of the functions in the `mrIML` package are aimed at interrogating, explaining, and comparing these fitted `mrIML` models.
 
 # Model performance and comparison
 
@@ -110,7 +109,7 @@ perf_lm <- mrIML_lm %>%
 perf_rf$model_performance
 ```
 
-These performance metrics can be compared between different `mrIML` model using the `mrPerformancePlot()` function.
+These performance metrics can be compared between different `mrIML` model using `mrPerformancePlot()`.
 
 ```{r compare-mrIML}
 perf_comp <- mrPerformancePlot(perf_rf, perf_lm)
@@ -144,7 +143,7 @@ PD_scale.prop.zos_rf[[1]] /
   plot_layout(axis = "collect")
 ```
 
-Since PDs are model agnostic we can use them for any kind of predictive model. For example we can compare the random forest model results above directly with the linear model bellow. We could even compare a Neural Net if we had enough data to fit it!
+Since PDs are model agnostic, we can use them for any kind of predictive model. For example we can compare the RF model results above directly with the LM bellow. We could even compare a Neural Net if we had enough data to fit it!
 
 ```{r fig.height = 6}
 PD_scale.prop.zos_lm <- mrIML_lm %>%
@@ -156,7 +155,7 @@ PD_scale.prop.zos_lm[[1]] /
   plot_layout(axis = "collect")
 ```
 
-The variability in the response probability across a PD curve can be used to rank variable importance in each response model. `mrVip()` compares variable importance across the response models inside a `mrIML` model.
+The variability in the response probability across a PD curve can be used to rank variable importance in each response model. On this basis, `mrVip()` compares variable importance across the response models inside a `mrIML` model.
 
 ```{r}
 vip_rf <- mrIML_rf %>%
@@ -165,7 +164,7 @@ vip_rf <- mrIML_rf %>%
 vip_rf[[3]]
 ```
 
-If there are many response models and/or predictive covariates, the `threshold`, `global_top_var`, and `local_top_var` arguments can be used to filter the variable importance results that are plotted by `mrVip`. The `taxa` argument can also be used to plot a desirable response model that may not fit the filtering criteria. See `?mrVip()` for the specifics of these arguments.
+If there are many response models and/or covariates, the `threshold`, `global_top_var`, and `local_top_var` arguments can be used to filter the variable importance results that are plotted by `mrVip`. The `taxa` argument can also be used to plot a desired response model that may not fit the filtering criteria. See `?mrVip()` for the specifics of these arguments.
 
 # Bootstrapping for uncertainty
 
@@ -196,7 +195,7 @@ vip_boot_rf[[3]]
 
 # Checking for interactions
 
-Another helpful investigative tool is `mrInteraction()`. This function quickly identifies which response models have strong evidence of interactions between predictors, which predictors have the most interactive effects and which interactions are the strongest.
+Another helpful investigative tool is `mrInteraction()`. This function quickly identifies which response models have strong evidence of interactions between predictors, which predictors have the most interactive effects, and which interactions are the strongest.
 
 ```{r fig.height = 10}
 interactions_rf <- mrIML_rf %>%
