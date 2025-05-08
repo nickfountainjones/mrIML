@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# mrIML: multi-response (Multivariate) interpretable machine learning <img src="man/figures/logo.png" align="right" height="120"/></a>
+# `mrIML`: multi-Response (Multivariate) Interpretable Machine Learning <img src="man/figures/logo.png" align="right" height="120"/></a>
 
 <!-- badges: start -->
 
@@ -20,12 +20,9 @@ coverage](https://codecov.io/gh/nickfountainjones/mrIML/graph/badge.svg)](https:
 
 This package aims to enable users to build and interpret multivariate
 machine learning models harnessing the tidyverse (tidy model syntax in
-particular). This package builds off ideas from Gradient Forests [Ellis
-et al
-2012](https://esajournals-onlinelibrary-wiley-com.prox.lib.ncsu.edu/doi/full/10.1890/11-0252.1)),
-ecological genomic approaches [Fitzpatrick and Keller,
-2014](https://onlinelibrary.wiley.com/doi/abs/10.1111/ele.12376) and
-multi-response stacking algorithms \[Xing et al 2019\].
+particular). This package builds off ideas from Gradient Forests (Ellis
+et al., 2012), ecological genomic approaches (Fitzpatrick & Keller,
+2015), and multi-response stacking algorithms (Xing et al., 2020).
 
 This package can be of use for any multi-response machine learning
 problem, but was designed to handle data common to community ecology
@@ -34,18 +31,18 @@ by SNP loci).
 
 ## How to Install
 
-You can install the development version of `mrIML` using `devtools`:
+You can install the development version of `mrIML` using devtools:
 
 ``` r
 install.packages("mrIML")
 
-# Install developement version
+# Install development version
 devtools::install_github('nickfountainjones/mrIML')
 ```
 
-## Ursing `mrIML`
+## Using mrIML
 
-To get started, load `mrIML` and `tidymodels`:
+To get started, load mrIML and tidymodels:
 
 ``` r
 library(mrIML)
@@ -66,7 +63,7 @@ library(tidymodels)
 #> ✖ recipes::step()  masks stats::step()
 ```
 
-Many functions in `mrIML` benefit from parallel processing.
+Many functions in mrIML benefit from parallel processing.
 
 ``` r
 future::plan("multisession", workers = 2)
@@ -120,7 +117,7 @@ The object `mrIML_model` can be investigated using:
 Two multi-response models can be compared using `mrPerformance()`.
 
 Bootstrapping can be implemented using `mrBootstrap()`, which can then
-be used quantify uncertainty around partial dependence plots,
+be used to quantify uncertainty around partial dependence plots,
 `mrPdPlotBootstrap()`, and variable importance, `mrvipBootstrap()`, as
 well as build co-occurrence networks using `mrCoOccurNet()`.
 
@@ -130,26 +127,33 @@ well as build co-occurrence networks using `mrCoOccurNet()`.
     Landguth, E. L., Carver, S., Charleston, M., Gagne, R. B.,
     Greenwell, B., Kraberger, S., Trumbo, D. R., Mayer, M., Clark, N.
     J., & Machado, G. (2021). MrIML: Multi-response interpretable
-    machine learning to model genomic landscapes. Molecular Ecology
-    Resources, 21, 2766– 2781. <https://doi.org/10.1111/1755-0998.13495>
+    machine learning to model genomic landscapes. *Molecular Ecology
+    Resources, 21*, 2766–2781. <https://doi.org/10.1111/1755-0998.13495>
 
 2.  Sykes, A. L., Silva, G. S., Holtkamp, D. J., Mauch, B. W., Osemeke,
-    O., Linhares, D. C.L., & Machado, G. (2021). Interpretable machine
+    O., Linhares, D. C. L., & Machado, G. (2021). Interpretable machine
     learning applied to on-farm biosecurity and porcine reproductive and
-    respiratory syndrome virus. Transboundary and Emerging Diseases, 00,
-    1– 15. <https://doi.org/10.1111/tbed.14369>
+    respiratory syndrome virus. *Transboundary and Emerging Diseases,
+    00*, 1–15. <https://doi.org/10.1111/tbed.14369>
+
+3.  Fountain-Jones, N. M., Appaw, R., Alkhamis, M., Baker, S., Clark,
+    N., Powell-Romero, F., Mayer, M., Machado, G., & Videvall, E.
+    (2024). Advancing ecological community analysis with MrIML 2.0:
+    Unravelling taxa associations through interpretable machine
+    learning. Authorea \[preprint\].
+    <https://doi.org/10.22541/au.172676147.77148600/v1>
 
 ## References
 
-Xing, L, Lesperance, ML and Zhang, X (2020). Simultaneous prediction of
-multiple outcomes using revised stacking algorithms. Bioinformatics, 36,
-65-72. <doi:10.1093/bioinformatics/btz531>.
+Ellis, N., Smith, S. J., & Pitcher, C. R. (2012). Gradient forests:
+calculating importance gradients on physical predictors. *Ecology, 93*,
+156-168. <https://doi.org/10.1890/11-0252.1>
 
-Fitzpatrick, M.C. & Keller, S.R. (2015) Ecological genomics meets
-community-level modelling of biodiversity: mapping the genomic landscape
-of current and future environmental adaptation. Ecology Letters 18,
-1–16.doi.org/10.1111/ele.12376
+Fitzpatrick, M. C., & Keller, S. R. (2015). Ecological genomics meets
+community-level modelling of biodiversity: Mapping the genomic landscape
+of current and future environmental adaptation. *Ecology Letters, 18*,
+1–16. <https://doi.org/10.1111/ele.12376>
 
-Ellis, N., Smith, S.J. and Pitcher, C.R. (2012), Gradient forests:
-calculating importance gradients on physical predictors. Ecology, 93:
-156-168. <doi:10.1890/11-0252.1>
+Xing, L., Lesperance, M. L., & Zhang, X. (2020). Simultaneous prediction
+of multiple outcomes using revised stacking algorithms. *Bioinformatics,
+36*, 65-72. <https://doi.org/10.1093/bioinformatics/btz531>
