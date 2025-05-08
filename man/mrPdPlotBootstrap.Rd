@@ -45,7 +45,7 @@ X <- data \%>\%
   select(scale.prop.zos)
 
 model_rf <- rand_forest(
-  trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+  trees = 50, # 50 trees are set for brevity. Aim to start with 1000
   mode = "classification",
   mtry = tune(),
   min_n = tune()
@@ -58,11 +58,12 @@ mrIML_rf <- mrIMLpredicts(
   X1 = Y,
   Model = model_rf,
   prop = 0.7,
-  k = 5
+  k = 2,
+  racing = FALSE
 )
 
 mrIML_rf_boot <- mrIML_rf \%>\%
-  mrBootstrap()
+  mrBootstrap(num_bootstrap = 5)
   
 mrIML_rf_PD <- mrPdPlotBootstrap(
   mrIML_rf,

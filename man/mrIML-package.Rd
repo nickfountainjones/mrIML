@@ -8,7 +8,7 @@
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-Builds and interprets multi-response machine learning models using 'tidymodels' syntax. Users can supply a tidy model, and 'mrIML' automates the process of fitting multiple response models to multivariate data and applying interpretable machine learning techniques across them. For more details see Fountain-Jones et al.n (2021) \doi{https://doi.org/10.1111/1755-0998.13495} and Fountain-Jones et al. (2024) \doi{https://doi.org/10.22541/au.172676147.77148600/v1}.
+Builds and interprets multi-response machine learning models using 'tidymodels' syntax. Users can supply a tidy model, and 'mrIML' automates the process of fitting multiple response models to multivariate data and applying interpretable machine learning techniques across them. For more details see Fountain-Jones et al.n (2021) \doi{10.1111/1755-0998.13495} and Fountain-Jones et al. (2024) \doi{10.22541/au.172676147.77148600/v1}.
 }
 \seealso{
 Useful links:

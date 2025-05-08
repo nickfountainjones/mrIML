@@ -39,7 +39,7 @@
 #'   select(scale.prop.zos)
 #'
 #' model_rf <- rand_forest(
-#'   trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+#'   trees = 50, # 50 trees are set for brevity. Aim to start with 1000
 #'   mode = "classification",
 #'   mtry = tune(),
 #'   min_n = tune()
@@ -52,7 +52,8 @@
 #'   X1 = Y,
 #'   Model = model_rf,
 #'   prop = 0.7,
-#'   k = 5
+#'   k = 2,
+#'   racing = FALSE
 #' )
 #' 
 #' mrVip(mrIML_rf, taxa = "Plas")
@@ -60,7 +61,7 @@
 #' # With bootstrap
 #' 
 #' mrIML_rf_boot <- mrIML_rf %>%
-#'   mrBootstrap()
+#'   mrBootstrap(num_bootstrap = 5)
 #'   
 #' mrIML_rf_vip <- mrVip(
 #'   mrIML_rf,
@@ -68,9 +69,6 @@
 #' )
 #' 
 #' mrIML_rf_vip
-#' 
-#' mrIML_rf_vip %>%
-#'  mrVipPCA()
 #' 
 #' @export
 mrVip <- function(mrIMLobj,
@@ -348,7 +346,7 @@ mrVip_mrIMLobj <- function(mr_iml_obj) {
 #'   select(scale.prop.zos)
 #'
 #' model_rf <- rand_forest(
-#'   trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+#'   trees = 50, # 50 trees are set for brevity. Aim to start with 1000
 #'   mode = "classification",
 #'   mtry = tune(),
 #'   min_n = tune()
@@ -361,7 +359,8 @@ mrVip_mrIMLobj <- function(mr_iml_obj) {
 #'   X1 = Y,
 #'   Model = model_rf,
 #'   prop = 0.7,
-#'   k = 5
+#'   k = 2,
+#'   racing = FALSE
 #' )
 #' 
 #' mrIML_rf_vip <- mrVip(mrIML_rf, taxa = "Plas")

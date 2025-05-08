@@ -91,37 +91,24 @@ X <- data \%>\%
 
 # Specify a random forest tidy model
 model_rf <- rand_forest(
-  trees = 100, # 100 trees are set for brevity. Aim to start with 1000
+  trees = 50, # 50 trees are set for brevity. Aim to start with 1000
   mode = "classification",
   mtry = tune(),
   min_n = tune()
 ) \%>\%
   set_engine("randomForest")
 
-model_lm <- logistic_reg()
-
 # Fitting independent multi-response mode -----------------------------------
-# Random forest
 MR_model_rf <- mrIMLpredicts(
   X = X,
   Y = Y,
   Model = model_rf,
   prop = 0.7,
-  k = 5
-)
-
-# Linear model
-MR_model_lm <- mrIMLpredicts(
-  X = X,
-  Y = Y,
-  Model = model_lm,
-  prop = 0.7,
-  k = 5,
-  racing = FALSE # Currently a bug if racing = TRUE for non-tuneable models!
+  k = 2,
+  racing = FALSE
 )
 
 # Fitting a graphical network model -----------------------------------------
-
 # Define the dependent response variables (all in this case)
 X1 <- Y
 
@@ -131,7 +118,8 @@ GN_model <- mrIMLpredicts(
   X1 = X1,
   Model = model_rf,
   prop = 0.7,
-  k = 5
+  k = 2,
+  racing = FALSE
 )
 
 }
