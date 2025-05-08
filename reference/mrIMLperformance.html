@@ -17,7 +17,7 @@ and sensitivity are reported."><meta property="og:image" content="https://github
 
     <a class="navbar-brand me-2" href="../index.html">mrIML</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -109,7 +109,7 @@ models and RMSE for regression model.</p></li>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Fit GN model</span></span></span>
 <span class="r-in"><span><span class="va">model_rf</span> <span class="op">&lt;-</span> <span class="fu">rand_forest</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  trees <span class="op">=</span> <span class="fl">100</span>, <span class="co"># 100 trees are set for brevity. Aim to start with 1000</span></span></span>
+<span class="r-in"><span>  trees <span class="op">=</span> <span class="fl">50</span>, <span class="co"># 50 trees are set for brevity. Aim to start with 1000</span></span></span>
 <span class="r-in"><span>  mode <span class="op">=</span> <span class="st">"classification"</span>,</span></span>
 <span class="r-in"><span>  mtry <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  min_n <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span></span></span>
@@ -122,9 +122,14 @@ models and RMSE for regression model.</p></li>
 <span class="r-in"><span>  X1 <span class="op">=</span> <span class="va">X1</span>,</span></span>
 <span class="r-in"><span>  Model <span class="op">=</span> <span class="va">model_rf</span>,</span></span>
 <span class="r-in"><span>  prop <span class="op">=</span> <span class="fl">0.7</span>,</span></span>
-<span class="r-in"><span>  k <span class="op">=</span> <span class="fl">5</span></span></span>
+<span class="r-in"><span>  k <span class="op">=</span> <span class="fl">2</span>,</span></span>
+<span class="r-in"><span>  racing <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |                                                                      |   0%  |                                                                              |==================                                                    |  25%  |                                                                              |===================================                                   |  50%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================================| 100%</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">i</span> <span style="color: #000000;">Creating pre-processing data to finalize unknown parameter: mtry</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">i</span> <span style="color: #000000;">Creating pre-processing data to finalize unknown parameter: mtry</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">i</span> <span style="color: #000000;">Creating pre-processing data to finalize unknown parameter: mtry</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">i</span> <span style="color: #000000;">Creating pre-processing data to finalize unknown parameter: mtry</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">perf</span> <span class="op">&lt;-</span> <span class="fu">mrIMLperformance</span><span class="op">(</span><span class="va">GN_model_rf</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>NAs produced when calculating MCC. This is common when there is a class imbalance. Substituting NA values with zero.</span>
@@ -132,12 +137,12 @@ models and RMSE for regression model.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 × 8</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   response     model_name roc_AUC   mcc sensitivity   ppv specificity prevalence</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.911 0.708       0.908 0.927       0.811     0.265 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.815 0.214       0.974 0.868       0.15      0.116 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.815 0.321       0.935 0.840       0.321     0.196 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.941 0           1     0.911       0         0.098<span style="text-decoration: underline;">0</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.912 0.601       0.942 0.891      0.613      0.265 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.811 0           1     0.859      0          0.116 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.849 0.229       1     0.789      0.066<span style="text-decoration: underline;">7</span>     0.196 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.904 0.394       0.984 0.946      0.3        0.098<span style="text-decoration: underline;">0</span></span>
 <span class="r-in"><span><span class="va">perf</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.3105738</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.3061029</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

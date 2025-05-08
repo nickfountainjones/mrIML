@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Multi Response Interpretable Machine Learning • mrIML</title>
+<title>Multi-Response (Multivariate) Interpretable Machine Learning • mrIML</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -15,9 +15,9 @@
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Multi Response Interpretable Machine Learning">
-<meta name="description" content="This package aims to enable users to build and interpret multivariate machine learning models harnessing the tidyverse (tidy model syntax in particular). This package builds off ideas from Gradient Forests (Ellis et al 2012), ecological genomic approaches (Fitzpatrick and Keller, 2014) and multi-response stacking algorithms (Xing et al 2019).">
-<meta property="og:description" content="This package aims to enable users to build and interpret multivariate machine learning models harnessing the tidyverse (tidy model syntax in particular). This package builds off ideas from Gradient Forests (Ellis et al 2012), ecological genomic approaches (Fitzpatrick and Keller, 2014) and multi-response stacking algorithms (Xing et al 2019).">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Multi-Response (Multivariate) Interpretable Machine Learning">
+<meta name="description" content="Builds and interprets multi-response machine learning models using tidymodels syntax. Users can supply a tidy model, and mrIML automates the process of fitting multiple response models to multivariate data and applying interpretable machine learning techniques across them. For more details see Fountain-Jones et al.n (2021) &lt;doi:10.1111/1755-0998.13495&gt; and Fountain-Jones et al. (2024) &lt;doi:10.22541/au.172676147.77148600/v1&gt;.">
+<meta property="og:description" content="Builds and interprets multi-response machine learning models using tidymodels syntax. Users can supply a tidy model, and mrIML automates the process of fitting multiple response models to multivariate data and applying interpretable machine learning techniques across them. For more details see Fountain-Jones et al.n (2021) &lt;doi:10.1111/1755-0998.13495&gt; and Fountain-Jones et al. (2024) &lt;doi:10.22541/au.172676147.77148600/v1&gt;.">
 <meta property="og:image" content="https://github.com/nickfountainjones/mrIML/logo.png">
 </head>
 <body>
@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">mrIML</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -92,7 +92,10 @@
 </h2>
 <p>You can install the development version of <code>mrIML</code> using <code>devtools</code>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">'nickfountainjones/mrIML'</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"mrIML"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Install developement version</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">'nickfountainjones/mrIML'</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="ursing-mriml">Ursing <code>mrIML</code>
@@ -147,7 +150,19 @@
 <span>  k <span class="op">=</span> <span class="fl">5</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |==================                                                    |  25%  |                                                                              |===================================                                   |  50%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================================| 100%</span></span></code></pre></div>
-<p>The object <code>mrIML_model</code> can be investigated using: - <code><a href="reference/mrIMLperformance.html">mrIMLperformance()</a></code> to get performance metrics for each response variable, - <code>mrvip()</code> to get variable importance for each response variable, - <code><a href="reference/mrFlashlight.html">mrFlashlight()</a></code> to get partial dependence plots for each response variable, - <code><a href="reference/mrCovar.html">mrCovar()</a></code> to get covariate importance for each predictor variable, and - <code><a href="reference/mrInteractions.html">mrInteractions()</a></code> to get interaction importance for each predictor variable in the response models.</p>
+<p>The object <code>mrIML_model</code> can be investigated using:</p>
+<ul>
+<li>
+<code><a href="reference/mrIMLperformance.html">mrIMLperformance()</a></code> to get performance metrics for each response variable,</li>
+<li>
+<code>mrvip()</code> to get variable importance for each response variable,</li>
+<li>
+<code><a href="reference/mrFlashlight.html">mrFlashlight()</a></code> to get partial dependence plots for each response variable,</li>
+<li>
+<code><a href="reference/mrCovar.html">mrCovar()</a></code> to get covariate importance for each predictor variable, and</li>
+<li>
+<code><a href="reference/mrInteractions.html">mrInteractions()</a></code> to get interaction importance for each predictor variable in the response models.</li>
+</ul>
 <p>Two multi-response models can be compared using <code>mrPerformance()</code>.</p>
 <p>Bootstrapping can be implemented using <code><a href="reference/mrBootstrap.html">mrBootstrap()</a></code>, which can then be used quantify uncertainty around partial dependence plots, <code><a href="reference/mrPdPlotBootstrap.html">mrPdPlotBootstrap()</a></code>, and variable importance, <code>mrvipBootstrap()</code>, as well as build co-occurrence networks using <code><a href="reference/mrCoOccurNet.html">mrCoOccurNet()</a></code>.</p>
 </div>
@@ -195,7 +210,7 @@
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>
-<a href="https://discover.utas.edu.au/Nick.FountainJones" class="external-link">Nick Fountain-Jones</a> <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0001-9248-8493" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<a href="https://discover.utas.edu.au/Nick.FountainJones" class="external-link">Nick Fountain-Jones</a> <br><small class="roles"> Author, maintainer, copyright holder </small> <a href="https://orcid.org/0000-0001-9248-8493" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 <li>Ryan Leadbetter <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-1942-3121" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 <li>
 <a href="https://machado-lab.github.io/" class="external-link">Gustavo Machado</a> <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0001-7552-6144" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
