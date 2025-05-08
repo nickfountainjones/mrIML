@@ -30,9 +30,16 @@
 #' data proportion to be used, defaults to `prop = 0.7`.
 #'
 #' @details
-#' Additional details about two types of model...
+#' `mrIMLpredicts` fits the supplied tidy model to each response variable in the 
+#' data frame `Y`. If only `X` (a data frame of predictors) is supplied, then 
+#' independent models are fit, i.e. the other reponse variables are not used as 
+#' predictors. If `X1` (a data frame of all or select response variables) is 
+#' supplied, then those response variables are also used as predictors in the 
+#' response models. e.g. Supplying `X1` means that a co-occurance model is fit.
 #'
-#' The finer details of how things such as `balance_data`...
+#' If `balance_data = "up"` then [themis::step_rose()] is used to upsample the 
+#' dataset, however we generaly recomend to use `balance_data = "no" in most 
+#' cases.
 #'
 #' @returns A list object with three slots:
 #' * `$Model`: The \pkg{tidymodels} object that was fit.

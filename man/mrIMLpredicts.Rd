@@ -64,9 +64,16 @@ the \pkg{tidymodels} framework, for each response variable in a data set. This i
 the core function of \code{mrIML}.
 }
 \details{
-Additional details about two types of model...
+\code{mrIMLpredicts} fits the supplied tidy model to each response variable in the
+data frame \code{Y}. If only \code{X} (a data frame of predictors) is supplied, then
+independent models are fit, i.e. the other reponse variables are not used as
+predictors. If \code{X1} (a data frame of all or select response variables) is
+supplied, then those response variables are also used as predictors in the
+response models. e.g. Supplying \code{X1} means that a co-occurance model is fit.
 
-The finer details of how things such as \code{balance_data}...
+If \code{balance_data = "up"} then \code{\link[themis:step_rose]{themis::step_rose()}} is used to upsample the
+dataset, however we generaly recomend to use `balance_data = "no" in most
+cases.
 }
 \examples{
 library(tidymodels)
