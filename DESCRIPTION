@@ -1,7 +1,7 @@
 Package: mrIML
 Type: Package
 Title: Multi-Response (Multivariate) Interpretable Machine Learning
-Version: 2.0.0.9000
+Version: 2.1.0
 Authors@R: c(
     person("Nick", "Fountain-Jones", , "nfountainjones@gmail.com", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0001-9248-8493")),
