@@ -86,7 +86,7 @@
     
     
 <p><code>mrIML</code> is a package for interpretable machine learning in
-R, specifically designed for multivariate (multi-response) data. It
+R, specifically designed for multivariate (or multi-response) data. It
 provides tools for building and interpreting multi-response models using
 the <a href="https://www.tidymodels.org/start/" class="external-link"><code>tidymodels</code></a>
 syntax; making it very useful for applications in community ecology and
@@ -95,7 +95,6 @@ ecological genomics.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nickfountainjones/mrIML">mrIML</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mayer79/flashlight" class="external-link">flashlight</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
 <span></span>
@@ -131,7 +130,7 @@ variables used only as predictors.</p>
 can be greatly sped up by using parallel processing. To do this, we just
 need to set up a cluster using the <code>future</code> package.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="fitting-a-mriml-model">Fitting a mrIML model<a class="anchor" aria-label="anchor" href="#fitting-a-mriml-model"></a>
 </h2>
@@ -180,7 +179,7 @@ case we use all the response variables).</p>
 <span>  racing <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The resulting fitted <code>mrIML</code> model is a list object
-containing the original tidymodel, the data, and the fitted response
+containing the original tidy model, the data, and the fitted response
 models. The remainder of the functions in the <code>mrIML</code> package
 are aimed at interrogating, explaining, and comparing these fitted
 <code>mrIML</code> models.</p>
@@ -215,8 +214,7 @@ model.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.902 0.438       0.955 0.875       0.4       0.196 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.905 0           1     0.896       0         0.098<span style="text-decoration: underline;">0</span></span></span></code></pre></div>
 <p>These performance metrics can be compared between different
-<code>mrIML</code> model using the <code><a href="../reference/mrPerformancePlot.html">mrPerformancePlot()</a></code>
-function.</p>
+<code>mrIML</code> model using <code><a href="../reference/mrPerformancePlot.html">mrPerformancePlot()</a></code>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">perf_comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrPerformancePlot.html">mrPerformancePlot</a></span><span class="op">(</span><span class="va">perf_rf</span>, <span class="va">perf_lm</span><span class="op">)</span></span>
 <span><span class="va">perf_comp</span><span class="op">$</span><span class="va">performance_plot</span> <span class="op">+</span> <span class="va">perf_comp</span><span class="op">$</span><span class="va">performance_diff_plot</span></span></code></pre></div>
@@ -256,10 +254,10 @@ response models.</p>
 <span>  <span class="va">PD_scale.prop.zos_rf</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>axis <span class="op">=</span> <span class="st">"collect"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mrIML_files/figure-html/unnamed-chunk-3-1.png" width="672"></p>
-<p>Since PDs are model agnostic we can use them for any kind of
-predictive model. For example we can compare the random forest model
-results above directly with the linear model bellow. We could even
-compare a Neural Net if we had enough data to fit it!</p>
+<p>Since PDs are model agnostic, we can use them for any kind of
+predictive model. For example we can compare the RF model results above
+directly with the LM bellow. We could even compare a Neural Net if we
+had enough data to fit it!</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">PD_scale.prop.zos_lm</span> <span class="op">&lt;-</span> <span class="va">mrIML_lm</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/mrCovar.html">mrCovar</a></span><span class="op">(</span>var <span class="op">=</span> <span class="st">"scale.prop.zos"</span>, sdthresh <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
@@ -270,7 +268,7 @@ compare a Neural Net if we had enough data to fit it!</p>
 <span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>axis <span class="op">=</span> <span class="st">"collect"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mrIML_files/figure-html/unnamed-chunk-4-1.png" width="672"></p>
 <p>The variability in the response probability across a PD curve can be
-used to rank variable importance in each response model.
+used to rank variable importance in each response model. On this basis,
 <code><a href="../reference/mrVip.html">mrVip()</a></code> compares variable importance across the response
 models inside a <code>mrIML</code> model.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
@@ -279,11 +277,11 @@ models inside a <code>mrIML</code> model.</p>
 <span></span>
 <span><span class="va">vip_rf</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
 <p><img src="mrIML_files/figure-html/unnamed-chunk-5-1.png" width="672"></p>
-<p>If there are many response models and/or predictive covariates, the
+<p>If there are many response models and/or covariates, the
 <code>threshold</code>, <code>global_top_var</code>, and
 <code>local_top_var</code> arguments can be used to filter the variable
 importance results that are plotted by <code>mrVip</code>. The
-<code>taxa</code> argument can also be used to plot a desirable response
+<code>taxa</code> argument can also be used to plot a desired response
 model that may not fit the filtering criteria. See <code>?mrVip()</code>
 for the specifics of these arguments.</p>
 </div>
@@ -323,7 +321,7 @@ plots.</p>
 <p>Another helpful investigative tool is <code>mrInteraction()</code>.
 This function quickly identifies which response models have strong
 evidence of interactions between predictors, which predictors have the
-most interactive effects and which interactions are the strongest.</p>
+most interactive effects, and which interactions are the strongest.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">interactions_rf</span> <span class="op">&lt;-</span> <span class="va">mrIML_rf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/mrInteractions.html">mrInteractions</a></span><span class="op">(</span>feature <span class="op">=</span> <span class="st">"Plas"</span>, num_bootstrap <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>

@@ -81,21 +81,22 @@ the core function of <code>mrIML</code>.</p>
 
 
 <dl><dt id="arg-y-x-x-">Y, X, X1<a class="anchor" aria-label="anchor" href="#arg-y-x-x-"></a></dt>
-<dd><p>Data frames containing the response, predictor, and the join
-response variables (if fitting GN model) respectively. If <code>X1</code> is not
-provided then a standard multi-response model will be fit to the data (i.e.
-the response values will be independent conditional on the predictors). See
-<strong>Details</strong> section bellow.</p></dd>
+<dd><p>Data frames containing the response, predictor, and the joint
+response variables (i.e. the responses that are also to be used as predictors
+if fitting GN model) respectively. If <code>X1</code> is not provided then a standard
+multi-response model will be fit to the data (e.g. the response models are
+independant of one another conditional on the predictors supplied in X). See
+<strong>Details</strong> section below.</p></dd>
 
 
 <dt id="arg-model">Model<a class="anchor" aria-label="anchor" href="#arg-model"></a></dt>
-<dd><p>Any model from the <span class="pkg">tidymodels</span> package. See examples.</p></dd>
+<dd><p>Any model from the <span class="pkg">tidymodels</span> package. See <strong>Examples</strong>.</p></dd>
 
 
 <dt id="arg-balance-data">balance_data<a class="anchor" aria-label="anchor" href="#arg-balance-data"></a></dt>
-<dd><p>A character string.</p><ul><li><p>"up": up-samples the data to equal class sizes.</p></li>
+<dd><p>A character string:</p><ul><li><p>"up": up-samples the data to equal class sizes.</p></li>
 <li><p>"down": down-samples the data to equal class sizes.</p></li>
-<li><p>"no": leaves data as is. "no" is the default value.</p></li>
+<li><p>"no": leaves the data as is. "no" is the default value.</p></li>
 </ul></dd>
 
 
@@ -106,7 +107,7 @@ included in the data recipe.</p></dd>
 
 <dt id="arg-prop">prop<a class="anchor" aria-label="anchor" href="#arg-prop"></a></dt>
 <dd><p>A numeric value between 0 and 1. Defines the training-testing
-data proportion to be used, defaults to <code>prop = 0.7</code>.</p></dd>
+data proportion to be used, which defaults to <code>prop = 0.7</code>.</p></dd>
 
 
 <dt id="arg-tune-grid-size">tune_grid_size<a class="anchor" aria-label="anchor" href="#arg-tune-grid-size"></a></dt>
@@ -122,26 +123,26 @@ if <code>racing = TRUE</code>.</p></dd>
 
 <dt id="arg-racing">racing<a class="anchor" aria-label="anchor" href="#arg-racing"></a></dt>
 <dd><p>A logical value. If <code>TRUE</code>, <code>mrIML</code> performs the grid search
-using the <code><a href="https://finetune.tidymodels.org/reference/tune_race_anova.html" class="external-link">finetune::tune_race_anova()</a></code> method. <code>racing = TRUE</code> is now the
-default method of tuning.</p></dd>
+using the <code><a href="https://finetune.tidymodels.org/reference/tune_race_anova.html" class="external-link">finetune::tune_race_anova()</a></code> method; otherwise, <code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune::tune_grid()</a></code>
+is used. <code>racing = TRUE</code> is now the default method of tuning.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list object with three slots:</p><ul><li><p><code>$Model</code>: The <span class="pkg">tidymodels</span> object that was fit.</p></li>
 <li><p><code>$Data</code>: A list of the raw data.</p></li>
-<li><p><code>$Fits</code>: A list of the fitted models to each response variable.</p></li>
+<li><p><code>$Fits</code>: A list of the fitted models for each response variable.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><code>mrIMLpredicts</code> fits the supplied tidy model to each response variable in the
 data frame <code>Y</code>. If only <code>X</code> (a data frame of predictors) is supplied, then
-independent models are fit, i.e. the other reponse variables are not used as
+independent models are fit, i.e., the other response variables are not used as
 predictors. If <code>X1</code> (a data frame of all or select response variables) is
 supplied, then those response variables are also used as predictors in the
-response models. e.g. Supplying <code>X1</code> means that a co-occurance model is fit.</p>
-<p>If <code>balance_data = "up"</code> then <code><a href="https://themis.tidymodels.org/reference/step_rose.html" class="external-link">themis::step_rose()</a></code> is used to upsample the
-dataset, however we generaly recomend to use `balance_data = "no" in most
+response models. For example, supplying <code>X1</code> means that a co-occurrence model is fit.</p>
+<p>If <code>balance_data = "up"</code>, then <code><a href="https://themis.tidymodels.org/reference/step_rose.html" class="external-link">themis::step_rose()</a></code> is used to upsample the
+dataset; however, we generally recommend using <code>balance_data = "no"</code> in most
 cases.</p>
     </div>
 
@@ -169,7 +170,7 @@ cases.</p>
 <span class="r-in"><span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Fitting independent multi-response mode -----------------------------------</span></span></span>
+<span class="r-in"><span><span class="co"># Fitting independent multi-response model -----------------------------------</span></span></span>
 <span class="r-in"><span><span class="va">MR_model_rf</span> <span class="op">&lt;-</span> <span class="fu">mrIMLpredicts</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  X <span class="op">=</span> <span class="va">X</span>,</span></span>
 <span class="r-in"><span>  Y <span class="op">=</span> <span class="va">Y</span>,</span></span>
