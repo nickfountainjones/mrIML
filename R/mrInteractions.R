@@ -7,26 +7,27 @@
 #' @param mrIMLobj A list object output by [mrIMLpredicts()].
 #' @param num_bootstrap The number of bootstrap samples to generate
 #' (default: 1).
-#' @param feature The feature for which interactions need to be calculated.
+#' @param feature The response model for which detailed interaction plots should 
+#' be generated.
 #' @param top_int The number of top interactions to display (default: 10).
 #'
-#' @return A list containing
-#' * `$p_h2`: An ordered bar-plot of the variability in each response model that
+#' @return A list containing:
+#' * `$p_h2`: An ordered bar plot of the variability in each response model that
 #' is unexplained by the main effects.
-#' * `$p_h2_overall`: An ordered bar-plot of the percentage of prediction
-#' variability that can be attributed to interaction with each predictor for the
+#' * `$p_h2_overall`: An ordered bar plot of the percentage of prediction
+#' variability that can be attributed to interactions with each predictor for the
 #' model specified by `feature`.
-#' * `$p_h2_pairwise`: An ordered bar-plot of the strength of the two-way
-#' interactions in the model specified by `feature`. Strength is of an
-#' interaction is taken to be the un-normalized square root of of the
+#' * `$p_h2_pairwise`: An ordered bar plot of the strength of the two-way
+#' interactions in the model specified by `feature`. The strength of an
+#' interaction is taken to be the un-normalized square root of the
 #' H2-pairwise statistic (which is on the prediction scale).
-#' * `$h2_df`: A data frame of the H2 statistics for each response model, and
-#' bootstraps if applicable.
-#' * `$h2_overall_df`: A data frame of the H2-overall statistics for variable in
-#' each response model, and bootstraps if applicable.
-#' * `$h2_pairwise_df`: A data frame of the H2-pairwise statistics for variable
-#' in each response model, and bootstraps if applicable.
-#' 
+#' * `$h2_df`: A data frame of the H2 statistics for each response model, along
+#' with bootstraps if applicable.
+#' * `$h2_overall_df`: A data frame of the H2-overall statistics for the variable
+#' in each response model, along with bootstraps if applicable.
+#' * `$h2_pairwise_df`: A data frame of the H2-pairwise statistics for the
+#' variable in each response model, along with bootstraps if applicable.
+#'
 #' @examples
 #' library(tidymodels)
 #'
@@ -55,18 +56,18 @@
 #'   k = 2,
 #'   racing = FALSE
 #' )
-#' 
+#'
 #' mrIML_interactions_rf <- mrInteractions(
 #'   mrIML_rf,
 #'   num_bootstrap = 5,
 #'   feature = "Plas"
 #' )
-#' 
+#'
 #' mrIML_interactions_rf[[1]]
 #' mrIML_interactions_rf[[2]]
 #' mrIML_interactions_rf[[3]]
-#' 
-#' @export  
+#'
+#' @export
 mrInteractions <- function(mrIMLobj,
                            num_bootstrap = 1,
                            feature = NULL,

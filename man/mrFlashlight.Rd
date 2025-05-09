@@ -24,9 +24,9 @@ A flashlight or multi-flashlight object.
 }
 \description{
 A wrapper function around \code{\link[flashlight:flashlight]{flashlight::flashlight()}} to run multi-response
-model agnostic interpretable machine learning analyses. The output can be
+model-agnostic interpretable machine learning analyses. The output can be
 interrogated using the core functionality of \pkg{flashlight}: see
-`vignette("flashlight", package = "flashlight")'.
+\code{vignette("flashlight", package = "flashlight")}.
 }
 \examples{
 library(tidymodels)
@@ -70,15 +70,15 @@ fl \%>\%
   ) \%>\%
   plot() +
   ylim(0, 1)
-  
+
 # Partial dependence curves
 fl \%>\%
   light_profile(data = cbind(X, Y), "scale.prop.zos") \%>\%
   plot()
-  
+
 # Two-way partial dependence
 fl \%>\%
-  light_profile2d(c("scale.prop.zos","Plas")) \%>\%
+  light_profile2d(c("scale.prop.zos", "Plas")) \%>\%
   plot()
 
 }

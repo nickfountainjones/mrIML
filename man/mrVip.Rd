@@ -20,8 +20,8 @@ mrVip(
 \item{mrBootstrap_obj}{A list of bootstrap results output by \code{\link[=mrBootstrap]{mrBootstrap()}}.}
 
 \item{threshold}{The performance threshold for response models (AUC for
-classification and $R^2$ for regression). Only response models that meet this
-performance criteria are plotted.}
+classification and R2 for regression). Only response models that meet this
+performance criterion are plotted.}
 
 \item{global_top_var}{The number of top global variables to display
 (default: 10).}
@@ -33,23 +33,23 @@ display (default: 5).}
 plotted.}
 
 \item{model_perf}{A list object containing model performance metrics output
-by \code{\link[=mrIMLperformance]{mrIMLperformance()}}. If not supplied then \code{\link[=mrIMLperformance]{mrIMLperformance()}} is run
+by \code{\link[=mrIMLperformance]{mrIMLperformance()}}. If not supplied, then \code{\link[=mrIMLperformance]{mrIMLperformance()}} is run
 inside \code{mrvip()} to get performance metrics.}
 }
 \value{
-A list with:
+A list containing:
 \itemize{
-\item \verb{$vi_data}: Variable importance data its raw form (including bootstrap
+\item \verb{$vi_data}: Variable importance data in its raw form (including bootstrap
 samples if \code{mrBootstrap_obj} was supplied).
 \item \verb{$vi_tbl}: Variable importance data point estimates.
-\item \verb{$vi_plot}: A group plot of the most important variables both globally and
+\item \verb{$vi_plot}: A grouped plot of the most important variables both globally and
 for the individual response models.
 }
 }
 \description{
-Summarizes variable importance in a \code{mrIML} model at both a global (accross
-all the response models) and local (for individual response models). This can
-be done for a plain \code{mrIML} model or bootstrap results obtained from
+Summarizes variable importance in a \code{mrIML} model at both a global
+(across all the response models) and local (for individual response models) level.
+This can be done for a plain \code{mrIML} model or bootstrap results obtained from
 \code{\link[=mrBootstrap]{mrBootstrap()}}.
 }
 \examples{

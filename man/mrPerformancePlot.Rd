@@ -11,8 +11,8 @@ mrPerformancePlot(
 )
 }
 \arguments{
-\item{ModelPerf1, ModelPerf2}{A data frame of model performance metrics to
-compare. The dataframe is created by \link{mrIMLperformance}, see \strong{Examples}.}
+\item{ModelPerf1, ModelPerf2}{Two data frames of model performance metrics to
+compare. The data frames are created by \link{mrIMLperformance}, see \strong{Examples}.}
 
 \item{mode}{A character string describing the mode of the models. Should be
 either "regression" or "classification". The default is "classification".}
@@ -20,11 +20,10 @@ either "regression" or "classification". The default is "classification".}
 \value{
 A list containing:
 \itemize{
-\item \verb{$performance_plot}: A ggplot object for the boxplot of model performance
-metrics.
-\item \verb{$performance_diff_plot}: A ggplot object for the barplot of differences in
+\item \verb{$performance_plot}: A box plot of model performance metrics.
+\item \verb{$performance_diff_plot}: A bar plot of the differences in
 performance metrics.
-\item \verb{$performance_diff_df}: A dataframe with the wide format of model
+\item \verb{$performance_diff_df}: A data frame in wide format containing model
 performance metrics and their differences.
 }
 }

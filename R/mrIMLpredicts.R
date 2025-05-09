@@ -1,54 +1,54 @@
 #' Generates a multi-response predictive model
 #'
 #' @description
-#'
 #' This function fits separate classification/regression models, specified in
 #' the \pkg{tidymodels} framework, for each response variable in a data set. This is
 #' the core function of `mrIML`.
 #'
-#' @param Y,X,X1 Data frames containing the response, predictor, and the join
-#' response variables (if fitting GN model) respectively. If `X1` is not
-#' provided then a standard multi-response model will be fit to the data (i.e.
-#' the response values will be independent conditional on the predictors). See
-#' **Details** section bellow.
-#' @param Model Any model from the \pkg{tidymodels} package. See examples.
-#' @param balance_data A character string.
+#' @param Y,X,X1 Data frames containing the response, predictor, and the joint
+#' response variables (i.e. the responses that are also to be used as predictors
+#' if fitting GN model) respectively. If `X1` is not provided then a standard 
+#' multi-response model will be fit to the data (e.g. the response models are
+#' independant of one another conditional on the predictors supplied in X). See
+#' **Details** section below.
+#' @param Model Any model from the \pkg{tidymodels} package. See **Examples**.
+#' @param balance_data A character string:
 #' * "up": up-samples the data to equal class sizes.
 #' * "down": down-samples the data to equal class sizes.
-#' * "no": leaves data as is. "no" is the default value.
+#' * "no": leaves the data as is. "no" is the default value.
 #' @param dummy A logical value indicating if [recipes::step_dummy()] should be
 #' included in the data recipe.
 #' @param tune_grid_size A numeric value that sets the grid size for
 #' hyperparameter tuning. Larger grid sizes increase computational time. Ignored
 #' if `racing = TRUE`.
 #' @param racing A logical value. If `TRUE`, `mrIML` performs the grid search
-#' using the [finetune::tune_race_anova()] method. `racing = TRUE` is now the
-#' default method of tuning.
+#' using the [finetune::tune_race_anova()] method; otherwise, [tune::tune_grid()]
+#' is used. `racing = TRUE` is now the default method of tuning.
 #' @param k A numeric value. Sets the number of folds in the cross-validation.
 #' 10-fold CV is the default.
 #' @param prop A numeric value between 0 and 1. Defines the training-testing
-#' data proportion to be used, defaults to `prop = 0.7`.
+#' data proportion to be used, which defaults to `prop = 0.7`.
 #'
 #' @details
-#' `mrIMLpredicts` fits the supplied tidy model to each response variable in the 
-#' data frame `Y`. If only `X` (a data frame of predictors) is supplied, then 
-#' independent models are fit, i.e. the other reponse variables are not used as 
-#' predictors. If `X1` (a data frame of all or select response variables) is 
-#' supplied, then those response variables are also used as predictors in the 
-#' response models. e.g. Supplying `X1` means that a co-occurance model is fit.
+#' `mrIMLpredicts` fits the supplied tidy model to each response variable in the
+#' data frame `Y`. If only `X` (a data frame of predictors) is supplied, then
+#' independent models are fit, i.e., the other response variables are not used as
+#' predictors. If `X1` (a data frame of all or select response variables) is
+#' supplied, then those response variables are also used as predictors in the
+#' response models. For example, supplying `X1` means that a co-occurrence model is fit.
 #'
-#' If `balance_data = "up"` then [themis::step_rose()] is used to upsample the 
-#' dataset, however we generaly recomend to use `balance_data = "no" in most 
+#' If `balance_data = "up"`, then [themis::step_rose()] is used to upsample the
+#' dataset; however, we generally recommend using `balance_data = "no"` in most
 #' cases.
 #'
 #' @returns A list object with three slots:
 #' * `$Model`: The \pkg{tidymodels} object that was fit.
 #' * `$Data`: A list of the raw data.
-#' * `$Fits`: A list of the fitted models to each response variable.
+#' * `$Fits`: A list of the fitted models for each response variable.
 #'
 #' @examples
 #' library(tidymodels)
-#' 
+#'
 #' data <- MRFcov::Bird.parasites
 #'
 #' # Define the response variables of interest
@@ -69,7 +69,7 @@
 #' ) %>%
 #'   set_engine("randomForest")
 #'
-#' # Fitting independent multi-response mode -----------------------------------
+#' # Fitting independent multi-response model -----------------------------------
 #' MR_model_rf <- mrIMLpredicts(
 #'   X = X,
 #'   Y = Y,
@@ -92,7 +92,7 @@
 #'   k = 2,
 #'   racing = FALSE
 #' )
-#' 
+#'
 #' @export
 mrIMLpredicts <- function(X,
                           X1 = NULL,

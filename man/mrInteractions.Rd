@@ -12,28 +12,29 @@ mrInteractions(mrIMLobj, num_bootstrap = 1, feature = NULL, top_int = 10)
 \item{num_bootstrap}{The number of bootstrap samples to generate
 (default: 1).}
 
-\item{feature}{The feature for which interactions need to be calculated.}
+\item{feature}{The response model for which detailed interaction plots should
+be generated.}
 
 \item{top_int}{The number of top interactions to display (default: 10).}
 }
 \value{
-A list containing
+A list containing:
 \itemize{
-\item \verb{$p_h2}: An ordered bar-plot of the variability in each response model that
+\item \verb{$p_h2}: An ordered bar plot of the variability in each response model that
 is unexplained by the main effects.
-\item \verb{$p_h2_overall}: An ordered bar-plot of the percentage of prediction
-variability that can be attributed to interaction with each predictor for the
+\item \verb{$p_h2_overall}: An ordered bar plot of the percentage of prediction
+variability that can be attributed to interactions with each predictor for the
 model specified by \code{feature}.
-\item \verb{$p_h2_pairwise}: An ordered bar-plot of the strength of the two-way
-interactions in the model specified by \code{feature}. Strength is of an
-interaction is taken to be the un-normalized square root of of the
+\item \verb{$p_h2_pairwise}: An ordered bar plot of the strength of the two-way
+interactions in the model specified by \code{feature}. The strength of an
+interaction is taken to be the un-normalized square root of the
 H2-pairwise statistic (which is on the prediction scale).
-\item \verb{$h2_df}: A data frame of the H2 statistics for each response model, and
-bootstraps if applicable.
-\item \verb{$h2_overall_df}: A data frame of the H2-overall statistics for variable in
-each response model, and bootstraps if applicable.
-\item \verb{$h2_pairwise_df}: A data frame of the H2-pairwise statistics for variable
-in each response model, and bootstraps if applicable.
+\item \verb{$h2_df}: A data frame of the H2 statistics for each response model, along
+with bootstraps if applicable.
+\item \verb{$h2_overall_df}: A data frame of the H2-overall statistics for the variable
+in each response model, along with bootstraps if applicable.
+\item \verb{$h2_pairwise_df}: A data frame of the H2-pairwise statistics for the
+variable in each response model, along with bootstraps if applicable.
 }
 }
 \description{

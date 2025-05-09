@@ -8,9 +8,10 @@
 #' (default: 10).
 #' @param downsample Logical. Should the bootstrap samples be downsampled?
 #' (default: FALSE).
-#' 
+#'
 #' @return A list containing bootstrap samples of variable profiles for each
 #' response variable.
+#' 
 #' @examplesIf !identical(Sys.getenv("NOT_CRAN"), "true")
 #' library(tidymodels)
 #'
@@ -39,12 +40,11 @@
 #'   k = 5
 #' )
 #' 
-#' # cl <- parallel::makeCluster(5)
-#' # future::plan(cluster, workers=cl)
-#' 
+#' #future::plan(multisession, workers = 4)
+#'
 #' mrIML_bootstrap <- mrIML_rf %>%
 #'   mrBootstrap(
-#'   num_bootstrap = 50
+#'     num_bootstrap = 50
 #'   )
 #'
 #' @export

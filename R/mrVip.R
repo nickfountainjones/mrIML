@@ -1,30 +1,30 @@
 #' Calculates and helps interpret variable importance for `mrIML` models.
 #'
-#' Summarizes variable importance in a `mrIML` model at both a global (accross
-#' all the response models) and local (for individual response models). This can
-#' be done for a plain `mrIML` model or bootstrap results obtained from
-#' [mrBootstrap()]. 
+#' Summarizes variable importance in a `mrIML` model at both a global 
+#' (across all the response models) and local (for individual response models) level. 
+#' This can be done for a plain `mrIML` model or bootstrap results obtained from
+#' [mrBootstrap()].
 #'
 #' @param mrIMLobj A list object output by [mrIMLpredicts()].
 #' @param mrBootstrap_obj A list of bootstrap results output by [mrBootstrap()].
 #' @param threshold The performance threshold for response models (AUC for
-#' classification and $R^2$ for regression). Only response models that meet this
-#' performance criteria are plotted.
-#' @param global_top_var The number of top global variables to display
+#' classification and R2 for regression). Only response models that meet this
+#' performance criterion are plotted.
+#' @param global_top_var The number of top global variables to display 
 #' (default: 10).
 #' @param local_top_var The number of top local variables for each response to
 #' display (default: 5).
 #' @param taxa A character string identifying which response model should be
 #' plotted.
 #' @param model_perf A list object containing model performance metrics output
-#' by [mrIMLperformance()]. If not supplied then [mrIMLperformance()] is run
+#' by [mrIMLperformance()]. If not supplied, then [mrIMLperformance()] is run
 #' inside `mrvip()` to get performance metrics.
-#' 
-#' @return A list with:
-#' * `$vi_data`: Variable importance data its raw form (including bootstrap
+#'
+#' @return A list containing:
+#' * `$vi_data`: Variable importance data in its raw form (including bootstrap
 #' samples if `mrBootstrap_obj` was supplied).
 #' * `$vi_tbl`: Variable importance data point estimates.
-#' * `$vi_plot`: A group plot of the most important variables both globally and
+#' * `$vi_plot`: A grouped plot of the most important variables both globally and
 #' for the individual response models.
 #' 
 #' @examples
@@ -324,15 +324,19 @@ mrVip_mrIMLobj <- function(mr_iml_obj) {
   dplyr::bind_rows(var_imp_list)
 }
 
-#' Principle Component Analysis of mrIML variable importance
-#' 
+#' Principal Component Analysis of mrIML variable importance
+#'
 #' @param mrVip_obj A list returned by [mrVip()].
-#' 
+#'
 #' @returns A list of PCA results:
-#' * `$PCA_plot`: Side-by-side plots of the diferent response models on the first two PCs and a Scree plot.
-#' * `$PC_outlires`: A list the models flagged as outliers on at least one of the PCs.
-#' * `$eigenvalues`: The Eigenvalues.
-#' * `$PC_scores`: The PC scores of each response model
+#' * `$PCA_plot`: Side-by-side plots of the different response
+#' models on the first two principal components (PCs) and a
+#' Scree plot.
+#' * `$PC_outliers`: A list of the models flagged as outliers
+#' on at least one of the PCs.
+#' * `$eigenvalues`: The eigenvalues associated with the
+#' principal components.
+#' * `$PC_scores`: The PC scores of each response model.
 #' 
 #' @examples
 #' library(tidymodels)

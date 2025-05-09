@@ -7,7 +7,7 @@
 mrCoOccurNet(mrBootstrap_obj)
 }
 \arguments{
-\item{mrBootstrap_obj}{A of bootstrapped partial dependencies output from
+\item{mrBootstrap_obj}{A list of bootstrapped partial dependencies output from
 \code{\link[=mrBootstrap]{mrBootstrap()}}.}
 }
 \value{
@@ -16,7 +16,8 @@ strengths and directionality.
 }
 \description{
 This function generates a co-occurrence network from a provided list and
-calculates strength and directionality of the relationships.
+calculates strength and directionality of the relationships. The output can be
+passed to \pkg{igraph} to plot a directed acyclic graph (DAG).
 }
 \examples{
 \dontshow{if (!identical(Sys.getenv("NOT_CRAN"), "true")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
@@ -51,11 +52,11 @@ mrIML_rf <- mrIMLpredicts(
 mrIML_rf_boot <- mrIML_rf \%>\%
   mrBootstrap()
 
-assoc_net_filtered <- mrIML_rf_boot \%>\% 
+assoc_net_filtered <- mrIML_rf_boot \%>\%
   mrCoOccurNet_bootstrap() \%>\%
   filter(mean_strength > 0.05)
- 
-#convert to igraph
+
+# Convert to igraph
 g <- graph_from_data_frame(
   assoc_net_filtered,
   directed = TRUE,
@@ -73,25 +74,25 @@ ggplot(
   gg,
   aes(x = x, y = y, xend = xend, yend = yend)
 ) +
- geom_edges(
-   aes(color = Color, linewidth = Value),
-   curvature = 0.2,
-   arrow = arrow(length = unit(5, "pt"), type = "closed")
- ) +
- geom_nodes(
-   color = "gray",
-   size = degree(g, mode = "out") / 2
- ) +
- scale_color_identity() +
- theme_void() +
- theme(legend.position = "none")  +
- geom_nodelabel_repel(
-   aes(label = name),
-   box.padding = unit(0.5, "lines"),
-   size = 2,
-   segment.colour = "black",
-   colour = "white",
-   fill = "grey36"
- )
+  geom_edges(
+    aes(color = Color, linewidth = Value),
+    curvature = 0.2,
+    arrow = arrow(length = unit(5, "pt"), type = "closed")
+  ) +
+  geom_nodes(
+    color = "gray",
+    size = degree(g, mode = "out") / 2
+  ) +
+  scale_color_identity() +
+  theme_void() +
+  theme(legend.position = "none") +
+  geom_nodelabel_repel(
+    aes(label = name),
+    box.padding = unit(0.5, "lines"),
+    size = 2,
+    segment.colour = "black",
+    colour = "white",
+    fill = "grey36"
+  )
 \dontshow{\}) # examplesIf}
 }

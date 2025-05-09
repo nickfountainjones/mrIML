@@ -1,9 +1,9 @@
 #' Convert mrIML object into a \pkg{flashlight} object
-#' 
+#'
 #' A wrapper function around [flashlight::flashlight()] to run multi-response
-#' model agnostic interpretable machine learning analyses. The output can be
+#' model-agnostic interpretable machine learning analyses. The output can be
 #' interrogated using the core functionality of \pkg{flashlight}: see
-#' `vignette("flashlight", package = "flashlight")'.
+#' `vignette("flashlight", package = "flashlight")`.
 #'
 #' @param mrIMLobj A list object output by [mrIMLpredicts()].
 #' @param response A character string indicating the type of response:
@@ -13,20 +13,20 @@
 #' which response column in the data to create a flashlight object for.
 #' @param predict_function A function specifying a user-defined prediction
 #' function (optional).
-#' 
+#'
 #' @returns A flashlight or multi-flashlight object.
-#' 
-#' @examples 
+#'
+#' @examples
 #' library(tidymodels)
 #' library(flashlight)
-#' 
+#'
 #' data <- MRFcov::Bird.parasites
 #' Y <- data %>%
 #'   select(-scale.prop.zos) %>%
 #'   select(order(everything()))
 #' X <- data %>%
 #'   select(scale.prop.zos)
-#' 
+#'
 #' model_rf <- rand_forest(
 #'   trees = 50, # 50 trees are set for brevity. Aim to start with 1000
 #'   mode = "classification",
@@ -44,13 +44,13 @@
 #'   k = 2,
 #'   racing = FALSE
 #' )
-#' 
+#'
 #' fl <- mrFlashlight(
 #'   mrIML_rf,
 #'   response = "multi",
 #'   index = 1
 #' )
-#' 
+#'
 #' # Performance comparison
 #' fl %>%
 #'   light_performance(
@@ -58,15 +58,15 @@
 #'   ) %>%
 #'   plot() +
 #'   ylim(0, 1)
-#'   
+#'
 #' # Partial dependence curves
 #' fl %>%
 #'   light_profile(data = cbind(X, Y), "scale.prop.zos") %>%
 #'   plot()
-#'   
+#'
 #' # Two-way partial dependence
 #' fl %>%
-#'   light_profile2d(c("scale.prop.zos","Plas")) %>%
+#'   light_profile2d(c("scale.prop.zos", "Plas")) %>%
 #'   plot()
 #'
 #' @export

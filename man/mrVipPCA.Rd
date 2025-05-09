@@ -2,7 +2,7 @@
 % Please edit documentation in R/mrVip.R
 \name{mrVipPCA}
 \alias{mrVipPCA}
-\title{Principle Component Analysis of mrIML variable importance}
+\title{Principal Component Analysis of mrIML variable importance}
 \usage{
 mrVipPCA(mrVip_obj)
 }
@@ -12,14 +12,18 @@ mrVipPCA(mrVip_obj)
 \value{
 A list of PCA results:
 \itemize{
-\item \verb{$PCA_plot}: Side-by-side plots of the diferent response models on the first two PCs and a Scree plot.
-\item \verb{$PC_outlires}: A list the models flagged as outliers on at least one of the PCs.
-\item \verb{$eigenvalues}: The Eigenvalues.
-\item \verb{$PC_scores}: The PC scores of each response model
+\item \verb{$PCA_plot}: Side-by-side plots of the different response
+models on the first two principal components (PCs) and a
+Scree plot.
+\item \verb{$PC_outliers}: A list of the models flagged as outliers
+on at least one of the PCs.
+\item \verb{$eigenvalues}: The eigenvalues associated with the
+principal components.
+\item \verb{$PC_scores}: The PC scores of each response model.
 }
 }
 \description{
-Principle Component Analysis of mrIML variable importance
+Principal Component Analysis of mrIML variable importance
 }
 \examples{
 library(tidymodels)

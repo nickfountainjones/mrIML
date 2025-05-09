@@ -1,23 +1,24 @@
-#' Bootstrap Partial Dependence plots
+#' Bootstrap Partial Dependence Plots
 #'
-#' This function bootstraps model predictions and generates partial dependence
-#' plots for each response variable. It also creates a combined plot for the top
-#' variables of interest.
+#' This function extracts and plots the bootrapped partial dependence functions 
+#' calculated by [mrBootstrap()] for each response variable.
 #'
 #' @param mrIML_obj A list object returned by [mrIMLpredicts()].
 #' @param mrBootstrap_obj A list object returned by [mrBootstrap()].
 #' @param vi_obj A list object returned by [mrVip()]. If `vi_obj` is not
-#' provided then it is created inside `mrPD_bootstrap` by running [mrVip()]
+#' provided, then it is created inside `mrPD_bootstrap` by running [mrVip()].
 #' @param target The target variable for generating plots.
 #' @param global_top_var The number of top variables to consider (default: 2).
-#' 
+#'
 #' @return A list with two elements:
-#' *`[[1]]` A data frame of the partial dependence grid for each response model, predictor variable, and bootstrap
-#' *`[[2]]` A list of partial dependence plots for each predictor variable in the `target` response model.
+#' * `[[1]]`: A data frame of the partial dependence grid for each response model,
+#' predictor variable, and bootstrap.
+#' * `[[2]]`: A list of partial dependence plots for each predictor variable in
+#' the `target` response model.
 #'
 #' @examples
 #' library(tidymodels)
-#' 
+#'
 #' data <- MRFcov::Bird.parasites
 #' Y <- data %>%
 #'   select(-scale.prop.zos) %>%
@@ -32,7 +33,7 @@
 #'   min_n = tune()
 #' ) %>%
 #'   set_engine("randomForest")
-#' 
+#'
 #' mrIML_rf <- mrIMLpredicts(
 #'   X = X,
 #'   Y = Y,
@@ -42,20 +43,20 @@
 #'   k = 2,
 #'   racing = FALSE
 #' )
-#' 
+#'
 #' mrIML_rf_boot <- mrIML_rf %>%
 #'   mrBootstrap(num_bootstrap = 5)
-#'   
+#'
 #' mrIML_rf_PD <- mrPdPlotBootstrap(
 #'   mrIML_rf,
 #'   mrIML_rf_boot,
 #'   target = "Plas",
 #'   global_top_var = 4
 #' )
-#' 
+#'
 #' head(mrIML_rf_PD[[1]])
 #' mrIML_rf_PD[[2]]
-#' 
+#'
 #' @export
 mrPdPlotBootstrap <- function(mrIML_obj,
                            mrBootstrap_obj,

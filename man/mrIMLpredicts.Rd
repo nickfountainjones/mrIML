@@ -18,26 +18,27 @@ mrIMLpredicts(
 )
 }
 \arguments{
-\item{Y, X, X1}{Data frames containing the response, predictor, and the join
-response variables (if fitting GN model) respectively. If \code{X1} is not
-provided then a standard multi-response model will be fit to the data (i.e.
-the response values will be independent conditional on the predictors). See
-\strong{Details} section bellow.}
+\item{Y, X, X1}{Data frames containing the response, predictor, and the joint
+response variables (i.e. the responses that are also to be used as predictors
+if fitting GN model) respectively. If \code{X1} is not provided then a standard
+multi-response model will be fit to the data (e.g. the response models are
+independant of one another conditional on the predictors supplied in X). See
+\strong{Details} section below.}
 
-\item{Model}{Any model from the \pkg{tidymodels} package. See examples.}
+\item{Model}{Any model from the \pkg{tidymodels} package. See \strong{Examples}.}
 
-\item{balance_data}{A character string.
+\item{balance_data}{A character string:
 \itemize{
 \item "up": up-samples the data to equal class sizes.
 \item "down": down-samples the data to equal class sizes.
-\item "no": leaves data as is. "no" is the default value.
+\item "no": leaves the data as is. "no" is the default value.
 }}
 
 \item{dummy}{A logical value indicating if \code{\link[recipes:step_dummy]{recipes::step_dummy()}} should be
 included in the data recipe.}
 
 \item{prop}{A numeric value between 0 and 1. Defines the training-testing
-data proportion to be used, defaults to \code{prop = 0.7}.}
+data proportion to be used, which defaults to \code{prop = 0.7}.}
 
 \item{tune_grid_size}{A numeric value that sets the grid size for
 hyperparameter tuning. Larger grid sizes increase computational time. Ignored
@@ -47,15 +48,15 @@ if \code{racing = TRUE}.}
 10-fold CV is the default.}
 
 \item{racing}{A logical value. If \code{TRUE}, \code{mrIML} performs the grid search
-using the \code{\link[finetune:tune_race_anova]{finetune::tune_race_anova()}} method. \code{racing = TRUE} is now the
-default method of tuning.}
+using the \code{\link[finetune:tune_race_anova]{finetune::tune_race_anova()}} method; otherwise, \code{\link[tune:tune_grid]{tune::tune_grid()}}
+is used. \code{racing = TRUE} is now the default method of tuning.}
 }
 \value{
 A list object with three slots:
 \itemize{
 \item \verb{$Model}: The \pkg{tidymodels} object that was fit.
 \item \verb{$Data}: A list of the raw data.
-\item \verb{$Fits}: A list of the fitted models to each response variable.
+\item \verb{$Fits}: A list of the fitted models for each response variable.
 }
 }
 \description{
@@ -66,13 +67,13 @@ the core function of \code{mrIML}.
 \details{
 \code{mrIMLpredicts} fits the supplied tidy model to each response variable in the
 data frame \code{Y}. If only \code{X} (a data frame of predictors) is supplied, then
-independent models are fit, i.e. the other reponse variables are not used as
+independent models are fit, i.e., the other response variables are not used as
 predictors. If \code{X1} (a data frame of all or select response variables) is
 supplied, then those response variables are also used as predictors in the
-response models. e.g. Supplying \code{X1} means that a co-occurance model is fit.
+response models. For example, supplying \code{X1} means that a co-occurrence model is fit.
 
-If \code{balance_data = "up"} then \code{\link[themis:step_rose]{themis::step_rose()}} is used to upsample the
-dataset, however we generaly recomend to use `balance_data = "no" in most
+If \code{balance_data = "up"}, then \code{\link[themis:step_rose]{themis::step_rose()}} is used to upsample the
+dataset; however, we generally recommend using \code{balance_data = "no"} in most
 cases.
 }
 \examples{
@@ -98,7 +99,7 @@ model_rf <- rand_forest(
 ) \%>\%
   set_engine("randomForest")
 
-# Fitting independent multi-response mode -----------------------------------
+# Fitting independent multi-response model -----------------------------------
 MR_model_rf <- mrIMLpredicts(
   X = X,
   Y = Y,

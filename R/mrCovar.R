@@ -1,5 +1,5 @@
 #' Investigate partial dependencies of a covariate for mrIML JSDMs (Joint
-#' species distirbution models)
+#' Species Distribution Models)
 #'
 #' This function is a wrapper around [mrFlashlight()] that plots the covariate
 #' partial dependencies for a specified environmental/host variable. It also
@@ -10,20 +10,20 @@
 #' @param sdthresh The standard deviation threshold for filtering taxa
 #' (default: 0.05).
 #' @param ... Arguments passed to [flashlight::light_profile()]
-#' 
+#'
 #' @return A list of figures:
 #' * `$partial_dep_curves`: The covariate partial dependence profiles for those
-#' models that meet the `sdthreshold` requirement
+#' models that meet the `sdthresh` requirement.
 #' * `$partial_dep_avg`: The average partial dependence profile for all models.
-#' All indervidual model partial dependence profiles are silhouetted in the
+#' All individual model partial dependence profiles are silhouetted in the
 #' background.
 #' * `$partial_dep_diff`: The distribution of the rates of change in probability
 #' for the specified variable (the derivatives of the PD curves). Useful to
 #' identify key threshold values in the variable.
-#' 
+#'
 #' @examples
 #' library(tidymodels)
-#' 
+#'
 #' # Without bootstrap
 #' data <- MRFcov::Bird.parasites
 #' Y <- data %>%
@@ -39,7 +39,7 @@
 #'   min_n = tune()
 #' ) %>%
 #'   set_engine("randomForest")
-#' 
+#'
 #' mrIML_rf <- mrIMLpredicts(
 #'   X = X,
 #'   Y = Y,
@@ -49,7 +49,7 @@
 #'   k = 2,
 #'   racing = FALSE
 #' )
-#' 
+#'
 #' mrIML_rf %>%
 #'   mrCovar(var = "scale.prop.zos", sdthresh = 0.05)
 #' 

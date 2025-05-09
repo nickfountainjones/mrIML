@@ -3,7 +3,7 @@
 \name{mrCovar}
 \alias{mrCovar}
 \title{Investigate partial dependencies of a covariate for mrIML JSDMs (Joint
-species distirbution models)}
+Species Distribution Models)}
 \usage{
 mrCovar(mrIMLobj, var, sdthresh = 0.05, ...)
 }
@@ -21,9 +21,9 @@ mrCovar(mrIMLobj, var, sdthresh = 0.05, ...)
 A list of figures:
 \itemize{
 \item \verb{$partial_dep_curves}: The covariate partial dependence profiles for those
-models that meet the \code{sdthreshold} requirement
+models that meet the \code{sdthresh} requirement.
 \item \verb{$partial_dep_avg}: The average partial dependence profile for all models.
-All indervidual model partial dependence profiles are silhouetted in the
+All individual model partial dependence profiles are silhouetted in the
 background.
 \item \verb{$partial_dep_diff}: The distribution of the rates of change in probability
 for the specified variable (the derivatives of the PD curves). Useful to

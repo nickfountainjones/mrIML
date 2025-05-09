@@ -1,9 +1,10 @@
-#' Generate a MrIML co-occurrence network 
+#' Generate a MrIML co-occurrence network
 #'
 #' This function generates a co-occurrence network from a provided list and
-#' calculates strength and directionality of the relationships.
+#' calculates strength and directionality of the relationships. The output can be
+#' passed to \pkg{igraph} to plot a directed acyclic graph (DAG).
 #'
-#' @param mrBootstrap_obj A of bootstrapped partial dependencies output from
+#' @param mrBootstrap_obj A list of bootstrapped partial dependencies output from
 #' [mrBootstrap()].
 #'
 #' @return A data frame representing the co-occurrence network with edge
@@ -13,7 +14,7 @@
 #' library(tidymodels)
 #' library(igraph)
 #' library(ggnetwork)
-#' 
+#'
 #' data <- MRFcov::Bird.parasites
 #' Y <- data %>%
 #'   select(-scale.prop.zos) %>%
@@ -28,7 +29,7 @@
 #'   min_n = tune()
 #' ) %>%
 #'   set_engine("randomForest")
-#' 
+#'
 #' mrIML_rf <- mrIMLpredicts(
 #'   X = X,
 #'   Y = Y,
@@ -37,15 +38,15 @@
 #'   prop = 0.7,
 #'   k = 5
 #' )
-#' 
+#'
 #' mrIML_rf_boot <- mrIML_rf %>%
 #'   mrBootstrap()
 #'
-#' assoc_net_filtered <- mrIML_rf_boot %>% 
+#' assoc_net_filtered <- mrIML_rf_boot %>%
 #'   mrCoOccurNet_bootstrap() %>%
 #'   filter(mean_strength > 0.05)
-#'  
-#' #convert to igraph
+#'
+#' # Convert to igraph
 #' g <- graph_from_data_frame(
 #'   assoc_net_filtered,
 #'   directed = TRUE,
@@ -63,29 +64,28 @@
 #'   gg,
 #'   aes(x = x, y = y, xend = xend, yend = yend)
 #' ) +
-#'  geom_edges(
-#'    aes(color = Color, linewidth = Value),
-#'    curvature = 0.2,
-#'    arrow = arrow(length = unit(5, "pt"), type = "closed")
-#'  ) +
-#'  geom_nodes(
-#'    color = "gray",
-#'    size = degree(g, mode = "out") / 2
-#'  ) +
-#'  scale_color_identity() +
-#'  theme_void() +
-#'  theme(legend.position = "none")  +
-#'  geom_nodelabel_repel(
-#'    aes(label = name),
-#'    box.padding = unit(0.5, "lines"),
-#'    size = 2,
-#'    segment.colour = "black",
-#'    colour = "white",
-#'    fill = "grey36"
-#'  )
+#'   geom_edges(
+#'     aes(color = Color, linewidth = Value),
+#'     curvature = 0.2,
+#'     arrow = arrow(length = unit(5, "pt"), type = "closed")
+#'   ) +
+#'   geom_nodes(
+#'     color = "gray",
+#'     size = degree(g, mode = "out") / 2
+#'   ) +
+#'   scale_color_identity() +
+#'   theme_void() +
+#'   theme(legend.position = "none") +
+#'   geom_nodelabel_repel(
+#'     aes(label = name),
+#'     box.padding = unit(0.5, "lines"),
+#'     size = 2,
+#'     segment.colour = "black",
+#'     colour = "white",
+#'     fill = "grey36"
+#'   )
 #'
 #' @export
-
 mrCoOccurNet <- function(mrBootstrap_obj) {
   # Expand bootstrap object
   pd_boot_df <- lapply(

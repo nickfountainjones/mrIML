@@ -2,7 +2,7 @@
 % Please edit documentation in R/mrPdPlotBootstrap.R
 \name{mrPdPlotBootstrap}
 \alias{mrPdPlotBootstrap}
-\title{Bootstrap Partial Dependence plots}
+\title{Bootstrap Partial Dependence Plots}
 \usage{
 mrPdPlotBootstrap(
   mrIML_obj,
@@ -18,7 +18,7 @@ mrPdPlotBootstrap(
 \item{mrBootstrap_obj}{A list object returned by \code{\link[=mrBootstrap]{mrBootstrap()}}.}
 
 \item{vi_obj}{A list object returned by \code{\link[=mrVip]{mrVip()}}. If \code{vi_obj} is not
-provided then it is created inside \code{mrPD_bootstrap} by running \code{\link[=mrVip]{mrVip()}}}
+provided, then it is created inside \code{mrPD_bootstrap} by running \code{\link[=mrVip]{mrVip()}}.}
 
 \item{target}{The target variable for generating plots.}
 
@@ -26,13 +26,16 @@ provided then it is created inside \code{mrPD_bootstrap} by running \code{\link[
 }
 \value{
 A list with two elements:
-*\verb{[[1]]} A data frame of the partial dependence grid for each response model, predictor variable, and bootstrap
-*\verb{[[2]]} A list of partial dependence plots for each predictor variable in the \code{target} response model.
+\itemize{
+\item \verb{[[1]]}: A data frame of the partial dependence grid for each response model,
+predictor variable, and bootstrap.
+\item \verb{[[2]]}: A list of partial dependence plots for each predictor variable in
+the \code{target} response model.
+}
 }
 \description{
-This function bootstraps model predictions and generates partial dependence
-plots for each response variable. It also creates a combined plot for the top
-variables of interest.
+This function extracts and plots the bootrapped partial dependence functions
+calculated by \code{\link[=mrBootstrap]{mrBootstrap()}} for each response variable.
 }
 \examples{
 library(tidymodels)
@@ -64,7 +67,7 @@ mrIML_rf <- mrIMLpredicts(
 
 mrIML_rf_boot <- mrIML_rf \%>\%
   mrBootstrap(num_bootstrap = 5)
-  
+
 mrIML_rf_PD <- mrPdPlotBootstrap(
   mrIML_rf,
   mrIML_rf_boot,

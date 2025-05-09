@@ -52,12 +52,11 @@ mrIML_rf <- mrIMLpredicts(
   k = 5
 )
 
-# cl <- parallel::makeCluster(5)
-# future::plan(cluster, workers=cl)
+#future::plan(multisession, workers = 4)
 
 mrIML_bootstrap <- mrIML_rf \%>\%
   mrBootstrap(
-  num_bootstrap = 50
+    num_bootstrap = 50
   )
 \dontshow{\}) # examplesIf}
 }
