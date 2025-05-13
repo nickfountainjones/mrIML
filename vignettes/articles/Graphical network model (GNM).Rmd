@@ -271,12 +271,13 @@ gg %>%
     )
   ) +
   geom_edges(
-    aes(color = Color, linewidth = (Value)), 
+    aes(color = Color, linewidth = Value), 
     curvature = 0.2,
     arrow = arrow(
       length = unit(5, "pt"),
-      type = "closed")
-    ) + 
+      type = "closed"
+    )
+  ) + 
   geom_nodes(
     color = "gray", 
     size = degree(g, mode = "out")/2
@@ -288,18 +289,19 @@ gg %>%
     aes(label = name),
     box.padding = unit(0.5, "lines"),
     data = gg,
-    size = 2,
+    size = 3,
     segment.colour = "black",
     colour = "white",
     fill = "grey36"
-  )
+  ) +
+  coord_cartesian(xlim = c(-0.2, 1.2), ylim = c(-0.2, 1.2))
 ```
 
 ## One-way, two-way, and three-way interactions
 
 Finally, we can quantify the overall importance of interactions in different taxa models, as well as the importance of one- and two-way interactions for a specific taxon using the same bootstrapping approach. To quantify interaction importance, we use H-statistics from the [`hstats`](https://github.com/mayer79/hstats) package.
 
-```{r interactions}
+```{r interactions, fig.height=10}
 int_ <- mrInteractions(
   yhats_rf,
   num_bootstrap = 100,
