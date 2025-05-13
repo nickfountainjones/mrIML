@@ -394,8 +394,15 @@ mrVipPCA <- function(mrVip_obj) {
   
   vi_tbl <- mrVip_obj[[2]]
   
-  # Run PCA
-  pc_analasys <- t(vi_tbl) %>%
+  pc_analasys <- vi_tbl %>%
+    # Filter out rows with only one value
+    dplyr::rowwise() %>%
+    dplyr::filter(
+      dplyr::n_distinct(dplyr::c_across(tidyselect::everything())) > 1
+    ) %>%
+    # Transpose
+    t() %>%
+    # PCA
     stats::prcomp(scale. = TRUE)
   
   # Get scores
@@ -432,6 +439,13 @@ mrVipPCA <- function(mrVip_obj) {
   
   # Plot the variability captured by each PC
   p_pc_var_explained <- var_explained %>%
+    mutate(
+      PC = factor(
+        PC,
+        levels = paste0("PC", 1:n()),
+        ordered = TRUE
+      )
+    ) %>%
     ggplot2::ggplot(
       ggplot2::aes(x = .data$PC, y = (.data$proportion * 100))
     ) +
