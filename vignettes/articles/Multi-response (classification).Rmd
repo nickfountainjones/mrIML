@@ -1,0 +1,238 @@
+---
+title: "Multi-response (classification)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Landscape genetics (classification)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  fig.width = 8,
+  fig.height = 6,
+  fig.align = "center",
+  comment = "#>"
+)
+options(rmarkdown.html_vignette.check_title = FALSE)
+```
+
+`mrIML` is an R package that allows users to generate and interpret multi-response models (i.e., joint species distribution models) leveraging advances in data science and machine learning. `mrIML` couples the [`tidymodels`](https://www.tidymodels.org) infrastructure developed by Max Kuhn and colleagues with model agnostic interpretable machine learning tools to gain insights into multiple response data such as. As such `mrIML` is flexible and easily extendable, allowing users to construct everything from simple linear models to tree-based methods for each response using the same syntax and same comparisons of predictive performance. In this vignette we will guide you through how to apply this package to landscape genetics problems but keep in mind any multiple-response data can be interrogated using this package (e.g., species or OTU presence/absence data).
+
+Let's start by loading the required packages and data. The data we are going to use is from Fountain-Jones etal (2017) and consists of single nucleotide polymorphism (SNP) data from a virus (feline immunodeficiency virus, FIV) infecting bobcats in Southern California.
+
+Features (a.k.a predictor variables) with missing data can be removed or interpolated depending on the nature of the missing data. Here we remove them.
+
+```{r load-packages}
+library(mrIML)
+library(tidymodels)
+library(flashlight)
+
+set.seed(7007)
+```
+
+```{r load-data}
+load("Features.RData")
+load("Responsedata.RData")
+
+# Print first 6 cols
+head(Features)[1:6]
+head(Responsedata)[1:6]
+```
+
+When constructing these type of models, SNPs that are common (occur say in >80% of samples) or rare (<10% of samples) are difficult to model. This can be a problem for potentially adaptice loci which tend to be rarer. We provide down-sampling or up-sampling strategies for dealing with unbalanced data (see below) but filtering out common and rare loci is another option. The more response variables (SNPs) you include the longer the computational time, so for this example we will drop SNPs occurring in <40% or >70% of individuals. This leaves 29 SNPs remaining. In practice, these filtering steps are stringent so <20% and >80% maybe more appropriate.
+ 
+```{r define-data}
+# Define the responses
+Y <- filterRareCommon(
+  Responsedata,
+  lower = 0.4,
+  higher = 0.7
+) 
+
+# Define the predictors
+X <- Features %>%
+  select(where(~ n_distinct(.) > 1))
+```
+
+If your feature data consists of landscape resistance data generated from Circuitscape or similar, we provide functionality that can extract each surface from a folder and generate resistance components that can be used in these models (using principal coordinate analysis). This data can be easily merged if needs be with other non-matrix data (e.g., age/sex). There was no resistance surfaces here, but if there were, we could load it as follows:
+
+```{r load-surfaces, eval = FALSE}
+R <- resist_components(
+  filename = "FILE_PATH", p_val = 0.01)
+
+# Add to predictors
+X <- cbind(R,X)
+```
+
+Now all the data is loaded and ready to go we can formulate the model using tidymodel syntax. In this case we have binary data (SNP presence/absence at each loci) but the data could also be counts or continuous (the `mode` argument would be `"regression"` instead of `"classification"`). The user can specify any model from the tidymodel universe (see https://www.tidymodels.org/find/ for details). However, we have done most of our testing on random forests (RF), xgr boost and glms (generalized linear models). Here we will specify an RF classification model to fit each response.
+
+```{r}
+model_rf <- rand_forest(
+  trees = 100,
+  mode = "classification",
+  mtry = tune(),
+  min_n = tune()
+) %>%
+ set_engine("randomForest")
+```
+
+Now we can run the model. Hyper parameter tuning (for algorithms that have hyper parameters) is done automatically by testing how model performance changes across a random grid and the best performing combination is kept. The only choice to make is to either down/up sample data or leave it as is. As our viral data set is small, we will not do any up- or down-sampling (`balance_data = "no"`). We can also implement parallel processing for larger data sets to speed up the `mrIML` workflow. 
+
+```{r parallel-setup, eval=FALSE}
+future::plan("multisession", workers = 4)
+```
+
+```{r fit-mrIML, message=FALSE, warning = FALSE, results='hide'}
+yhats_rf <- mrIMLpredicts(
+  X = X,
+  Y = Y,
+  Model = model_rf,
+  tune_grid_size = 5,
+  k = 5,
+  racing = FALSE
+)
+```
+
+It takes a couple of minutes to run on a laptop and there are warnings that you can ignore (this data set is small). The above code constructs tuned random forest models for the features (`Y`) you have selected for each response (29 viral SNP in this case). We can then check the performance of each model separately and overall. The performance metrics we provide for classification models are area under curve (`roc_AUC`),  Mathew's correlation coefficient (`mcc` - a good metric when data is imbalanced i.e., unequal numbers of 0/1s in each response), specificity (proportion correctly classified not having the mutation at that loci) and sensitivity (proportion correctly classified having the mutation at that loci). We also provide "prevalence", which tells you how common that SNP was in the population sampled.
+
+```{r performance, message=FALSE, warning=FALSE}
+ModelPerf_rf <- mrIMLperformance(yhats_rf)
+ModelPerf_rf$model_performance
+ModelPerf_rf$global_performance_summary
+```
+
+You can compare the predictive performance of random forests with any other technique simply by altering the following. Lets try a logistic regression. Note that for logistic regression you may need to scale/transform the data or create dummy variables if you include categorical variables. These steps can easily be added to the pipeline following tidymodel syntax.
+
+```{r linear-model, message=FALSE, warning=FALSE}
+# Define LM
+model_glm <- logistic_reg() %>%
+  set_engine("glm")
+
+# Fit mrIML model
+yhats_glm <- mrIMLpredicts(
+  X = X,
+  Y = Y,
+  Model = model_glm,
+  tune_grid_size = 5,
+  k = 5,
+  racing = FALSE
+)
+
+# Get performance
+ModelPerf_glm <- mrIMLperformance(yhats_glm)
+ModelPerf_glm$global_performance_summary
+```
+
+You can see that the random forests model outperforms the logistic regression in this case (`r ModelPerf_glm$global_performance_summary` versus `r ModelPerf_rf$global_performance_summary`). Once we are happy with the underlying model we can then dive in to see how this model predicts the SNPs. First we can check variable importance. 
+
+```{r var-imp, message=FALSE, warning=FALSE}
+glm_impVI <- mrVip(
+  yhats_glm,
+  threshold = 0.5,
+  global_top_var = 10,
+  local_top_var = 5,
+  model_perf = ModelPerf_glm
+)
+glm_impVI[[3]]
+```
+
+The output of `mrVip()` contains a figure summarising variable imporance. The main plot on the left shows the global importance (what features shape genetic change overall) and the sub plots on the right show the individual models (with an option to filter by the mcc value using `threshold`). We also provide functionality to assess outlier SNPs utilizing a PCA on importance scores. 
+
+```{r}
+glm_impVI_PCA <- glm_impVI %>%
+  mrVipPCA()
+glm_impVI_PCA[[1]]
+```
+
+<span style="color:red">We can see only one outlier was detected on PC3 (env24) indicating that this SNP was bets predicted by a different set of predictors. Looking at the indiivudal importance plots shows that, unlike the other SNPs, forest cover was the best predictor for env24. See the regression vignette for more details.</span>
+
+If your features can be grouped together this can make it easier to interpret variable importance plots. The order of the groups should match the order of the columns in the X data, for example:
+
+```{r eval = FALSE}
+groupCov <- c(
+  rep("Host_characteristics", 1),
+  rep("Urbanisation", 3),
+  rep("Vegetation", 2),
+  rep("Urbanisation", 1),
+  rep("Spatial", 2),
+  rep("Host_relatedness", 6),
+  rep("Host_characteristics", 1),
+  rep("Vegetation", 2),
+  rep("Urbanisation",1)
+)
+```
+
+`mrIML` allows a full suite of model agnostic interpretable machine learning tools to be applied to individual models or the "global" throught `mrFlashlight()`. We utilize the R package [`flashlight`](https://mayer79.github.io/flashlight/) which offers an exciting and ever growing tool set to interpret these kinds of models. For example, once we create the flashlight objects, we can plot the predicted values of a feature for each response.
+
+```{r flashlight, message=FALSE, warning=FALSE}
+fl <- mrFlashlight(
+  yhats_rf,
+  response = "single",
+  index = 1
+)
+
+fl %>%
+  light_scatter(
+    v = "Grassland",
+    type = "predicted"
+  ) %>%
+  plot()
+```
+
+`mrIMl` also provides a wraper function for some flashlight functionality to visualize the marginal (i.e. partial dependencies) or conditional (accumulated local effects) effect of a feature on the responses. Partial dependencies take longer to calculate and are more sensitive to correlated features, therefore the results of the two can vary. For example, in the two plots bellow generated with `mrCovar()`, the results differ slightly but not significantly. ALE plots are a better option if your feature set is even moderately impacted by collinearity (e.g., rho = 0.6). <span style="color:red">The second plot is the overall smoothed genetic-turnover function.</span>
+
+```{r marginal-effects, message=FALSE, warning=FALSE}
+# Partial dependencies
+profilePlot_pd <- mrCovar(
+  yhats_rf,
+  var = "Grassland",
+  sdthresh = 0.05
+)
+profilePlot_pd[[1]] +
+  xlim(0, NA)
+
+# Acumulated local effects
+profilePlot_ale <- mrCovar(
+  yhats_rf,
+  var = "Grassland",
+  sdthresh = 0.05,
+  type = "ale"
+)
+profilePlot_ale[[1]] +
+  xlim(0, NA)
+```
+
+Finally, we can assess how features interact overall to shape genetic change using `mrInteractions()`. Be warned, this is memory intensive. Future updates to this package will enable users to visualize these interactions and explore them in more detail using 2D ALE plots for example.
+
+```{r interactions, message=FALSE, warning=FALSE}
+interactions <- mrInteractions(
+  yhats_rf,
+  feature = "Forest",
+  num_bootstrap = 1,
+  top_int = 2
+)
+```
+
+You could easily compare the plots generated above from our random forest model with the logistic regression model we fit earlier.
+
+You can visualize detected interactions by converting the `mrIML` object into a flashlight object and using the `flashlight::light_profile2d()` function. In effect, the resulting heatmap shows the average prediction of the interacting features across loci/response variables. Both ALEs and partial dependencies can be used - but we highly recommend using ALEs for the most robust results (see Molnar (2019) for more detail)
+
+```{r two-way-interaction, eval=FALSE, include=FALSE}
+fl <- mrFlashlight(
+  yhats_rf,
+  response = "single",
+  index = 1
+)
+
+fl %>%
+  light_profile2d(
+    c("Forest", "Grassland"),
+    cbind(Y, X)
+  ) %>%
+  plot() +
+  theme_bw()
+```
+
+This is just an example of the tools can be applied to better interpret multi-response models and in turn gain insights into how landscape impacts genetic change. We've demonstrated that this package is modular  and flexible, allowing future work on 'tidymodels' and interpretable machine learning to easily be incorporated. The predictions from these models, for example,  can be used to identify individual SNPs that may be adaptive assess gene flow across space (future updates) or to help better formulate probabilistic models such as generalized dissimilarity models (GDMs).

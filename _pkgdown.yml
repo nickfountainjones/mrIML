@@ -19,8 +19,8 @@ articles:
   navbar: ~
   contents:
   - mrIML
-  - articles/Landscape genetics (classification)
-  - articles/Regression
+  - articles/Multi-response (classification)
+  - articles/Multi-response (regression)
   - articles/Graphical network model (GNM)
 
 - title: Other
