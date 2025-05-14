@@ -86,7 +86,7 @@ mrBootstrap <- function(mrIMLobj,
     function(yhat) {
       list(
         data = yhat$data,
-        workflow = yhat$last_mod_fit
+        workflow = hardhat::extract_workflow(yhat$last_mod_fit)
       )
     }
   )
@@ -103,7 +103,7 @@ mrBootstrap <- function(mrIMLobj,
       utils::setTxtProgressBar(pb, i)
       var_id <- var_ids[i]
       boot_id <- boot_ids[i]
-      boot_fun(
+      mrIML_internal_bootstrap_fun(
         bootstrap_wf[[var_id]]$workflow,
         bootstrap_wf[[var_id]]$data,
         metrics = flashlight_ops$metrics,
@@ -113,7 +113,6 @@ mrBootstrap <- function(mrIMLobj,
         boot_id = boot_id
       )
     },
-    boot_fun = mrIML_internal_bootstrap_fun,
     future.seed = TRUE
   )
   
@@ -170,7 +169,7 @@ mrIML_internal_bootstrap_fun <- function(wf,
   
   # Refit model and create flashlight
   model_fit <- workflows::fit(
-    hardhat::extract_workflow(wf),
+    wf,
     data = bootstrap_sample
   )
   

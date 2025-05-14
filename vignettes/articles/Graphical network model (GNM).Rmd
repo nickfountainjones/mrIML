@@ -165,7 +165,8 @@ yhats_rf_downSamp <- mrIMLpredicts(
   balance_data = "down", #down sampling
   prop = 0.75,
   k = 5,
-  racing = TRUE)
+  racing = TRUE
+)
 
 ModelPerf_rf_downSamp <- mrIMLperformance(yhats_rf_downSamp)
 ModelPerf_rf_downSamp[[1]]
