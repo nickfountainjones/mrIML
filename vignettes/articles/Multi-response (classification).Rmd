@@ -18,11 +18,9 @@ knitr::opts_chunk$set(
 options(rmarkdown.html_vignette.check_title = FALSE)
 ```
 
-`mrIML` is an R package that allows users to generate and interpret multi-response models (i.e., joint species distribution models) leveraging advances in data science and machine learning. `mrIML` couples the [`tidymodels`](https://www.tidymodels.org) infrastructure developed by Max Kuhn and colleagues with model agnostic interpretable machine learning tools to gain insights into multiple response data such as. As such `mrIML` is flexible and easily extendable, allowing users to construct everything from simple linear models to tree-based methods for each response using the same syntax and same comparisons of predictive performance. In this vignette we will guide you through how to apply this package to landscape genetics problems but keep in mind any multiple-response data can be interrogated using this package (e.g., species or OTU presence/absence data).
+`mrIML` is an R package that allows users to generate and interpret multi-response models (i.e., joint species distribution models) leveraging advances in data science and machine learning. `mrIML` couples the [`tidymodels`](https://www.tidymodels.org) infrastructure developed by Max Kuhn and colleagues with model-agnostic interpretable machine learning tools to gain insights into multiple response data. As such, `mrIML` is flexible and easily extendable, allowing users to construct everything from simple linear models to tree-based methods for each response using the same syntax and comparisons of predictive performance. In this vignette, we will guide you through how to apply this package to landscape genetics problems, but keep in mind that any multiple-response data can be interrogated using this package (e.g., species or OTU presence/absence data).
 
-Let's start by loading the required packages and data. The data we are going to use is from Fountain-Jones etal (2017) and consists of single nucleotide polymorphism (SNP) data from a virus (feline immunodeficiency virus, FIV) infecting bobcats in Southern California.
-
-Features (a.k.a predictor variables) with missing data can be removed or interpolated depending on the nature of the missing data. Here we remove them.
+Let's start by loading the required packages and data. The data we are going to use is from Fountain-Jones et al. (2017) and consists of single nucleotide polymorphism (SNP) data from a virus (feline immunodeficiency virus, FIV) infecting bobcats in Southern California.
 
 ```{r load-packages}
 library(mrIML)
@@ -41,8 +39,8 @@ head(Features)[1:6]
 head(Responsedata)[1:6]
 ```
 
-When constructing these type of models, SNPs that are common (occur say in >80% of samples) or rare (<10% of samples) are difficult to model. This can be a problem for potentially adaptice loci which tend to be rarer. We provide down-sampling or up-sampling strategies for dealing with unbalanced data (see below) but filtering out common and rare loci is another option. The more response variables (SNPs) you include the longer the computational time, so for this example we will drop SNPs occurring in <40% or >70% of individuals. This leaves 29 SNPs remaining. In practice, these filtering steps are stringent so <20% and >80% maybe more appropriate.
- 
+When constructing these types of models, SNPs that are common (occur in >80% of samples) or rare (<10% of samples) are difficult to model. This can be a problem for potentially adaptive loci, which tend to be rarer. We provide down-sampling or up-sampling strategies for dealing with unbalanced data (see below), but filtering out common and rare loci is another option. The more response variables (SNPs) you include, the longer the computational time, so for this example, we will drop SNPs occurring in <40% or >70% of individuals. This leaves 29 SNPs remaining. In practice, these filtering steps are stringent, so <20% and >80% may be more appropriate.
+
 ```{r define-data}
 # Define the responses
 Y <- filterRareCommon(
@@ -56,14 +54,15 @@ X <- Features %>%
   select(where(~ n_distinct(.) > 1))
 ```
 
-If your feature data consists of landscape resistance data generated from Circuitscape or similar, we provide functionality that can extract each surface from a folder and generate resistance components that can be used in these models (using principal coordinate analysis). This data can be easily merged if needs be with other non-matrix data (e.g., age/sex). There was no resistance surfaces here, but if there were, we could load it as follows:
+If your feature data consists of landscape resistance data generated from Circuitscape or similar, we provide functionality that can extract each surface from a folder and generate resistance components that can be used in these models (using principal coordinate analysis). This data can be easily merged with other non-matrix data (e.g., age/sex) if needed. There were no resistance surfaces here, but if there were, we could load them as follows:
 
 ```{r load-surfaces, eval = FALSE}
 R <- resist_components(
-  filename = "FILE_PATH", p_val = 0.01)
+  filename = "FILE_PATH", p_val = 0.01
+)
 
 # Add to predictors
-X <- cbind(R,X)
+X <- cbind(R, X)
 ```
 
 Now all the data is loaded and ready to go we can formulate the model using tidymodel syntax. In this case we have binary data (SNP presence/absence at each loci) but the data could also be counts or continuous (the `mode` argument would be `"regression"` instead of `"classification"`). The user can specify any model from the tidymodel universe (see https://www.tidymodels.org/find/ for details). However, we have done most of our testing on random forests (RF), xgr boost and glms (generalized linear models). Here we will specify an RF classification model to fit each response.
@@ -78,7 +77,7 @@ model_rf <- rand_forest(
  set_engine("randomForest")
 ```
 
-Now we can run the model. Hyper parameter tuning (for algorithms that have hyper parameters) is done automatically by testing how model performance changes across a random grid and the best performing combination is kept. The only choice to make is to either down/up sample data or leave it as is. As our viral data set is small, we will not do any up- or down-sampling (`balance_data = "no"`). We can also implement parallel processing for larger data sets to speed up the `mrIML` workflow. 
+Now we can run the model. Hyper parameter tuning (for algorithms that have hyper parameters) is done automatically by testing how model performance changes across a random grid and the best performing combination is kept. The only choice to make is to either down/up sample data or leave it as is. As our viral data set is small, we will not do any up- or down-sampling (i.e.,`balance_data = "no"`). We can also implement parallel processing for larger data sets to speed up the `mrIML` workflow. 
 
 ```{r parallel-setup, eval=FALSE}
 future::plan("multisession", workers = 4)
@@ -206,20 +205,24 @@ profilePlot_ale[[1]] +
 
 Finally, we can assess how features interact overall to shape genetic change using `mrInteractions()`. Be warned, this is memory intensive. Future updates to this package will enable users to visualize these interactions and explore them in more detail using 2D ALE plots for example.
 
-```{r interactions, message=FALSE, warning=FALSE}
+```{r interactions, message=FALSE, warning=FALSE, fig.height=10}
 interactions <- mrInteractions(
   yhats_rf,
   feature = "Forest",
   num_bootstrap = 1,
   top_int = 2
 )
+
+interactions[[1]] /
+  interactions[[2]] /
+  interactions[[3]]
 ```
 
 You could easily compare the plots generated above from our random forest model with the logistic regression model we fit earlier.
 
 You can visualize detected interactions by converting the `mrIML` object into a flashlight object and using the `flashlight::light_profile2d()` function. In effect, the resulting heatmap shows the average prediction of the interacting features across loci/response variables. Both ALEs and partial dependencies can be used - but we highly recommend using ALEs for the most robust results (see Molnar (2019) for more detail)
 
-```{r two-way-interaction, eval=FALSE, include=FALSE}
+```{r two-way-interaction}
 fl <- mrFlashlight(
   yhats_rf,
   response = "single",
