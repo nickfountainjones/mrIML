@@ -122,7 +122,7 @@ mrIMLpredicts <- function(X,
   
   yhats <- future.apply::future_lapply(
     X = seq(1, n_response),
-    FUN = function(i, fit_fun) {
+    FUN = function(i) {
       utils::setTxtProgressBar(pb, i)
       mrIML_internal_fit_function(
         i,
@@ -170,19 +170,37 @@ mrIML_internal_fit_function <- function(i,
                                         k,
                                         racing,
                                         seed) {
+  resp_name <- names(.Y)[i]
   if (!is.null(.X1)) {
     if (!is.null(.X)) {
       data <- tibble::as_tibble(
-        cbind(.Y[[i]], .X, .X1[-i])
+        cbind(
+          .Y %>%
+            dplyr::select(resp_name),
+          .X,
+          .X1 %>%
+            dplyr::select(-tidyselect::any_of(resp_name))
+        )
       )
     } else {
       data <- tibble::as_tibble(
-        cbind(.Y[[i]], .X1[-i])
+        cbind(
+          .Y %>%
+            dplyr::select(resp_name),
+          .X1 %>%
+            dplyr::select(-tidyselect::any_of(resp_name))
+        )
       )
     }
   } else {
     if (!is.null(.X)) {
-      data <- tibble::as_tibble(cbind(.Y[[i]], .X))
+      data <- tibble::as_tibble(
+        cbind(
+          .Y %>%
+            dplyr::select(resp_name),
+          .X
+        )
+      )
     } else {
       stop("At least one of X or X1 must be specified.")
     }
