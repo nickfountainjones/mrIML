@@ -4,7 +4,7 @@
 #' This function generates SHAP (SHapley Additive exPlanations) plots for
 #' multiple models and responses.
 #'
-#' @param mrIMLobj A list object output by [mrIMLpredicts()].
+#' @param mrIML_obj A list object output by [mrIMLpredicts()].
 #' @param taxa An optional character vector specifying which responses to include.
 #' @param kind A character string passed to [shapviz::sv_importance()] specifying
 #' the type of plot parameter (e.g., "beeswarm" for feature effect plot, "bar" for
@@ -82,18 +82,18 @@ mrShapely <- function(mrIML_obj,
         # Classification models need to predict the probability (type = "prob").
         classification = list(
           object = response$last_mod_fit %>%
-            extract_workflow(),
+            hardhat::extract_workflow(),
           X = response$data %>%
-            select(-class),
+            dplyr::select(-class),
           bg_X = response$data,
           type = "prob"
         ),
         # Regression models need to predict the raw response (defult type).
         regression = list(
           object = response$last_mod_fit %>%
-            extract_workflow(),
+            hardhat::extract_workflow(),
           X = response$data %>%
-            select(-class),
+            dplyr::select(-class),
           bg_X = response$data
         )
       )
@@ -152,7 +152,7 @@ mrShapely <- function(mrIML_obj,
         covariate_names <- mrIML_obj$Fits[[response_name]]$data %>%
           dplyr::select(-class) %>%
           colnames()
-        covariate_name_combos <- combn(
+        covariate_name_combos <- utils::combn(
           covariate_names,
           m = 2,
           simplify = FALSE

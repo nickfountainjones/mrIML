@@ -16,6 +16,8 @@ mrShapely(
 )
 }
 \arguments{
+\item{mrIML_obj}{A list object output by \code{\link[=mrIMLpredicts]{mrIMLpredicts()}}.}
+
 \item{taxa}{An optional character vector specifying which responses to include.}
 
 \item{kind}{A character string passed to \code{\link[shapviz:sv_importance]{shapviz::sv_importance()}} specifying
@@ -33,8 +35,6 @@ plots (default is TRUE).}
 
 \item{plot_2D_dependencies}{A logical indicating whether to generate
 interaction plots (default is TRUE).}
-
-\item{mrIMLobj}{A list object output by \code{\link[=mrIMLpredicts]{mrIMLpredicts()}}.}
 }
 \value{
 A list object where the first element returns the SHAP results, and the
