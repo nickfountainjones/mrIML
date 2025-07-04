@@ -74,7 +74,11 @@ multiple models and responses.</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-taxa">taxa<a class="anchor" aria-label="anchor" href="#arg-taxa"></a></dt>
+<dl><dt id="arg-mriml-obj">mrIML_obj<a class="anchor" aria-label="anchor" href="#arg-mriml-obj"></a></dt>
+<dd><p>A list object output by <code><a href="mrIMLpredicts.html">mrIMLpredicts()</a></code>.</p></dd>
+
+
+<dt id="arg-taxa">taxa<a class="anchor" aria-label="anchor" href="#arg-taxa"></a></dt>
 <dd><p>An optional character vector specifying which responses to include.</p></dd>
 
 
@@ -103,10 +107,6 @@ plots (default is TRUE).</p></dd>
 <dd><p>A logical indicating whether to generate
 interaction plots (default is TRUE).</p></dd>
 
-
-<dt id="arg-mrimlobj">mrIMLobj<a class="anchor" aria-label="anchor" href="#arg-mrimlobj"></a></dt>
-<dd><p>A list object output by <code><a href="mrIMLpredicts.html">mrIMLpredicts()</a></code>.</p></dd>
-
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -117,7 +117,9 @@ if they were set to TRUE in the input.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"NOT_CRAN"</span><span class="op">)</span>, <span class="st">"true"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">MRFcov</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MRFcov/man/Bird.parasites.html" class="external-link">Bird.parasites</a></span></span></span>
 <span class="r-in"><span></span></span>
