@@ -376,21 +376,7 @@ mrVip_mrIMLobj <- function(mr_iml_obj) {
 mrVipPCA <- function(mrVip_obj) {
   
   # Require the 'ggrepel' package to be installed
-  if (!requireNamespace("ggrepel", quietly = TRUE)) {
-    message(
-      paste0("The 'ggrepel' package is required for this function. Would you ",
-             "like to install it? (yes/no)")
-    )
-    response <- readline()
-    if (tolower(response) == "yes") {
-      utils::install.packages("ggrepel")
-    } else {
-      stop(
-        paste0("The 'ggrepel' package is needed for this function. Please ",
-               "install it to proceed.")
-      )
-    }
-  }
+  rlang::check_installed("ggrepel", reason = "to use `mrVipPCA()`.")
   
   vi_tbl <- mrVip_obj[[2]]
   
@@ -439,10 +425,10 @@ mrVipPCA <- function(mrVip_obj) {
   
   # Plot the variability captured by each PC
   p_pc_var_explained <- var_explained %>%
-    mutate(
+    dplyr::mutate(
       PC = factor(
         PC,
-        levels = paste0("PC", 1:n()),
+        levels = paste0("PC", 1:dplyr::n()),
         ordered = TRUE
       )
     ) %>%
