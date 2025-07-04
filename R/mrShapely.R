@@ -22,7 +22,7 @@
 #' following elements contain the feature-effect, 1D-dependencies, and 2D-dependencies
 #' if they were set to TRUE in the input.
 #'
-#' @examples
+#' @examples !identical(Sys.getenv("NOT_CRAN"), "true")
 #' library(tidymodels)
 #'
 #' data <- MRFcov::Bird.parasites
