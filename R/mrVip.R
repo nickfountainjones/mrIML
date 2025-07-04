@@ -427,7 +427,7 @@ mrVipPCA <- function(mrVip_obj) {
   p_pc_var_explained <- var_explained %>%
     dplyr::mutate(
       PC = factor(
-        PC,
+        .data$PC,
         levels = paste0("PC", 1:dplyr::n()),
         ordered = TRUE
       )
