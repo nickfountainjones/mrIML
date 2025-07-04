@@ -53,7 +53,7 @@ mrIML_rf_boot <- mrIML_rf \%>\%
   mrBootstrap()
 
 assoc_net_filtered <- mrIML_rf_boot \%>\%
-  mrCoOccurNet_bootstrap() \%>\%
+  mrCoOccurNet() \%>\%
   filter(mean_strength > 0.05)
 
 # Convert to igraph

@@ -43,7 +43,7 @@
 #'   mrBootstrap()
 #'
 #' assoc_net_filtered <- mrIML_rf_boot %>%
-#'   mrCoOccurNet_bootstrap() %>%
+#'   mrCoOccurNet() %>%
 #'   filter(mean_strength > 0.05)
 #'
 #' # Convert to igraph
@@ -87,6 +87,9 @@
 #'
 #' @export
 mrCoOccurNet <- function(mrBootstrap_obj) {
+  stopifnot(
+    "mrCoOccurNet() only available for classification models."=attr(mrBootstrap_obj, "mode") == "classification"
+  )
   # Expand bootstrap object
   pd_boot_df <- lapply(
     mrBootstrap_obj %>%

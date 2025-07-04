@@ -46,6 +46,7 @@ This function generates SHAP (SHapley Additive exPlanations) plots for
 multiple models and responses.
 }
 \examples{
+!identical(Sys.getenv("NOT_CRAN"), "true")
 library(tidymodels)
 
 data <- MRFcov::Bird.parasites
