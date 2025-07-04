@@ -126,7 +126,10 @@ mrBootstrap <- function(mrIMLobj,
     bstraps_pd_list[[var_ids[i]]][[boot_ids[[i]]]] <- bootstrap_results[[i]]
   }
   
-  bstraps_pd_list
+  bstraps_pd_list |>
+    structure(
+      mode = mode
+    )
 }
 
 mrIML_internal_bootstrap_fun <- function(wf,
