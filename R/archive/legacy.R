@@ -324,7 +324,7 @@ MrShapely <- function(yhats, MultRespVars = Resp,
     } else {
       taxa_to_iterate <- seq_along(shapobj_list)
     }
-    s
+    
     feature_plots_with_labels <- future_lapply(taxa_to_iterate, function(i) {
       response_name <- ifelse(is.null(ResponseNames[i]), "", ResponseNames[i])
 

@@ -54,7 +54,9 @@ Suggests:
     gridExtra,
     future,
     generics,
-    missForest
+    missForest,
+    kernelshap,
+    shapviz
 License: MIT + file LICENSE
 LazyData: true    
 VignetteBuilder: knitr, rmarkdown
