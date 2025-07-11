@@ -111,6 +111,7 @@ MR_model_rf <- mrIMLpredicts(
 
 # Fitting a graphical network model -----------------------------------------
 # Define the dependent response variables (all in this case)
+\donttest{
 X1 <- Y
 
 GN_model <- mrIMLpredicts(
@@ -122,5 +123,5 @@ GN_model <- mrIMLpredicts(
   k = 2,
   racing = FALSE
 )
-
+}
 }
