@@ -16,7 +16,7 @@
 #' * `[[2]]`: A list of partial dependence plots for each predictor variable in
 #' the `target` response model.
 #'
-#' @examples
+#' @examplesIf identical(Sys.getenv("NOT_CRAN"), "true")
 #' library(tidymodels)
 #'
 #' data <- MRFcov::Bird.parasites
@@ -27,7 +27,7 @@
 #'   select(scale.prop.zos)
 #'
 #' model_rf <- rand_forest(
-#'   trees = 50, # 50 trees are set for brevity. Aim to start with 1000
+#'   trees = 10, # 10 trees are set for brevity. Aim to start with 1000
 #'   mode = "classification",
 #'   mtry = tune(),
 #'   min_n = tune()
@@ -45,7 +45,7 @@
 #' )
 #'
 #' mrIML_rf_boot <- mrIML_rf %>%
-#'   mrBootstrap(num_bootstrap = 5)
+#'   mrBootstrap(num_bootstrap = 50)
 #'
 #' mrIML_rf_PD <- mrPdPlotBootstrap(
 #'   mrIML_rf,

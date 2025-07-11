@@ -20,7 +20,7 @@ calculates strength and directionality of the relationships. The output can be
 passed to \pkg{igraph} to plot a directed acyclic graph (DAG).
 }
 \examples{
-\dontshow{if (!identical(Sys.getenv("NOT_CRAN"), "true")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (identical(Sys.getenv("NOT_CRAN"), "true")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(tidymodels)
 library(igraph)
 library(ggnetwork)

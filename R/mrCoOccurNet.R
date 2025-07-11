@@ -10,7 +10,7 @@
 #' @return A data frame representing the co-occurrence network with edge
 #' strengths and directionality.
 #'
-#' @examplesIf !identical(Sys.getenv("NOT_CRAN"), "true")
+#' @examplesIf identical(Sys.getenv("NOT_CRAN"), "true")
 #' library(tidymodels)
 #' library(igraph)
 #' library(ggnetwork)

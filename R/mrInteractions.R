@@ -28,7 +28,7 @@
 #' * `$h2_pairwise_df`: A data frame of the H2-pairwise statistics for the
 #' variable in each response model, along with bootstraps if applicable.
 #'
-#' @examples
+#' @examplesIf identical(Sys.getenv("NOT_CRAN"), "true")
 #' library(tidymodels)
 #'
 #' data <- MRFcov::Bird.parasites
@@ -40,7 +40,7 @@
 #'
 #' # Specify a random forest tidy model
 #' model_rf <- rand_forest(
-#'   trees = 50, # 50 trees are set for brevity. Aim to start with 1000
+#'   trees = 10, # 10 trees are set for brevity. Aim to start with 1000
 #'   mode = "classification",
 #'   mtry = tune(),
 #'   min_n = tune()
@@ -56,10 +56,10 @@
 #'   k = 2,
 #'   racing = FALSE
 #' )
-#'
+#' 
 #' mrIML_interactions_rf <- mrInteractions(
 #'   mrIML_rf,
-#'   num_bootstrap = 5,
+#'   num_bootstrap = 50,
 #'   feature = "Plas"
 #' )
 #'

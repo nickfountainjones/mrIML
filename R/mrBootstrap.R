@@ -12,7 +12,7 @@
 #' @return A list containing bootstrap samples of variable profiles for each
 #' response variable.
 #' 
-#' @examplesIf !identical(Sys.getenv("NOT_CRAN"), "true")
+#' @examplesIf identical(Sys.getenv("NOT_CRAN"), "true")
 #' library(tidymodels)
 #'
 #' data <- MRFcov::Bird.parasites

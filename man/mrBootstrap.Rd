@@ -24,7 +24,7 @@ This function bootstraps model predictions and generates variable profiles
 for each response variable.
 }
 \examples{
-\dontshow{if (!identical(Sys.getenv("NOT_CRAN"), "true")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (identical(Sys.getenv("NOT_CRAN"), "true")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(tidymodels)
 
 data <- MRFcov::Bird.parasites
