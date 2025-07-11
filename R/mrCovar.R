@@ -22,8 +22,9 @@
 #' identify key threshold values in the variable.
 #'
 #' @examples
-#' library(tidymodels)
-#'
+#' library(parsnip)
+#' library(dplyr)
+#' 
 #' # Without bootstrap
 #' data <- MRFcov::Bird.parasites
 #' Y <- data %>%
@@ -50,7 +51,7 @@
 #'   racing = FALSE
 #' )
 #'
-#' mrIML_rf %>%
+#' covar_results <- mrIML_rf %>%
 #'   mrCovar(var = "scale.prop.zos", sdthresh = 0.05)
 #' 
 #' @export

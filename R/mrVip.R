@@ -56,7 +56,7 @@
 #'   racing = FALSE
 #' )
 #' 
-#' mrVip(mrIML_rf, taxa = "Plas")
+#' vip_results <-mrVip(mrIML_rf, taxa = "Plas")
 #' 
 #' # With bootstrap
 #' \donttest{
@@ -67,8 +67,6 @@
 #'   mrIML_rf,
 #'   mrBootstrap_obj = mrIML_rf_boot
 #' )
-#' 
-#' mrIML_rf_vip
 #' }
 #' @export
 mrVip <- function(mrIMLobj,
@@ -369,7 +367,7 @@ mrVip_mrIMLobj <- function(mr_iml_obj) {
 #' 
 #' mrIML_rf_vip <- mrVip(mrIML_rf, taxa = "Plas")
 #' 
-#' mrIML_rf_vip %>%
+#' vipPCA_results <- mrIML_rf_vip %>%
 #'  mrVipPCA()
 #' 
 #' @export

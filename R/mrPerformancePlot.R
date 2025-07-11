@@ -17,7 +17,8 @@
 #' performance metrics and their differences.
 #' 
 #' @examples
-#' library(tidymodels)
+#' library(parsnip)
+#' library(dplyr)
 #'
 #' data <- MRFcov::Bird.parasites
 #' Y <- data %>%
@@ -59,10 +60,6 @@
 #'   ModelPerf1 = MR_perf_rf,
 #'   ModelPerf2 = MR_perf_lm
 #' )
-#'
-#' perf_comp[[1]]
-#' perf_comp[[2]]
-#' perf_comp[[3]]
 #' 
 #' @export
 mrPerformancePlot <- function(ModelPerf1 = NULL,

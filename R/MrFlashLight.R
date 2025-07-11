@@ -50,7 +50,7 @@
 #'   response = "multi",
 #'   index = 1
 #' )
-#'
+#' \donttest{
 #' # Performance comparison
 #' fl %>%
 #'   light_performance(
@@ -68,7 +68,7 @@
 #' fl %>%
 #'   light_profile2d(c("scale.prop.zos", "Plas")) %>%
 #'   plot()
-#'
+#' }
 #' @export
 mrFlashlight <- function(mrIMLobj,
                          response = "multi",
