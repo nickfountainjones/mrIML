@@ -62,7 +62,7 @@ fl <- mrFlashlight(
   response = "multi",
   index = 1
 )
-
+\donttest{
 # Performance comparison
 fl \%>\%
   light_performance(
@@ -80,5 +80,5 @@ fl \%>\%
 fl \%>\%
   light_profile2d(c("scale.prop.zos", "Plas")) \%>\%
   plot()
-
+}
 }

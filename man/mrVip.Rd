@@ -81,7 +81,7 @@ mrIML_rf <- mrIMLpredicts(
   racing = FALSE
 )
 
-mrVip(mrIML_rf, taxa = "Plas")
+vip_results <-mrVip(mrIML_rf, taxa = "Plas")
 
 # With bootstrap
 \donttest{
@@ -92,7 +92,5 @@ mrIML_rf_vip <- mrVip(
   mrIML_rf,
   mrBootstrap_obj = mrIML_rf_boot
 )
-
-mrIML_rf_vip
 }
 }

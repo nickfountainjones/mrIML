@@ -26,23 +26,21 @@ principal components.
 Principal Component Analysis of mrIML variable importance
 }
 \examples{
-library(tidymodels)
-
 # Without bootstrap
 data <- MRFcov::Bird.parasites
 Y <- data \%>\%
-  select(-scale.prop.zos) \%>\%
-  select(order(everything()))
+  dplyr::select(-scale.prop.zos) \%>\%
+  dplyr::select(order(everything()))
 X <- data \%>\%
-  select(scale.prop.zos)
+  dplyr::select(scale.prop.zos)
 
-model_rf <- rand_forest(
+model_rf <- parsnip::rand_forest(
   trees = 10, # 10 trees are set for brevity. Aim to start with 1000
   mode = "classification",
-  mtry = tune(),
-  min_n = tune()
-) \%>\%
-  set_engine("randomForest")
+  mtry = tune::tune(),
+  min_n = tune::tune(),
+  engine = "randomForest"
+)
 
 mrIML_rf <- mrIMLpredicts(
   X = X,
@@ -56,7 +54,6 @@ mrIML_rf <- mrIMLpredicts(
 
 mrIML_rf_vip <- mrVip(mrIML_rf, taxa = "Plas")
 
-mrIML_rf_vip \%>\%
+vipPCA_results <- mrIML_rf_vip \%>\%
  mrVipPCA()
-
 }

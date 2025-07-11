@@ -337,23 +337,21 @@ mrVip_mrIMLobj <- function(mr_iml_obj) {
 #' * `$PC_scores`: The PC scores of each response model.
 #' 
 #' @examples
-#' library(tidymodels)
-#' 
 #' # Without bootstrap
 #' data <- MRFcov::Bird.parasites
 #' Y <- data %>%
-#'   select(-scale.prop.zos) %>%
-#'   select(order(everything()))
+#'   dplyr::select(-scale.prop.zos) %>%
+#'   dplyr::select(order(everything()))
 #' X <- data %>%
-#'   select(scale.prop.zos)
+#'   dplyr::select(scale.prop.zos)
 #'
-#' model_rf <- rand_forest(
+#' model_rf <- parsnip::rand_forest(
 #'   trees = 10, # 10 trees are set for brevity. Aim to start with 1000
 #'   mode = "classification",
-#'   mtry = tune(),
-#'   min_n = tune()
-#' ) %>%
-#'   set_engine("randomForest")
+#'   mtry = tune::tune(),
+#'   min_n = tune::tune(),
+#'   engine = "randomForest"
+#' )
 #' 
 #' mrIML_rf <- mrIMLpredicts(
 #'   X = X,
@@ -369,7 +367,6 @@ mrVip_mrIMLobj <- function(mr_iml_obj) {
 #' 
 #' vipPCA_results <- mrIML_rf_vip %>%
 #'  mrVipPCA()
-#' 
 #' @export
 mrVipPCA <- function(mrVip_obj) {
   

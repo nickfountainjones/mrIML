@@ -36,7 +36,8 @@ partial dependencies for a specified environmental/host variable. It also
 filters the taxa based on standard deviation thresholds.
 }
 \examples{
-library(tidymodels)
+library(parsnip)
+library(dplyr)
 
 # Without bootstrap
 data <- MRFcov::Bird.parasites
@@ -64,7 +65,7 @@ mrIML_rf <- mrIMLpredicts(
   racing = FALSE
 )
 
-mrIML_rf \%>\%
+covar_results <- mrIML_rf \%>\%
   mrCovar(var = "scale.prop.zos", sdthresh = 0.05)
 
 }
