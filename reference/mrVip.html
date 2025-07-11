@@ -137,7 +137,7 @@ for the individual response models.</p></li>
 <span class="r-in"><span>  <span class="fu">select</span><span class="op">(</span><span class="va">scale.prop.zos</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">model_rf</span> <span class="op">&lt;-</span> <span class="fu">rand_forest</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  trees <span class="op">=</span> <span class="fl">50</span>, <span class="co"># 50 trees are set for brevity. Aim to start with 1000</span></span></span>
+<span class="r-in"><span>  trees <span class="op">=</span> <span class="fl">10</span>, <span class="co"># 10 trees are set for brevity. Aim to start with 1000</span></span></span>
 <span class="r-in"><span>  mode <span class="op">=</span> <span class="st">"classification"</span>,</span></span>
 <span class="r-in"><span>  mtry <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  min_n <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span></span></span>
@@ -164,37 +164,37 @@ for the individual response models.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 16 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    var            sd_value response     bootstrap</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> Hkillangoi      0.165   Hzosteropis  <span style="color: #BB0000;">NA</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> Microfilaria    0.245   Hzosteropis  <span style="color: #BB0000;">NA</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> Plas            0.116   Hzosteropis  <span style="color: #BB0000;">NA</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> scale.prop.zos  0.284   Hzosteropis  <span style="color: #BB0000;">NA</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> Hzosteropis     0.093<span style="text-decoration: underline;">5</span>  Hkillangoi   <span style="color: #BB0000;">NA</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> Microfilaria    0.009<span style="text-decoration: underline;">32</span> Hkillangoi   <span style="color: #BB0000;">NA</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> Plas            0.065<span style="text-decoration: underline;">0</span>  Hkillangoi   <span style="color: #BB0000;">NA</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> scale.prop.zos  0.143   Hkillangoi   <span style="color: #BB0000;">NA</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> Hkillangoi      0.057<span style="text-decoration: underline;">3</span>  Plas         <span style="color: #BB0000;">NA</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> Hzosteropis     0.093<span style="text-decoration: underline;">5</span>  Plas         <span style="color: #BB0000;">NA</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> Microfilaria    0.190   Plas         <span style="color: #BB0000;">NA</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> scale.prop.zos  0.208   Plas         <span style="color: #BB0000;">NA</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">13</span> Hkillangoi      0.007<span style="text-decoration: underline;">97</span> Microfilaria <span style="color: #BB0000;">NA</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">14</span> Hzosteropis     0.030<span style="text-decoration: underline;">1</span>  Microfilaria <span style="color: #BB0000;">NA</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">15</span> Plas            0.048<span style="text-decoration: underline;">0</span>  Microfilaria <span style="color: #BB0000;">NA</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">16</span> scale.prop.zos  0.091<span style="text-decoration: underline;">9</span>  Microfilaria <span style="color: #BB0000;">NA</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> Hkillangoi       0.193  Hzosteropis  <span style="color: #BB0000;">NA</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> Microfilaria     0.055<span style="text-decoration: underline;">1</span> Hzosteropis  <span style="color: #BB0000;">NA</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> Plas             0.140  Hzosteropis  <span style="color: #BB0000;">NA</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> scale.prop.zos   0.268  Hzosteropis  <span style="color: #BB0000;">NA</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> Hzosteropis      0.132  Hkillangoi   <span style="color: #BB0000;">NA</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> Microfilaria     0.015<span style="text-decoration: underline;">3</span> Hkillangoi   <span style="color: #BB0000;">NA</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> Plas             0.055<span style="text-decoration: underline;">4</span> Hkillangoi   <span style="color: #BB0000;">NA</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> scale.prop.zos   0.198  Hkillangoi   <span style="color: #BB0000;">NA</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> Hkillangoi       0.059<span style="text-decoration: underline;">8</span> Plas         <span style="color: #BB0000;">NA</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> Hzosteropis      0.073<span style="text-decoration: underline;">9</span> Plas         <span style="color: #BB0000;">NA</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> Microfilaria     0.148  Plas         <span style="color: #BB0000;">NA</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> scale.prop.zos   0.357  Plas         <span style="color: #BB0000;">NA</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">13</span> Hkillangoi       0.012<span style="text-decoration: underline;">0</span> Microfilaria <span style="color: #BB0000;">NA</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">14</span> Hzosteropis      0.048<span style="text-decoration: underline;">7</span> Microfilaria <span style="color: #BB0000;">NA</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">15</span> Plas             0.116  Microfilaria <span style="color: #BB0000;">NA</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">16</span> scale.prop.zos   0.106  Microfilaria <span style="color: #BB0000;">NA</span>       </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 Hkillangoi Hzosteropis Microfilaria       Plas</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Hzosteropis    0.093482981   0.2026983  0.030111095 0.09345148</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Microfilaria   0.009323101   0.2451408  0.044487798 0.19008416</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Plas           0.065041225   0.1161923  0.048001369 0.13716418</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> scale.prop.zos 0.142578902   0.2842901  0.091869998 0.20779659</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Hkillangoi     0.077606552   0.1651701  0.007968731 0.05732447</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                Hkillangoi Hzosteropis Microfilaria       Plas</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Hzosteropis    0.13228724  0.16421928   0.04866281 0.07386037</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Microfilaria   0.01527603  0.05511968   0.07057552 0.14819320</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Plas           0.05543465  0.14000399   0.11575133 0.15974637</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> scale.prop.zos 0.19811860  0.26836209   0.10591910 0.35708769</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Hkillangoi     0.10027913  0.19339134   0.01196885 0.05984423</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]</span>
 <span class="r-plt img"><img src="mrVip-1.png" alt="" width="700" height="433"></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># With bootstrap</span></span></span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="va">mrIML_rf_boot</span> <span class="op">&lt;-</span> <span class="va">mrIML_rf</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="mrBootstrap.html">mrBootstrap</a></span><span class="op">(</span>num_bootstrap <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |                                                                      |   0%  |                                                                              |====                                                                  |   5%  |                                                                              |=======                                                               |  10%  |                                                                              |==========                                                            |  15%  |                                                                              |==============                                                        |  20%  |                                                                              |==================                                                    |  25%  |                                                                              |=====================                                                 |  30%  |                                                                              |========================                                              |  35%  |                                                                              |============================                                          |  40%  |                                                                              |================================                                      |  45%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================                                |  55%  |                                                                              |==========================================                            |  60%  |                                                                              |==============================================                        |  65%  |                                                                              |=================================================                     |  70%  |                                                                              |====================================================                  |  75%  |                                                                              |========================================================              |  80%  |                                                                              |============================================================          |  85%  |                                                                              |===============================================================       |  90%  |                                                                              |==================================================================    |  95%  |                                                                              |======================================================================| 100%</span>
@@ -209,30 +209,30 @@ for the individual response models.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 80 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    var            sd_value response    bootstrap</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> Hkillangoi       0.140  Hzosteropis         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> Microfilaria     0.307  Hzosteropis         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> Plas             0.099<span style="text-decoration: underline;">3</span> Hzosteropis         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> scale.prop.zos   0.237  Hzosteropis         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> Hkillangoi       0.166  Hzosteropis         2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> Microfilaria     0.114  Hzosteropis         2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> Plas             0.143  Hzosteropis         2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> scale.prop.zos   0.278  Hzosteropis         2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> Hkillangoi       0.167  Hzosteropis         3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> Microfilaria     0.139  Hzosteropis         3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> Hkillangoi       0.212  Hzosteropis         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> Microfilaria     0.082<span style="text-decoration: underline;">0</span> Hzosteropis         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> Plas             0.068<span style="text-decoration: underline;">2</span> Hzosteropis         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> scale.prop.zos   0.243  Hzosteropis         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> Hkillangoi       0.226  Hzosteropis         2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> Microfilaria     0.075<span style="text-decoration: underline;">1</span> Hzosteropis         2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> Plas             0.079<span style="text-decoration: underline;">4</span> Hzosteropis         2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> scale.prop.zos   0.354  Hzosteropis         2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> Hkillangoi       0.232  Hzosteropis         3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> Microfilaria     0.064<span style="text-decoration: underline;">4</span> Hzosteropis         3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 70 more rows</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                Hkillangoi Hzosteropis Microfilaria       Plas</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Hzosteropis    0.10388958  0.17570746   0.05376531 0.07035791</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Microfilaria   0.00611671  0.19277400   0.06764472 0.22957505</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Plas           0.07441472  0.09568777   0.07004924 0.14316124</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> scale.prop.zos 0.16533182  0.24846097   0.12510700 0.23367467</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Hkillangoi     0.08743821  0.16590709   0.02165731 0.03903733</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Hzosteropis     0.1394056  0.17256208   0.04333982 0.10812907</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Microfilaria    0.0217644  0.07801797   0.04886374 0.14457105</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Plas            0.1063337  0.08954586   0.04091455 0.16861083</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> scale.prop.zos  0.2392751  0.31212730   0.09104253 0.34306380</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Hkillangoi      0.1266947  0.21055719   0.02015806 0.07867941</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]</span>
 <span class="r-plt img"><img src="mrVip-2.png" alt="" width="700" height="433"></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

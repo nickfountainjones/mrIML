@@ -119,7 +119,7 @@ variable in each response model, along with bootstraps if applicable.</p></li>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Specify a random forest tidy model</span></span></span>
 <span class="r-in"><span><span class="va">model_rf</span> <span class="op">&lt;-</span> <span class="fu">rand_forest</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  trees <span class="op">=</span> <span class="fl">50</span>, <span class="co"># 50 trees are set for brevity. Aim to start with 1000</span></span></span>
+<span class="r-in"><span>  trees <span class="op">=</span> <span class="fl">10</span>, <span class="co"># 10 trees are set for brevity. Aim to start with 1000</span></span></span>
 <span class="r-in"><span>  mode <span class="op">=</span> <span class="st">"classification"</span>,</span></span>
 <span class="r-in"><span>  mtry <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  min_n <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span></span></span>
@@ -143,7 +143,7 @@ variable in each response model, along with bootstraps if applicable.</p></li>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">mrIML_interactions_rf</span> <span class="op">&lt;-</span> <span class="fu">mrInteractions</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">mrIML_rf</span>,</span></span>
-<span class="r-in"><span>  num_bootstrap <span class="op">=</span> <span class="fl">5</span>,</span></span>
+<span class="r-in"><span>  num_bootstrap <span class="op">=</span> <span class="fl">50</span>,</span></span>
 <span class="r-in"><span>  feature <span class="op">=</span> <span class="st">"Plas"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -153,7 +153,6 @@ variable in each response model, along with bootstraps if applicable.</p></li>
 <span class="r-plt img"><img src="mrInteractions-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mrIML_interactions_rf</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-plt img"><img src="mrInteractions-3.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

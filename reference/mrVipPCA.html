@@ -92,7 +92,7 @@ principal components.</p></li>
 <span class="r-in"><span>  <span class="fu">select</span><span class="op">(</span><span class="va">scale.prop.zos</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">model_rf</span> <span class="op">&lt;-</span> <span class="fu">rand_forest</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  trees <span class="op">=</span> <span class="fl">50</span>, <span class="co"># 50 trees are set for brevity. Aim to start with 1000</span></span></span>
+<span class="r-in"><span>  trees <span class="op">=</span> <span class="fl">10</span>, <span class="co"># 10 trees are set for brevity. Aim to start with 1000</span></span></span>
 <span class="r-in"><span>  mode <span class="op">=</span> <span class="st">"classification"</span>,</span></span>
 <span class="r-in"><span>  mtry <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  min_n <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span></span></span>
@@ -115,7 +115,6 @@ principal components.</p></li>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">i</span> <span style="color: #000000;">Creating pre-processing data to finalize unknown parameter: mtry</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">mrIML_rf_vip</span> <span class="op">&lt;-</span> <span class="fu"><a href="mrVip.html">mrVip</a></span><span class="op">(</span><span class="va">mrIML_rf</span>, taxa <span class="op">=</span> <span class="st">"Plas"</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>NAs produced when calculating MCC. This is common when there is a class imbalance. Substituting NA values with zero.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">mrIML_rf_vip</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span> <span class="fu">mrVipPCA</span><span class="op">(</span><span class="op">)</span></span></span>
@@ -123,19 +122,30 @@ principal components.</p></li>
 <span class="r-plt img"><img src="mrVipPCA-1.png" alt="" width="700" height="433"></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $PC_outliers</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $PC_outliers$PC1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> integer(0)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $PC_outliers$PC2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> integer(0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $PC_outliers$PC3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $PC_outliers$PC4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $eigenvalues</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3.245872e+00 1.708192e+00 4.593622e-02 4.720944e-33</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3.133804e+00 1.247946e+00 6.182499e-01 2.782706e-31</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $PC_scores</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 × 5</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      PC1    PC2     PC3       PC4 response    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>  1.54  -<span style="color: #BB0000;">0.768</span> -<span style="color: #BB0000;">0.233</span>   1.65<span style="color: #949494;">e</span><span style="color: #BB0000;">-17</span> Hkillangoi  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> -<span style="color: #BB0000;">2.12</span>  -<span style="color: #BB0000;">1.17</span>   0.054<span style="text-decoration: underline;">0</span>  1.80<span style="color: #949494;">e</span><span style="color: #BB0000;">-16</span> Hzosteropis </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>  1.46   0.169  0.269  -<span style="color: #BB0000;">1.93</span><span style="color: #949494;">e</span><span style="color: #BB0000;">-16</span> Microfilaria</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> -<span style="color: #BB0000;">0.874</span>  1.77  -<span style="color: #BB0000;">0.090</span><span style="color: #BB0000; text-decoration: underline;">8</span> -<span style="color: #BB0000;">5.63</span><span style="color: #949494;">e</span><span style="color: #BB0000;">-17</span> Plas        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      PC1    PC2    PC3       PC4 response    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>  0.775 -<span style="color: #BB0000;">1.43</span>  -<span style="color: #BB0000;">0.507</span> -<span style="color: #BB0000;">4.85</span><span style="color: #949494;">e</span><span style="color: #BB0000;">-16</span> Hkillangoi  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> -<span style="color: #BB0000;">2.40</span>   0.429 -<span style="color: #BB0000;">0.408</span> -<span style="color: #BB0000;">5.61</span><span style="color: #949494;">e</span><span style="color: #BB0000;">-16</span> Hzosteropis </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>  1.74   1.21  -<span style="color: #BB0000;">0.254</span> -<span style="color: #BB0000;">1.11</span><span style="color: #949494;">e</span><span style="color: #BB0000;">-15</span> Microfilaria</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> -<span style="color: #BB0000;">0.121</span> -<span style="color: #BB0000;">0.208</span>  1.17   2.68<span style="color: #949494;">e</span><span style="color: #BB0000;">-15</span> Plas        </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
