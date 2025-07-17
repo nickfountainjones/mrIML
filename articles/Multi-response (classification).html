@@ -114,7 +114,7 @@ California.</p>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">infer       </span> 1.0.9     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tune        </span> 1.3.0</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">modeldata   </span> 1.4.0     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">workflows   </span> 1.2.0</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">parsnip     </span> 1.3.2     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">workflowsets</span> 1.1.1</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">purrr       </span> 1.0.4     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">yardstick   </span> 1.3.2</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">purrr       </span> 1.1.0     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">yardstick   </span> 1.3.2</span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Conflicts</span> ───────────────────────────────────────── tidymodels_conflicts() ──</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">purrr</span>::<span style="color: #00BB00;">discard()</span> masks <span style="color: #0000BB;">scales</span>::discard()</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">filter()</span>  masks <span style="color: #0000BB;">stats</span>::filter()</span></span>
@@ -189,13 +189,13 @@ we have done most of our testing on random forests (RF), xgr boost and
 glms (generalized linear models). Here we will specify an RF
 classification model to fit each response.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">model_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://parsnip.tidymodels.org/reference/rand_forest.html" class="external-link">rand_forest</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">model_rf</span> <span class="op">&lt;-</span> <span class="fu">rand_forest</span><span class="op">(</span></span>
 <span>  trees <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  mode <span class="op">=</span> <span class="st">"classification"</span>,</span>
-<span>  mtry <span class="op">=</span> <span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  min_n <span class="op">=</span> <span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  mtry <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  min_n <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span> <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_engine.html" class="external-link">set_engine</a></span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span></code></pre></div>
+<span> <span class="fu">set_engine</span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span></code></pre></div>
 <p>Now we can run the model. Hyper parameter tuning (for algorithms that
 have hyper parameters) is done automatically by testing how model
 performance changes across a random grid and the best performing
@@ -255,8 +255,8 @@ categorical variables. These steps can easily be added to the pipeline
 following tidymodel syntax.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Define LM</span></span>
-<span><span class="va">model_glm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://parsnip.tidymodels.org/reference/logistic_reg.html" class="external-link">logistic_reg</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_engine.html" class="external-link">set_engine</a></span><span class="op">(</span><span class="st">"glm"</span><span class="op">)</span></span>
+<span><span class="va">model_glm</span> <span class="op">&lt;-</span> <span class="fu">logistic_reg</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"glm"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Fit mrIML model</span></span>
 <span><span class="va">yhats_glm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLpredicts.html">mrIMLpredicts</a></span><span class="op">(</span></span>

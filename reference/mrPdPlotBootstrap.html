@@ -103,37 +103,7 @@ the <code>target</code> response model.</p></li>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">MRFcov</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MRFcov/man/Bird.parasites.html" class="external-link">Bird.parasites</a></span></span></span>
-<span class="r-in"><span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">scale.prop.zos</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">everything</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">scale.prop.zos</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">model_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://parsnip.tidymodels.org/reference/rand_forest.html" class="external-link">rand_forest</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  trees <span class="op">=</span> <span class="fl">10</span>, <span class="co"># 10 trees are set for brevity. Aim to start with 1000</span></span></span>
-<span class="r-in"><span>  mode <span class="op">=</span> <span class="st">"classification"</span>,</span></span>
-<span class="r-in"><span>  mtry <span class="op">=</span> <span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  min_n <span class="op">=</span> <span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_engine.html" class="external-link">set_engine</a></span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">mrIML_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="mrIMLpredicts.html">mrIMLpredicts</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  X <span class="op">=</span> <span class="va">X</span>,</span></span>
-<span class="r-in"><span>  Y <span class="op">=</span> <span class="va">Y</span>,</span></span>
-<span class="r-in"><span>  X1 <span class="op">=</span> <span class="va">Y</span>,</span></span>
-<span class="r-in"><span>  Model <span class="op">=</span> <span class="va">model_rf</span>,</span></span>
-<span class="r-in"><span>  prop <span class="op">=</span> <span class="fl">0.7</span>,</span></span>
-<span class="r-in"><span>  k <span class="op">=</span> <span class="fl">2</span>,</span></span>
-<span class="r-in"><span>  racing <span class="op">=</span> <span class="cn">FALSE</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |                                                                      |   0%  |                                                                              |==================                                                    |  25%  |                                                                              |===================================                                   |  50%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================================| 100%</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">i</span> <span style="color: #000000;">Creating pre-processing data to finalize unknown parameter: mtry</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">i</span> <span style="color: #000000;">Creating pre-processing data to finalize unknown parameter: mtry</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">i</span> <span style="color: #000000;">Creating pre-processing data to finalize unknown parameter: mtry</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">i</span> <span style="color: #000000;">Creating pre-processing data to finalize unknown parameter: mtry</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">mrIML_rf</span> <span class="op">&lt;-</span> <span class="fu">mrIML</span><span class="fu">::</span><span class="va"><a href="mrIML_bird_parasites_RF.html">mrIML_bird_parasites_RF</a></span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">mrIML_rf_boot</span> <span class="op">&lt;-</span> <span class="va">mrIML_rf</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="mrBootstrap.html">mrBootstrap</a></span><span class="op">(</span>num_bootstrap <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span></span>
@@ -145,16 +115,15 @@ the <code>target</code> response model.</p></li>
 <span class="r-in"><span>  target <span class="op">=</span> <span class="st">"Plas"</span>,</span></span>
 <span class="r-in"><span>  global_top_var <span class="op">=</span> <span class="fl">4</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>NAs produced when calculating MCC. This is common when there is a class imbalance. Substituting NA values with zero.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mrIML_rf_PD</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              var     X counts      value label               type bootstrap</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 scale.prop.zos -1.75    449 0.17906459 class partial dependence         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 scale.prop.zos -1.25    449 0.44320713 class partial dependence         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 scale.prop.zos -0.75    449 0.62160356 class partial dependence         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 scale.prop.zos -0.25    449 0.66993318 class partial dependence         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 scale.prop.zos  0.25    449 0.72694878 class partial dependence         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 scale.prop.zos  0.75    449 0.01447661 class partial dependence         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              var     X counts     value label               type bootstrap</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 scale.prop.zos -1.75    449 0.1625835 class partial dependence         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 scale.prop.zos -1.25    449 0.1625835 class partial dependence         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 scale.prop.zos -0.75    449 0.5623608 class partial dependence         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 scale.prop.zos -0.25    449 0.5298441 class partial dependence         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 scale.prop.zos  0.25    449 0.5458797 class partial dependence         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 scale.prop.zos  0.75    449 0.0247216 class partial dependence         1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      response</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 Hzosteropis</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 Hzosteropis</span>

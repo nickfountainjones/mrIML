@@ -140,16 +140,16 @@ we can define a wide range of models using a unified syntax. To
 demonstrate, we are going to set up two models to compare: a random
 forest model (RF) and a logistic regression (lm).</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">model_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://parsnip.tidymodels.org/reference/rand_forest.html" class="external-link">rand_forest</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">model_rf</span> <span class="op">&lt;-</span> <span class="fu">rand_forest</span><span class="op">(</span></span>
 <span>  trees <span class="op">=</span> <span class="fl">100</span>, <span class="co"># 100 trees are set for brevity. Aim to start with 1000.</span></span>
 <span>  mode <span class="op">=</span> <span class="st">"classification"</span>,</span>
-<span>  mtry <span class="op">=</span> <span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  min_n <span class="op">=</span> <span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  mtry <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  min_n <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_engine.html" class="external-link">set_engine</a></span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">model_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://parsnip.tidymodels.org/reference/logistic_reg.html" class="external-link">logistic_reg</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_engine.html" class="external-link">set_engine</a></span><span class="op">(</span><span class="st">"glm"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">model_lm</span> <span class="op">&lt;-</span> <span class="fu">logistic_reg</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"glm"</span><span class="op">)</span></span></code></pre></div>
 <p>The models can then be fit as multi-response models using
 <code><a href="../reference/mrIMLpredicts.html">mrIMLpredicts()</a></code>, which is the work horse of the
 <code>mrIML</code> package. <code><a href="../reference/mrIMLpredicts.html">mrIMLpredicts()</a></code> fits the

@@ -146,9 +146,9 @@ We set Model 1 to a linear regression. See <a href="https://www.tidymodels.org/f
 model options. Note that ‘mode’ must be ‘regression’ and in
 <code>mrIML</code>predicts, model has to be set to ‘regression’.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">model_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">linear_reg</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_engine.html" class="external-link">set_engine</a></span><span class="op">(</span><span class="st">"lm"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_args.html" class="external-link">set_mode</a></span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">model_lm</span> <span class="op">&lt;-</span> <span class="fu">linear_reg</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"lm"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">yhats_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLpredicts.html">mrIMLpredicts</a></span><span class="op">(</span></span>
 <span>  X <span class="op">=</span> <span class="va">X</span>,</span>
@@ -198,7 +198,7 @@ forest. Random forest is the computational engine in gradient forests.
 Notice for random forests we have two hyperparameters to tune:
 <code>mtry</code> (number of features to randomly include at each split)
 and <code>min_n</code> (the minimum number of data points in a node that
-are required for the node to be split further). The syntax <span style="color:red"><code><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune()</a></code></span> acts as a placeholder to
+are required for the node to be split further). The syntax <span style="color:red"><code>tune()</code></span> acts as a placeholder to
 tell <code>mrIML</code> to tune those hyperparameters across a grid of
 values (defined in <code>mrIMLpredicts</code>
 <code>tune_grid_size</code> argument). Different algorithms will have
@@ -207,13 +207,13 @@ details. Note that large grid sizes (&gt;10) for algorithms with lots of
 hyperparameters (such as extreme gradient boosting) will be
 computationally demanding. In this case we choose a grid size of 5.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">model_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://parsnip.tidymodels.org/reference/rand_forest.html" class="external-link">rand_forest</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">model_rf</span> <span class="op">&lt;-</span> <span class="fu">rand_forest</span><span class="op">(</span></span>
 <span>  trees <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  mode <span class="op">=</span> <span class="st">"regression"</span>,</span>
-<span>  mtry <span class="op">=</span> <span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  min_n <span class="op">=</span> <span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  mtry <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  min_n <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span> <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_engine.html" class="external-link">set_engine</a></span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span>
+<span> <span class="fu">set_engine</span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">yhats_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLpredicts.html">mrIMLpredicts</a></span><span class="op">(</span></span>
 <span>  X <span class="op">=</span> <span class="va">X</span>,</span>

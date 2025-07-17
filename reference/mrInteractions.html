@@ -108,38 +108,7 @@ variable in each response model, along with bootstraps if applicable.</p></li>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">MRFcov</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MRFcov/man/Bird.parasites.html" class="external-link">Bird.parasites</a></span></span></span>
-<span class="r-in"><span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">scale.prop.zos</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">everything</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">scale.prop.zos</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Specify a random forest tidy model</span></span></span>
-<span class="r-in"><span><span class="va">model_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://parsnip.tidymodels.org/reference/rand_forest.html" class="external-link">rand_forest</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  trees <span class="op">=</span> <span class="fl">10</span>, <span class="co"># 10 trees are set for brevity. Aim to start with 1000</span></span></span>
-<span class="r-in"><span>  mode <span class="op">=</span> <span class="st">"classification"</span>,</span></span>
-<span class="r-in"><span>  mtry <span class="op">=</span> <span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  min_n <span class="op">=</span> <span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_engine.html" class="external-link">set_engine</a></span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">mrIML_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="mrIMLpredicts.html">mrIMLpredicts</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  X <span class="op">=</span> <span class="va">X</span>,</span></span>
-<span class="r-in"><span>  Y <span class="op">=</span> <span class="va">Y</span>,</span></span>
-<span class="r-in"><span>  X1 <span class="op">=</span> <span class="va">Y</span>,</span></span>
-<span class="r-in"><span>  Model <span class="op">=</span> <span class="va">model_rf</span>,</span></span>
-<span class="r-in"><span>  prop <span class="op">=</span> <span class="fl">0.7</span>,</span></span>
-<span class="r-in"><span>  k <span class="op">=</span> <span class="fl">2</span>,</span></span>
-<span class="r-in"><span>  racing <span class="op">=</span> <span class="cn">FALSE</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |                                                                      |   0%  |                                                                              |==================                                                    |  25%  |                                                                              |===================================                                   |  50%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================================| 100%</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">i</span> <span style="color: #000000;">Creating pre-processing data to finalize unknown parameter: mtry</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">i</span> <span style="color: #000000;">Creating pre-processing data to finalize unknown parameter: mtry</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">i</span> <span style="color: #000000;">Creating pre-processing data to finalize unknown parameter: mtry</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">i</span> <span style="color: #000000;">Creating pre-processing data to finalize unknown parameter: mtry</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">mrIML_rf</span> <span class="op">&lt;-</span> <span class="fu">mrIML</span><span class="fu">::</span><span class="va"><a href="mrIML_bird_parasites_RF.html">mrIML_bird_parasites_RF</a></span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">mrIML_interactions_rf</span> <span class="op">&lt;-</span> <span class="fu">mrInteractions</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">mrIML_rf</span>,</span></span>
