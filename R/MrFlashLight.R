@@ -19,12 +19,6 @@
 #' @examples
 #' library(flashlight)
 #' library(ggplot2)
-#' data <- MRFcov::Bird.parasites
-#' Y <- data %>%
-#'   dplyr::select(-scale.prop.zos) %>%
-#'   dplyr::select(order(everything()))
-#' X <- data %>%
-#'   dplyr::select(scale.prop.zos)
 #' 
 #' mrIML_rf <- mrIML::mrIML_bird_parasites_RF
 #'
@@ -44,7 +38,7 @@
 #'
 #' # Partial dependence curves
 #' fl %>%
-#'   light_profile(data = cbind(X, Y), "scale.prop.zos") %>%
+#'   light_profile(data = cbind(mrIML_rf$Data$X, mrIML_rf$Data$Y), "scale.prop.zos") %>%
 #'   plot()
 #'
 #' # Two-way partial dependence
@@ -74,7 +68,7 @@ mrFlashlight <- function(mrIMLobj,
   # Run flashlight on models
   if (response == "single") {
     mfl <- flashlight::flashlight(
-      model = yhats[[index]]$last_mod_fit,
+      model = yhats[[index]]$last_mod_fit$.workflow[[1]],
       label = colnames(Y)[index],
       data = cbind(Y[index], X),
       y = colnames(Y)[index],
@@ -86,7 +80,7 @@ mrFlashlight <- function(mrIMLobj,
       seq_along(yhats),
       function(i) {
         flashlight::flashlight(
-          model = yhats[[i]]$last_mod_fit,
+          model = yhats[[i]]$last_mod_fit$.workflow[[1]],
           label = colnames(Y)[i],
           y = colnames(Y)[i],
           x = colnames(yhats[[i]]$data)[-1]
