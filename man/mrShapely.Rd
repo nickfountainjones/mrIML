@@ -49,6 +49,6 @@ multiple models and responses.
 \dontshow{if (identical(Sys.getenv("NOT_CRAN"), "true")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 mrIML_model <- mrIML::mrIML_bird_parasites_RF
 
-mrShapely(mrIML_model, plot_2D_dependencies = FALSE)
+shapely_plots_list <- mrShapely(mrIML_model, plot_2D_dependencies = FALSE)
 \dontshow{\}) # examplesIf}
 }
