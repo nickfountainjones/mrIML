@@ -29,40 +29,23 @@ interrogated using the core functionality of \pkg{flashlight}: see
 \code{vignette("flashlight", package = "flashlight")}.
 }
 \examples{
-library(tidymodels)
 library(flashlight)
-
+library(ggplot2)
 data <- MRFcov::Bird.parasites
 Y <- data \%>\%
-  select(-scale.prop.zos) \%>\%
-  select(order(everything()))
+  dplyr::select(-scale.prop.zos) \%>\%
+  dplyr::select(order(everything()))
 X <- data \%>\%
-  select(scale.prop.zos)
+  dplyr::select(scale.prop.zos)
 
-model_rf <- rand_forest(
-  trees = 10, # 10 trees are set for brevity. Aim to start with 1000
-  mode = "classification",
-  mtry = tune(),
-  min_n = tune()
-) \%>\%
-  set_engine("randomForest")
-
-mrIML_rf <- mrIMLpredicts(
-  X = X,
-  Y = Y,
-  X1 = Y,
-  Model = model_rf,
-  prop = 0.7,
-  k = 2,
-  racing = FALSE
-)
+mrIML_rf <- mrIML::mrIML_bird_parasites_RF
 
 fl <- mrFlashlight(
   mrIML_rf,
   response = "multi",
   index = 1
 )
-\donttest{
+
 # Performance comparison
 fl \%>\%
   light_performance(
@@ -80,5 +63,4 @@ fl \%>\%
 fl \%>\%
   light_profile2d(c("scale.prop.zos", "Plas")) \%>\%
   plot()
-}
 }

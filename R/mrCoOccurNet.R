@@ -15,29 +15,7 @@
 #' library(igraph)
 #' library(ggnetwork)
 #'
-#' data <- MRFcov::Bird.parasites
-#' Y <- data %>%
-#'   select(-scale.prop.zos) %>%
-#'   dplyr::select(order(everything()))
-#' X <- data %>%
-#'   select(scale.prop.zos)
-#'
-#' model_rf <- rand_forest(
-#'   trees = 100, # 100 trees are set for brevity. Aim to start with 1000
-#'   mode = "classification",
-#'   mtry = tune(),
-#'   min_n = tune()
-#' ) %>%
-#'   set_engine("randomForest")
-#'
-#' mrIML_rf <- mrIMLpredicts(
-#'   X = X,
-#'   Y = Y,
-#'   X1 = Y,
-#'   Model = model_rf,
-#'   prop = 0.7,
-#'   k = 5
-#' )
+#' mrIML_rf <- mrIML::mrIML_bird_parasites_RF
 #'
 #' mrIML_rf_boot <- mrIML_rf %>%
 #'   mrBootstrap()
@@ -50,7 +28,7 @@
 #' g <- graph_from_data_frame(
 #'   assoc_net_filtered,
 #'   directed = TRUE,
-#'   vertices = names(Y)
+#'   vertices = names(mrIML_rf$Data$Y)
 #' )
 #' E(g)$Value <- assoc_net_filtered$mean_strength
 #' E(g)$Color <- ifelse(

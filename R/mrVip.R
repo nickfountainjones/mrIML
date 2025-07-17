@@ -28,33 +28,8 @@
 #' for the individual response models.
 #' 
 #' @examples
-#' library(tidymodels)
-#' 
 #' # Without bootstrap
-#' data <- MRFcov::Bird.parasites
-#' Y <- data %>%
-#'   select(-scale.prop.zos) %>%
-#'   select(order(everything()))
-#' X <- data %>%
-#'   select(scale.prop.zos)
-#'
-#' model_rf <- rand_forest(
-#'   trees = 10, # 10 trees are set for brevity. Aim to start with 1000
-#'   mode = "classification",
-#'   mtry = tune(),
-#'   min_n = tune()
-#' ) %>%
-#'   set_engine("randomForest")
-#' 
-#' mrIML_rf <- mrIMLpredicts(
-#'   X = X,
-#'   Y = Y,
-#'   X1 = Y,
-#'   Model = model_rf,
-#'   prop = 0.7,
-#'   k = 2,
-#'   racing = FALSE
-#' )
+#' mrIML_rf <- mrIML::mrIML_bird_parasites_RF
 #' 
 #' vip_results <-mrVip(mrIML_rf, taxa = "Plas")
 #' 
@@ -338,30 +313,7 @@ mrVip_mrIMLobj <- function(mr_iml_obj) {
 #' 
 #' @examples
 #' # Without bootstrap
-#' data <- MRFcov::Bird.parasites
-#' Y <- data %>%
-#'   dplyr::select(-scale.prop.zos) %>%
-#'   dplyr::select(order(everything()))
-#' X <- data %>%
-#'   dplyr::select(scale.prop.zos)
-#'
-#' model_rf <- parsnip::rand_forest(
-#'   trees = 10, # 10 trees are set for brevity. Aim to start with 1000
-#'   mode = "classification",
-#'   mtry = tune::tune(),
-#'   min_n = tune::tune(),
-#'   engine = "randomForest"
-#' )
-#' 
-#' mrIML_rf <- mrIMLpredicts(
-#'   X = X,
-#'   Y = Y,
-#'   X1 = Y,
-#'   Model = model_rf,
-#'   prop = 0.7,
-#'   k = 2,
-#'   racing = FALSE
-#' )
+#' mrIML_rf <- mrIML::mrIML_bird_parasites_RF
 #' 
 #' mrIML_rf_vip <- mrVip(mrIML_rf, taxa = "Plas")
 #' 

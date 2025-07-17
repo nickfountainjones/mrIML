@@ -47,35 +47,7 @@ multiple models and responses.
 }
 \examples{
 \dontshow{if (identical(Sys.getenv("NOT_CRAN"), "true")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
-library(tidymodels)
-
-data <- MRFcov::Bird.parasites
-
-# Define data
-Y <- data \%>\%
-  select(-scale.prop.zos) \%>\%
-  select(order(everything()))
-X <- data \%>\%
-  select(scale.prop.zos)
-X1 <- Y
-# Specify a random forest tidy model
-model_rf <- rand_forest(
-  trees = 10, # 10 trees are set for brevity. Aim to start with 1000
-  mode = "classification",
-  mtry = tune(),
-  min_n = tune()
-) \%>\%
-  set_engine("randomForest")
-# Fit mrIML model
-mrIML_model <- mrIMLpredicts(
-  X = X,
-  Y = Y,
-  X1 = X1,
-  Model = model_rf,
-  prop = 0.7,
-  k = 2,
-  racing = FALSE
-)
+mrIML_model <- mrIML::mrIML_bird_parasites_RF
 
 mrShapely(mrIML_model, plot_2D_dependencies = FALSE)
 \dontshow{\}) # examplesIf}

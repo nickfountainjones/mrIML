@@ -30,38 +30,9 @@ Matthews correlation coefficient (MCC), positive predictive value (PPV),
 specificity, and sensitivity are reported.
 }
 \examples{
-library(tidymodels)
+mrIML_rf <- mrIML::mrIML_bird_parasites_RF
 
-data <- MRFcov::Bird.parasites
-
-# Prepare data for mrIML
-Y <- data \%>\%
-  select(-scale.prop.zos) \%>\%
-  select(order(everything()))
-X <- data \%>\%
-  select(scale.prop.zos)
-X1 <- Y
-
-# Fit GN model
-model_rf <- rand_forest(
-  trees = 10, # 10 trees are set for brevity. Aim to start with 1000
-  mode = "classification",
-  mtry = tune(),
-  min_n = tune()
-) \%>\%
-  set_engine("randomForest")
-
-GN_model_rf <- mrIMLpredicts(
-  X = X,
-  Y = Y,
-  X1 = X1,
-  Model = model_rf,
-  prop = 0.7,
-  k = 2,
-  racing = FALSE
-)
-
-perf <- mrIMLperformance(GN_model_rf)
+perf <- mrIMLperformance(mrIML_rf )
 perf[[1]]
 perf[[2]]
 

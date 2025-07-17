@@ -13,33 +13,10 @@
 #' response variable.
 #' 
 #' @examplesIf identical(Sys.getenv("NOT_CRAN"), "true")
-#' library(tidymodels)
-#'
-#' data <- MRFcov::Bird.parasites
-#' Y <- data %>%
-#'   select(-scale.prop.zos) %>%
-#'   select(order(everything()))
-#' X <- data %>%
-#'   select(scale.prop.zos)
-#'
 #' # Specify a random forest tidy model
-#' model_rf <- rand_forest(
-#'   trees = 100, # 100 trees are set for brevity. Aim to start with 1000
-#'   mode = "classification",
-#'   mtry = tune(),
-#'   min_n = tune()
-#' ) %>%
-#'   set_engine("randomForest")
+#' data("mrIML_bird_parasites_RF", package = "mrIML")
+#' mrIML_rf <- mrIML_bird_parasites_RF
 #'
-#' mrIML_rf <- mrIMLpredicts(
-#'   X = X,
-#'   Y = Y,
-#'   X1 = Y,
-#'   Model = model_rf,
-#'   prop = 0.7,
-#'   k = 5
-#' )
-#' 
 #' #future::plan(multisession, workers = 4)
 #'
 #' mrIML_bootstrap <- mrIML_rf %>%
@@ -86,7 +63,7 @@ mrBootstrap <- function(mrIMLobj,
     function(yhat) {
       list(
         data = yhat$data,
-        workflow = hardhat::extract_workflow(yhat$last_mod_fit)
+        workflow = yhat$last_mod_fit$.workflow[[1]]
       )
     }
   )

@@ -29,33 +29,7 @@
 #' variable in each response model, along with bootstraps if applicable.
 #'
 #' @examplesIf identical(Sys.getenv("NOT_CRAN"), "true")
-#' library(tidymodels)
-#'
-#' data <- MRFcov::Bird.parasites
-#' Y <- data %>%
-#'   select(-scale.prop.zos) %>%
-#'   select(order(everything()))
-#' X <- data %>%
-#'   select(scale.prop.zos)
-#'
-#' # Specify a random forest tidy model
-#' model_rf <- rand_forest(
-#'   trees = 10, # 10 trees are set for brevity. Aim to start with 1000
-#'   mode = "classification",
-#'   mtry = tune(),
-#'   min_n = tune()
-#' ) %>%
-#'   set_engine("randomForest")
-#'
-#' mrIML_rf <- mrIMLpredicts(
-#'   X = X,
-#'   Y = Y,
-#'   X1 = Y,
-#'   Model = model_rf,
-#'   prop = 0.7,
-#'   k = 2,
-#'   racing = FALSE
-#' )
+#' mrIML_rf <- mrIML::mrIML_bird_parasites_RF
 #' 
 #' mrIML_interactions_rf <- mrInteractions(
 #'   mrIML_rf,
