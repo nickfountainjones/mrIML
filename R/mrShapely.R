@@ -25,7 +25,7 @@
 #' @examplesIf identical(Sys.getenv("NOT_CRAN"), "true")
 #' mrIML_model <- mrIML::mrIML_bird_parasites_RF
 #' 
-#' mrShapely(mrIML_model, plot_2D_dependencies = FALSE)
+#' shapely_plots_list <- mrShapely(mrIML_model, plot_2D_dependencies = FALSE)
 #' @export
 mrShapely <- function(mrIML_obj,
                       taxa = NULL,
@@ -53,8 +53,7 @@ mrShapely <- function(mrIML_obj,
         mode,
         # Classification models need to predict the probability (type = "prob").
         classification = list(
-          object = response$last_mod_fit %>%
-            hardhat::extract_workflow(),
+          object = response$last_mod_fit$.workflow[[1]],
           X = response$data %>%
             dplyr::select(-class),
           bg_X = response$data,
@@ -62,8 +61,7 @@ mrShapely <- function(mrIML_obj,
         ),
         # Regression models need to predict the raw response (defult type).
         regression = list(
-          object = response$last_mod_fit %>%
-            hardhat::extract_workflow(),
+          object = response$last_mod_fit$.workflow[[1]],
           X = response$data %>%
             dplyr::select(-class),
           bg_X = response$data

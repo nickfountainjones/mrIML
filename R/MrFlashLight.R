@@ -112,10 +112,10 @@ mrFlashlight <- function(mrIMLobj,
 mrIML_flashlight_setup <- function(mode, predict_function = NULL) {
   if (mode == "classification") {
     pred_fun <- function(m, dat) {
-      if (!inherits(m, "workflow")) {
-        m <- hardhat::extract_workflow(m)
-      }
-      pred <- m %>%
+      #if (!inherits(m, "workflow")) {
+      #  m <- hardhat::extract_workflow(m)
+      #}
+      pred <- m$.workflow[[1]] %>%
         stats::predict(
           new_data = dat,
           type = "prob"
@@ -130,10 +130,10 @@ mrIML_flashlight_setup <- function(mode, predict_function = NULL) {
     )
   } else if (mode == "regression") {
     pred_fun <- function(m, dat) {
-      if (!inherits(m, "workflow")) {
-        m <- hardhat::extract_workflow(m)
-      }
-      pred <- m %>%
+      #if (!inherits(m, "workflow")) {
+      #  m <- hardhat::extract_workflow(m)
+      #}
+      pred <- m$.workflow[[1]] %>%
         stats::predict(
           new_data = dat
         )
