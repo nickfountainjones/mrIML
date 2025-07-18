@@ -47,27 +47,25 @@
 #' * `$Fits`: A list of the fitted models for each response variable.
 #'
 #' @examples
-#' library(tidymodels)
-#'
 #' data <- MRFcov::Bird.parasites
 #'
 #' # Define the response variables of interest
 #' Y <- data %>%
-#'   select(-scale.prop.zos) %>%
-#'   select(order(everything()))
+#'   dplyr::select(-scale.prop.zos) %>%
+#'   dplyr::select(order(everything()))
 #'
 #' # Define the predictors
 #' X <- data %>%
-#'   select(scale.prop.zos)
+#'   dplyr::select(scale.prop.zos)
 #'
 #' # Specify a random forest tidy model
-#' model_rf <- rand_forest(
+#' model_rf <- parsnip::rand_forest(
 #'   trees = 10, # 50 trees are set for brevity. Aim to start with 1000
 #'   mode = "classification",
-#'   mtry = tune(),
-#'   min_n = tune()
-#' ) %>%
-#'   set_engine("randomForest")
+#'   mtry = tune::tune(),
+#'   min_n = tune::tune(),
+#'   engine = "randomForest"
+#' )
 #'
 #' # Fitting independent multi-response model -----------------------------------
 #' MR_model_rf <- mrIMLpredicts(
