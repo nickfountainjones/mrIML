@@ -16,6 +16,7 @@
 #'
 #' @returns A flashlight or multi-flashlight object.
 #'
+#' @importMethodsFrom workflows predict.workflow
 #' @examples
 #' library(flashlight)
 #' library(ggplot2)
