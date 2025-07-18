@@ -81,7 +81,7 @@
 #'
 #' # Fitting a graphical network model -----------------------------------------
 #' # Define the dependent response variables (all in this case)
-#' \donttest{
+#' \if (identical(Sys.getenv("NOT_CRAN"), "true")) {
 #' X1 <- Y
 #'
 #' GN_model <- mrIMLpredicts(
