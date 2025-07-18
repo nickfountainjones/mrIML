@@ -26,8 +26,7 @@ for each response variable.
 \examples{
 \dontshow{if (identical(Sys.getenv("NOT_CRAN"), "true")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 # Specify a random forest tidy model
-data("mrIML_bird_parasites_RF", package = "mrIML")
-mrIML_rf <- mrIML_bird_parasites_RF
+mrIML_rf <- mrIML::mrIML_bird_parasites_RF
 
 #future::plan(multisession, workers = 4)
 
