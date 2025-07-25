@@ -67,7 +67,7 @@
 #'   Y = Y,
 #'   Model = model_lm,
 #'   prop = 0.7,
-#'   k = 2,
+#'   k = 5,
 #'   racing = FALSE
 #' )
 #'
@@ -82,7 +82,7 @@
 #'   X1 = X1,
 #'   Model = model_lm,
 #'   prop = 0.7,
-#'   k = 2,
+#'   k = 5,
 #'   racing = FALSE
 #' )
 #' }
