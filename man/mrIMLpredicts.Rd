@@ -89,19 +89,13 @@ X <- data \%>\%
   dplyr::select(scale.prop.zos)
 
 # Specify a random forest tidy model
-model_rf <- parsnip::rand_forest(
-  trees = 10, # 50 trees are set for brevity. Aim to start with 1000
-  mode = "classification",
-  mtry = tune::tune(),
-  min_n = tune::tune(),
-  engine = "randomForest"
-)
+model_lm <- parsnip::logistic_reg() 
 
 # Fitting independent multi-response model -----------------------------------
-MR_model_rf <- mrIMLpredicts(
+MR_model <- mrIMLpredicts(
   X = X,
   Y = Y,
-  Model = model_rf,
+  Model = model_lm,
   prop = 0.7,
   k = 2,
   racing = FALSE
@@ -116,7 +110,7 @@ GN_model <- mrIMLpredicts(
   X = X,
   Y = Y,
   X1 = X1,
-  Model = model_rf,
+  Model = model_lm,
   prop = 0.7,
   k = 2,
   racing = FALSE
