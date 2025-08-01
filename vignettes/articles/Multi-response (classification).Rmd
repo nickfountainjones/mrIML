@@ -208,9 +208,9 @@ Finally, we can assess how features interact overall to shape genetic change usi
 ```{r interactions, message=FALSE, warning=FALSE, fig.height=10}
 interactions <- mrInteractions(
   yhats_rf,
-  feature = "Forest",
+  feature = "pol_105",
   num_bootstrap = 1,
-  top_int = 2
+  top_int = 5
 )
 
 interactions[[1]] /
