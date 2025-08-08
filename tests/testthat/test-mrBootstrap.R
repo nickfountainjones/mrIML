@@ -76,7 +76,8 @@ test_that("Bootstrap works for all types of classification model.", {
     X1 = data$X1,
     Model = model_rf_clas,
     prop = 0.7,
-    k = 5
+    k = 5,
+    racing = FALSE
   )
   expect_no_error(
     mrBootstrap(mrIML_co)

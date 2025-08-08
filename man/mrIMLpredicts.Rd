@@ -5,10 +5,10 @@
 \title{Generates a multi-response predictive model}
 \usage{
 mrIMLpredicts(
-  X,
-  X1 = NULL,
-  Y,
   Model,
+  Y,
+  X = tibble::tibble(),
+  X1 = tibble::tibble(),
   balance_data = "no",
   dummy = FALSE,
   prop = 0.7,
@@ -18,14 +18,14 @@ mrIMLpredicts(
 )
 }
 \arguments{
+\item{Model}{Any model from the \pkg{tidymodels} package. See \strong{Examples}.}
+
 \item{Y, X, X1}{Data frames containing the response, predictor, and the joint
 response variables (i.e. the responses that are also to be used as predictors
 if fitting GN model) respectively. If \code{X1} is not provided then a standard
 multi-response model will be fit to the data (e.g. the response models are
 independant of one another conditional on the predictors supplied in X). See
 \strong{Details} section below.}
-
-\item{Model}{Any model from the \pkg{tidymodels} package. See \strong{Examples}.}
 
 \item{balance_data}{A character string:
 \itemize{
@@ -89,7 +89,7 @@ X <- data \%>\%
   dplyr::select(scale.prop.zos)
 
 # Specify a random forest tidy model
-model_lm <- parsnip::logistic_reg() 
+model_lm <- parsnip::logistic_reg()
 
 # Fitting independent multi-response model -----------------------------------
 MR_model <- mrIMLpredicts(

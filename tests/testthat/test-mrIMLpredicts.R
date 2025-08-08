@@ -75,7 +75,8 @@ test_that("All types of model run without error for classification", {
       X1 = data$X1,
       Model = model_rf_clas,
       prop = 0.7,
-      k = 5
+      k = 5,
+      racing = FALSE
     )
   )
   # With a categorical variable
@@ -131,7 +132,8 @@ test_that("both types of model run without error for regression", {
       X1 = data$X1,
       Model = model_rf_reg,
       prop = 0.7,
-      k = 5
+      k = 5,
+      racing = FALSE
     )
   )
 })
