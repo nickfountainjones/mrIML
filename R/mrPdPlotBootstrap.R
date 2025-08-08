@@ -1,6 +1,6 @@
 #' Bootstrap Partial Dependence Plots
 #'
-#' This function extracts and plots the bootrapped partial dependence functions 
+#' This function extracts and plots the bootrapped partial dependence functions
 #' calculated by [mrBootstrap()] for each response variable.
 #'
 #' @param mrIML_obj A list object returned by [mrIMLpredicts()].
@@ -33,11 +33,13 @@
 #' mrIML_rf_PD[[2]]
 #'
 #' @export
-mrPdPlotBootstrap <- function(mrIML_obj,
-                           mrBootstrap_obj,
-                           vi_obj = NULL,
-                           target,
-                           global_top_var = 2) {
+mrPdPlotBootstrap <- function(
+  mrIML_obj,
+  mrBootstrap_obj,
+  vi_obj = NULL,
+  target,
+  global_top_var = 2
+) {
   # Unpack mrIML_obj
   Y <- mrIML_obj$Data$Y
   X <- mrIML_obj$Data$X
@@ -47,12 +49,12 @@ mrPdPlotBootstrap <- function(mrIML_obj,
       mrBootstrap_obj = mrBootstrap_obj
     )
   }
-  
+
   n_response <- ncol(Y)
   complete_df <- cbind(Y, X)
   n_data <- ncol(complete_df)
-  
-  # Collapse bootstrap results into a dataframe
+
+  # Collapse bootstrap results into named list of dataframe
   pd_boot_df <- lapply(
     mrBootstrap_obj %>%
       purrr::flatten() %>%
@@ -61,29 +63,26 @@ mrPdPlotBootstrap <- function(mrIML_obj,
       names(pd_df)[1] <- "X"
       pd_df
     }
-  ) %>%
-    dplyr::bind_rows(.id = "var")
-  
-  # Filter to target
+  )
+
+  # Filter list to target response
   pd_boot_df_target <- pd_boot_df %>%
-    dplyr::filter(.data$response == target)
-  
+    purrr::keep(~ unique(.$response) == target)
+
   # Get list of vars to plot according to VI
-  vi_obj <- vi_obj[[1]]
-  important_vars <- vi_obj %>%
+  important_vars <- vi_obj[[1]] %>%
     dplyr::filter(.data$response == target) %>%
     dplyr::group_by(.data$var) %>%
     dplyr::summarise(mean_sd = mean(.data$sd_value), .groups = "drop") %>%
     dplyr::arrange(dplyr::desc(.data$mean_sd)) %>%
     utils::head(global_top_var) %>%
     dplyr::pull(.data$var)
-  
+
   # Create PD plots
   plot_list <- lapply(
     important_vars,
     function(v) {
-      pd_var_df <- pd_boot_df_target %>%
-        dplyr::filter(.data$var == v)
+      pd_var_df <- pd_boot_df_target[[v]]
       if (length(unique(pd_var_df$X)) == 2) {
         plot_disc_pd(pd_var_df, v, target)
       } else {
@@ -91,7 +90,7 @@ mrPdPlotBootstrap <- function(mrIML_obj,
       }
     }
   )
-  
+
   # Plot in grid
   list(
     pd_boot_df,
@@ -113,7 +112,10 @@ plot_cont_pd <- function(pd_var_df, var_name, resp_name) {
 plot_disc_pd <- function(pd_var_df, var_name, resp_name) {
   pd_var_df %>%
     ggplot2::ggplot(
-      ggplot2::aes(x = ifelse(.data$X == 1, "present", "absent"), y = .data$value)
+      ggplot2::aes(
+        x = ifelse(.data$X == 1, "present", "absent"),
+        y = .data$value
+      )
     ) +
     ggplot2::geom_boxplot() +
     ggplot2::labs(x = var_name, y = paste(resp_name, "prob")) +
