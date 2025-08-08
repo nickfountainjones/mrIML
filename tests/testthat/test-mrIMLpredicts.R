@@ -44,7 +44,7 @@ model_rf_reg <- parsnip::rand_forest(
 ) %>%
   parsnip::set_engine("randomForest")
 
-test_that("both types of model run without error for classification", {
+test_that("All types of model run without error for classification", {
   skip_on_cran()
   data <- classificaiton_data()
   # multi-response
@@ -66,6 +66,36 @@ test_that("both types of model run without error for classification", {
       Model = model_rf_clas,
       prop = 0.7,
       k = 5
+    )
+  )
+  # co-occurance only
+  expect_no_error(
+    mrIMLpredicts(
+      Y = data$Y,
+      X1 = data$X1,
+      Model = model_rf_clas,
+      prop = 0.7,
+      k = 5
+    )
+  )
+  # With a categorical variable
+  X_fact <- data$X %>%
+    dplyr::mutate(
+      scale.prop.zos = cut(
+        scale.prop.zos,
+        quantile(scale.prop.zos, probs = seq(0, 1, length.out = 4)),
+        include.lowest = TRUE
+      )
+    )
+  expect_no_error(
+    mrIMLpredicts(
+      Y = data$Y,
+      X = X_fact,
+      X1 = data$X1,
+      Model = model_rf_clas,
+      prop = 0.7,
+      k = 5,
+      racing = FALSE
     )
   )
 })
@@ -94,6 +124,16 @@ test_that("both types of model run without error for regression", {
       k = 5
     )
   )
+  # co-occurance only
+  expect_no_error(
+    mrIMLpredicts(
+      Y = data$Y,
+      X1 = data$X1,
+      Model = model_rf_reg,
+      prop = 0.7,
+      k = 5
+    )
+  )
 })
 
 test_that("works for racing = FALSE", {
@@ -110,7 +150,7 @@ test_that("works for racing = FALSE", {
     )
   )
 })
-  
+
 test_that("expected dimensions of mrIML obj", {
   data <- classificaiton_data()
   mrIMLobj_MR <- mrIMLpredicts(
@@ -134,16 +174,16 @@ test_that("incorect model or data inputs throw errors", {
   data <- classificaiton_data()
   expect_error(
     mrIMLpredicts(
-      Y = data$Y, 
-      X = data$X, 
+      Y = data$Y,
+      X = data$X,
       Model = lm(Hzosteropis ~ ., cbind(data$Y, data$X))
     ),
     "The model should be a properly specified tidymodel."
   )
   expect_error(
     mrIMLpredicts(
-      Y = data$Y, 
-      X = data$X[1:(nrow(data$X) - 1), ], 
+      Y = data$Y,
+      X = data$X[1:(nrow(data$X) - 1), ],
       Model = model_rf_clas
     ),
     "All data inputs must have the same number of rows."
@@ -151,11 +191,10 @@ test_that("incorect model or data inputs throw errors", {
   expect_error(
     mrIMLpredicts(
       Y = data$Y,
-      X = data$X, 
+      X = data$X,
       X1 = data$X1[1:(nrow(data$X1) - 1), ],
       Model = model_rf_clas
     ),
     "All data inputs must have the same number of rows."
   )
 })
-

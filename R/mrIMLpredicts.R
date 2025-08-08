@@ -7,7 +7,7 @@
 #'
 #' @param Y,X,X1 Data frames containing the response, predictor, and the joint
 #' response variables (i.e. the responses that are also to be used as predictors
-#' if fitting GN model) respectively. If `X1` is not provided then a standard 
+#' if fitting GN model) respectively. If `X1` is not provided then a standard
 #' multi-response model will be fit to the data (e.g. the response models are
 #' independant of one another conditional on the predictors supplied in X). See
 #' **Details** section below.
@@ -59,7 +59,7 @@
 #'   dplyr::select(scale.prop.zos)
 #'
 #' # Specify a random forest tidy model
-#' model_lm <- parsnip::logistic_reg() 
+#' model_lm <- parsnip::logistic_reg()
 #'
 #' # Fitting independent multi-response model -----------------------------------
 #' MR_model <- mrIMLpredicts(
@@ -87,32 +87,50 @@
 #' )
 #' }
 #' @export
-mrIMLpredicts <- function(X,
-                          X1 = NULL,
-                          Y,
-                          Model,
-                          balance_data = "no",
-                          dummy = FALSE,
-                          prop = 0.7,
-                          tune_grid_size = 10,
-                          k = 10,
-                          racing = TRUE) {
+mrIMLpredicts <- function(
+  Model,
+  Y,
+  X = tibble::tibble(),
+  X1 = tibble::tibble(),
+  balance_data = "no",
+  dummy = FALSE,
+  prop = 0.7,
+  tune_grid_size = 10,
+  k = 10,
+  racing = TRUE
+) {
   mode <- Model$mode
-  
+
   # Coerce data to tibbles
   X <- tibble::as_tibble(X)
   Y <- tibble::as_tibble(Y)
-  if (!is.null(X1)) X1 <- tibble::as_tibble(X1)
-  
+  X1 <- tibble::as_tibble(X1)
+
+  # Handeling of factors
+  if (any(purrr::map_lgl(X, is.factor))) {
+    dummy = TRUE
+    message(
+      "Setting dummy = TRUE because X contains factors."
+    )
+  }
+
   # Check modeling inputs
   check_equal_rows(X, X1, Y)
+
+  # Check that X1 is identical to cols in Y
+  if ((nrow(X1) != 0) & !identical(dplyr::select(Y, names(X1)), X1)) {
+    stop(
+      "The format of the collumns in X1 do not match the coresponding columns in Y."
+    )
+  }
+
   if (!inherits(Model, "model_spec")) {
     stop("The model should be a properly specified tidymodel.")
   }
-  
+
   n_response <- length(Y)
   pb <- utils::txtProgressBar(min = 0, max = n_response, style = 3)
-  
+
   yhats <- future.apply::future_lapply(
     X = seq(1, n_response),
     FUN = function(i) {
@@ -134,9 +152,9 @@ mrIMLpredicts <- function(X,
     },
     future.seed = TRUE
   )
-  
+
   names(yhats) <- names(Y)
-  
+
   return(
     list(
       Model = Model,
@@ -150,47 +168,39 @@ mrIMLpredicts <- function(X,
   )
 }
 
-mrIML_internal_fit_function <- function(i,
-                                        .X,
-                                        .X1,
-                                        .Y,
-                                        Model,
-                                        balance_data,
-                                        mode,
-                                        dummy,
-                                        prop,
-                                        tune_grid_size,
-                                        k,
-                                        racing,
-                                        seed) {
+mrIML_internal_fit_function <- function(
+  i,
+  .X,
+  .X1,
+  .Y,
+  Model,
+  balance_data,
+  mode,
+  dummy,
+  prop,
+  tune_grid_size,
+  k,
+  racing,
+  seed
+) {
   resp_name <- names(.Y)[i]
   if (!is.null(.X1)) {
-    if (!is.null(.X)) {
-      data <- tibble::as_tibble(
-        cbind(
-          .Y %>%
-            dplyr::select(resp_name),
-          .X,
-          .X1 %>%
-            dplyr::select(-tidyselect::any_of(resp_name))
-        )
-      )
-    } else {
-      data <- tibble::as_tibble(
-        cbind(
-          .Y %>%
-            dplyr::select(resp_name),
-          .X1 %>%
-            dplyr::select(-tidyselect::any_of(resp_name))
-        )
-      )
-    }
+    data <- list(
+      .Y %>%
+        dplyr::select(tidyselect::any_of(resp_name)),
+      .X,
+      .X1 %>%
+        dplyr::select(-tidyselect::any_of(resp_name))
+    ) %>%
+      purrr::keep(~ nrow(.) > 0) %>%
+      dplyr::bind_cols() %>%
+      tibble::as_tibble()
   } else {
     if (!is.null(.X)) {
       data <- tibble::as_tibble(
         cbind(
           .Y %>%
-            dplyr::select(resp_name),
+            dplyr::select(tidyselect::any_of(resp_name)),
           .X
         )
       )
@@ -198,42 +208,46 @@ mrIML_internal_fit_function <- function(i,
       stop("At least one of X or X1 must be specified.")
     }
   }
-  
+
   # define response variable
   colnames(data)[1] <- "class"
-  
+
   if (mode == "classification") {
     data$class <- as.factor(data$class)
   }
-  
+
   data_split <- rsample::initial_split(data, prop = prop)
-  
+
   # extract training and testing sets
   data_train <- rsample::training(data_split)
   data_test <- rsample::testing(data_split)
-  
+
   # n-fold cross validation
   data_cv <- rsample::vfold_cv(data_train, v = k)
-  
+
   # Ensure themis is installed
   if (balance_data != "no") {
     if (!requireNamespace("themis", quietly = TRUE)) {
       message(
-        paste0("The 'themis' package is required if balance_data != 'no'. ",
-               "Would you like to install it? (yes/no)")
+        paste0(
+          "The 'themis' package is required if balance_data != 'no'. ",
+          "Would you like to install it? (yes/no)"
+        )
       )
       response <- readline()
       if (tolower(response) == "yes") {
         utils::install.packages("themis")
       } else {
         stop(
-          paste0("The 'themis' package is needed for this function. Please ",
-                 "install it to proceed.")
+          paste0(
+            "The 'themis' package is needed for this function. Please ",
+            "install it to proceed."
+          )
         )
       }
     }
   }
-  
+
   if (balance_data == "down") {
     data_recipe <- data_train %>%
       recipes::recipe(class ~ ., data = data_train) %>%
@@ -246,7 +260,7 @@ mrIML_internal_fit_function <- function(i,
     data_recipe <- data_train %>%
       recipes::recipe(class ~ ., data = data_train)
   }
-  
+
   if (dummy) {
     data_recipe <- data_recipe %>%
       recipes::step_dummy(
@@ -255,11 +269,11 @@ mrIML_internal_fit_function <- function(i,
         one_hot = TRUE
       )
   }
-  
+
   mod_workflow <- workflows::workflow() %>%
     workflows::add_recipe(data_recipe) %>%
     workflows::add_model(Model)
-  
+
   if (racing) {
     tune_m <- finetune::tune_race_anova(
       mod_workflow,
@@ -272,7 +286,7 @@ mrIML_internal_fit_function <- function(i,
       grid = tune_grid_size
     )
   }
-  
+
   if (mode == "classification") {
     best_m <- tune_m %>%
       tune::select_best(metric = "roc_auc")
@@ -280,27 +294,27 @@ mrIML_internal_fit_function <- function(i,
     best_m <- tune_m %>%
       tune::select_best(metric = "rmse")
   }
-  
+
   final_model <- tune::finalize_workflow(
     mod_workflow,
     best_m
   )
-  
+
   mod1_k <- final_model %>%
     workflows::fit(data = data_train)
-  
+
   if (mode == "classification") {
     yhatO <- stats::predict(mod1_k, new_data = data, type = "prob")
     yhat <- yhatO$.pred_1
-    
+
     yhatT <- stats::predict(mod1_k, new_data = data_test, type = "class") %>%
       dplyr::bind_cols(
         data_test %>%
           dplyr::select("class")
       )
-    
+
     truth <- as.numeric(as.character(data$class))
-    
+
     deviance <- sapply(
       seq_along(truth),
       function(j) {
@@ -312,21 +326,21 @@ mrIML_internal_fit_function <- function(i,
         return(resid)
       }
     )
-    
+
     deviance_morans <- deviance
     deviance_morans[is.infinite(deviance_morans)] <- 2
   } else {
     yhatO <- stats::predict(mod1_k, new_data = data_train)
     yhat <- yhatO$.pred
-    
+
     yhatT <- stats::predict(mod1_k, new_data = data_test)
-    
+
     deviance <- NULL
   }
-  
+
   last_mod_fit <- final_model %>%
     tune::last_fit(data_split)
-  
+
   list(
     last_mod_fit = last_mod_fit,
     tune_m = tune_m,
@@ -341,12 +355,12 @@ mrIML_internal_fit_function <- function(i,
 
 check_equal_rows <- function(X, X1, Y) {
   input_lengths <- c(nrow(X), nrow(X1), nrow(Y))
-  input_lengths <- input_lengths[!is.na(input_lengths)]
-  
+  input_lengths <- input_lengths[!(is.na(input_lengths) | input_lengths == 0)]
+
   unique_nrow_vals <- input_lengths %>%
     unique() %>%
     length()
-  
+
   if (unique_nrow_vals != 1) {
     stop("All data inputs must have the same number of rows.", call. = FALSE)
   }
