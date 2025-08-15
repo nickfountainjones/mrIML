@@ -66,7 +66,11 @@
 #' @export
 mrCoOccurNet <- function(mrBootstrap_obj) {
   stopifnot(
-    "mrCoOccurNet() only available for classification models."=attr(mrBootstrap_obj, "mode") == "classification"
+    "mrCoOccurNet() only available for classification models." = attr(
+      mrBootstrap_obj,
+      "mode"
+    ) ==
+      "classification"
   )
   # Expand bootstrap object
   pd_boot_df <- lapply(
@@ -75,20 +79,23 @@ mrCoOccurNet <- function(mrBootstrap_obj) {
       purrr::flatten(),
     function(pd_df) {
       names(pd_df)[1] <- "X"
-      pd_df
+      pd_df %>%
+        dplyr::mutate(
+          X = as.numeric(.data$X)
+        )
     }
   ) %>%
     dplyr::bind_rows(.id = "var")
-  
+
   # Filter to only taxa
   taxa <- pd_boot_df %>%
     dplyr::pull(.data$response) %>%
     unique()
-  
+
   pd_boot_df <- pd_boot_df %>%
     dplyr::filter(.data$var %in% taxa) %>%
     dplyr::mutate(X = ifelse(.data$X == 1, "present", "absent"))
-  
+
   # Calculate the strengths of edges
   edge_strength <- pd_boot_df %>%
     dplyr::group_by(.data$var, .data$response, .data$bootstrap) %>%
@@ -100,7 +107,7 @@ mrCoOccurNet <- function(mrBootstrap_obj) {
       upper_ci = stats::quantile(.data$sd_value, probs = 0.974),
       .groups = "drop"
     )
-  
+
   # Calculate the direction of influence (positive or negative)
   edge_direction <- pd_boot_df %>%
     tidyr::pivot_wider(names_from = .data$X, values_from = .data$value) %>%
@@ -113,7 +120,7 @@ mrCoOccurNet <- function(mrBootstrap_obj) {
     dplyr::mutate(
       direction = ifelse(.data$mean_direction > 0, "positive", "negative")
     )
-  
+
   # Join and return edge data for plotting
   dplyr::full_join(
     edge_strength,
