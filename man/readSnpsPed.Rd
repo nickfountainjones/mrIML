@@ -26,6 +26,6 @@ or leaves them. A histogram is also produced of the missing data.
 \examples{
 \dontshow{if (FALSE) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 snps <- readSnpsPed("FILE_NAME.plink.ped", "FILE_NAME.plink.map.map")
-X <- filterRareCommon(snps, lower = 0.4, higher = 0.7) 
+X <- filterRareCommon(snps, lower = 0.4, higher = 0.7)
 \dontshow{\}) # examplesIf}
 }

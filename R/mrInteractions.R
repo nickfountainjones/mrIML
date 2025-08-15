@@ -7,7 +7,7 @@
 #' @param mrIMLobj A list object output by [mrIMLpredicts()].
 #' @param num_bootstrap The number of bootstrap samples to generate
 #' (default: 1).
-#' @param feature The response model for which detailed interaction plots should 
+#' @param feature The response model for which detailed interaction plots should
 #' be generated.
 #' @param top_int The number of top interactions to display (default: 10).
 #'
@@ -30,7 +30,7 @@
 #'
 #' @examplesIf identical(Sys.getenv("NOT_CRAN"), "true")
 #' mrIML_rf <- mrIML::mrIML_bird_parasites_RF
-#' 
+#'
 #' mrIML_interactions_rf <- mrInteractions(
 #'   mrIML_rf,
 #'   num_bootstrap = 50,
@@ -42,20 +42,24 @@
 #' mrIML_interactions_rf[[3]]
 #'
 #' @export
-mrInteractions <- function(mrIMLobj,
-                           num_bootstrap = 1,
-                           feature = NULL,
-                           top_int = 10) {
+mrInteractions <- function(
+  mrIMLobj,
+  num_bootstrap = 1,
+  feature = NULL,
+  top_int = 10
+) {
   # Unpack mrIMLobj
   yhats <- mrIMLobj$Fits
   Y <- mrIMLobj$Data$Y
   X <- mrIMLobj$Data$X
   X1 <- mrIMLobj$Data$X1
   mode <- mrIMLobj$Model$mode
-  
+
   # If no feature supplied default to first response variable
-  if (is.null(feature)) feature <- names(yhats)[1]
-  
+  if (is.null(feature)) {
+    feature <- names(yhats)[1]
+  }
+
   # Prepare the work for workers (multithreaded)
   response_vect <- rep(names(yhats), each = num_bootstrap)
   boot_vect <- rep(1:num_bootstrap, length(yhats))
@@ -63,12 +67,18 @@ mrInteractions <- function(mrIMLobj,
     seq_along(response_vect),
     function(i) list(response = response_vect[i], boot = boot_vect[i])
   )
-  
+
   # Define prediction function
-  pred_fun <- function(m, dat) {
-    stats::predict(m, dat, type = "prob")[[".pred_1"]] # Only "classification"?
-  }
-  
+  pred_fun <- switch(
+    mode,
+    classification = function(m, dat) {
+      stats::predict(m, dat, type = "prob")[[".pred_1"]] # Only "classification"?
+    },
+    regression = function(m, dat) {
+      stats::predict(m, dat)
+    }
+  )
+
   # Calculate H statistics over responses and bootstraps (multithreaded)
   hstats_list <- future.apply::future_lapply(
     planned_work,
@@ -81,13 +91,13 @@ mrInteractions <- function(mrIMLobj,
             sample(1:dplyr::n(), replace = TRUE)
           )
       }
-      
+
       # fit model
       wflow <- yhats[[p$response]]$last_mod_fit %>%
         tune::extract_workflow()
       wflow$data <- bootstrap_sample
       model_fit <- workflows::fit(wflow, data = bootstrap_sample)
-      
+
       # Calculate H statistics
       s <- hstats::hstats(
         model_fit,
@@ -97,7 +107,7 @@ mrInteractions <- function(mrIMLobj,
         verbose = FALSE,
         pairwise_m = min(top_int, (ncol(bootstrap_sample) - 1))
       )
-      
+
       list(
         response = p$response,
         boot = p$boot,
@@ -127,26 +137,26 @@ mrInteractions <- function(mrIMLobj,
     },
     future.seed = TRUE
   )
-  
+
   # Extract H statistics
   overall_int_df <- purrr::map(
     hstats_list,
     purrr::pluck("H2")
   ) %>%
     dplyr::bind_rows()
-  
+
   overall_one_way_df <- purrr::map(
     hstats_list,
     purrr::pluck("H2_overall")
   ) %>%
     dplyr::bind_rows()
-  
+
   overall_two_way_df <- purrr::map(
     hstats_list,
     purrr::pluck("H2_pairwise")
   ) %>%
     dplyr::bind_rows()
-  
+
   # Plot comparisons
   p_overall <- overall_int_df %>%
     dplyr::rename(name = "response") %>%
@@ -156,7 +166,7 @@ mrInteractions <- function(mrIMLobj,
       x = "Response model",
       y = "Overall"
     )
-  
+
   p_one_way_filtered <- overall_one_way_df %>%
     dplyr::filter(.data$response == feature) %>%
     plot_hstat() +
@@ -165,7 +175,7 @@ mrInteractions <- function(mrIMLobj,
       x = "Variable",
       y = "Interaction importance"
     )
-  
+
   p_two_way_filtered <- overall_two_way_df %>%
     dplyr::filter(.data$response == feature) %>%
     plot_hstat() +
@@ -174,7 +184,7 @@ mrInteractions <- function(mrIMLobj,
       x = "Interaction",
       y = "Interaction importance"
     )
-  
+
   # Arrange output
   list(
     p_h2 = p_overall,

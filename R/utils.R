@@ -340,11 +340,17 @@ resist_components <- function(
 }
 
 #' A cbind variation that ignores objects with zero dimention
+#'
+#' @param ... (generalized) vectors or matrices. These can be
+#' given as named arguments. Other R objects may be coerced as
+#' appropriate, or S4 methods may be used: see sections ‘Details’
+#' and ‘Value’. (For the "data.frame" method of cbind these can
+#' be further arguments to data.frame such as stringsAsFactors.)
 cbind <- function(...) {
   df_list <- list(...)
   purrr::keep(
     df_list,
     ~ !all(dim(.) == c(0, 0))
   ) %>%
-    bind_cols()
+    dplyr::bind_cols()
 }
