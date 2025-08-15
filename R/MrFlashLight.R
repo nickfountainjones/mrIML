@@ -20,7 +20,7 @@
 #' @examples
 #' library(flashlight)
 #' library(ggplot2)
-#' 
+#'
 #' mrIML_rf <- mrIML::mrIML_bird_parasites_RF
 #'
 #' fl <- mrFlashlight(
@@ -28,7 +28,7 @@
 #'   response = "multi",
 #'   index = 1
 #' )
-#' 
+#'
 #' # Performance comparison
 #' fl %>%
 #'   light_performance(
@@ -47,11 +47,12 @@
 #'   light_profile2d(c("scale.prop.zos", "Plas")) %>%
 #'   plot()
 #' @export
-mrFlashlight <- function(mrIMLobj,
-                         response = "multi",
-                         index = 1,
-                         predict_function = NULL) {
-  
+mrFlashlight <- function(
+  mrIMLobj,
+  response = "multi",
+  index = 1,
+  predict_function = NULL
+) {
   # Unpack mrIML object
   yhats <- mrIMLobj$Fits
   Model <- mrIMLobj$Model
@@ -59,19 +60,19 @@ mrFlashlight <- function(mrIMLobj,
   X <- mrIMLobj$Data$X
   X1 <- mrIMLobj$Data$X1
   mode <- mrIMLobj$Model$mode
-  
+
   # Set up flashlight functions for mode
   flashlight_ops <- mrIML_flashlight_setup(
     mode,
     predict_function
   )
-  
+
   # Run flashlight on models
   if (response == "single") {
     mfl <- flashlight::flashlight(
       model = yhats[[index]]$last_mod_fit$.workflow[[1]],
       label = colnames(Y)[index],
-      data = cbind(Y[index], X),
+      data = cbind(Y, X),
       y = colnames(Y)[index],
       predict_function = flashlight_ops$pred_fun,
       metrics = flashlight_ops$metrics
@@ -100,7 +101,7 @@ mrFlashlight <- function(mrIMLobj,
       call. = FALSE
     )
   }
-  
+
   mfl
 }
 
@@ -148,10 +149,12 @@ mrIML_flashlight_setup <- function(mode, predict_function = NULL) {
       )
     )
   }
-  
+
   # Override pred_fun() if user supplied one
-  if (!is.null(predict_function)) pred_fun <- predict_function
-  
+  if (!is.null(predict_function)) {
+    pred_fun <- predict_function
+  }
+
   list(
     metrics = metrics,
     pred_fun = pred_fun
