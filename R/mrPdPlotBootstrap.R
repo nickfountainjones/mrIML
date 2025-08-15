@@ -86,6 +86,8 @@ mrPdPlotBootstrap <- function(
         dplyr::bind_rows()
       if (length(unique(pd_var_df$X)) == 2) {
         plot_disc_pd(pd_var_df, v, target)
+      } else if (is.factor(pd_var_df$X)) {
+        plot_fact_pd(pd_var_df, v, target)
       } else {
         plot_cont_pd(pd_var_df, v, target)
       }
@@ -115,6 +117,19 @@ plot_disc_pd <- function(pd_var_df, var_name, resp_name) {
     ggplot2::ggplot(
       ggplot2::aes(
         x = ifelse(.data$X == 1, "present", "absent"),
+        y = .data$value
+      )
+    ) +
+    ggplot2::geom_boxplot() +
+    ggplot2::labs(x = var_name, y = paste(resp_name, "prob")) +
+    ggplot2::theme_bw()
+}
+
+plot_fact_pd <- function(pd_var_df, var_name, resp_name) {
+  pd_var_df %>%
+    ggplot2::ggplot(
+      ggplot2::aes(
+        x = .data$X,
         y = .data$value
       )
     ) +
