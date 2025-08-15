@@ -82,7 +82,8 @@ mrPdPlotBootstrap <- function(
   plot_list <- lapply(
     important_vars,
     function(v) {
-      pd_var_df <- pd_boot_df_target[[v]]
+      pd_var_df <- pd_boot_df_target[names(pd_boot_df_target) == v] %>%
+        dplyr::bind_rows()
       if (length(unique(pd_var_df$X)) == 2) {
         plot_disc_pd(pd_var_df, v, target)
       } else {
