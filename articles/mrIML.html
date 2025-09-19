@@ -167,6 +167,10 @@ case we use all the response variables).</p>
 <span>  k <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  racing <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">i</span> <span style="color: #000000;">Creating pre-processing data to finalize 1 unknown parameter: </span><span style="color: #0000BB;">"mtry"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">i</span> <span style="color: #000000;">Creating pre-processing data to finalize 1 unknown parameter: </span><span style="color: #0000BB;">"mtry"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">i</span> <span style="color: #000000;">Creating pre-processing data to finalize 1 unknown parameter: </span><span style="color: #0000BB;">"mtry"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">i</span> <span style="color: #000000;">Creating pre-processing data to finalize 1 unknown parameter: </span><span style="color: #0000BB;">"mtry"</span></span></span>
 <span></span>
 <span><span class="va">mrIML_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLpredicts.html">mrIMLpredicts</a></span><span class="op">(</span></span>
 <span>  X <span class="op">=</span> <span class="va">X</span>,</span>
@@ -198,10 +202,10 @@ model.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
 <span><span class="co">#&gt;   response     model_name roc_AUC   mcc sensitivity   ppv specificity prevalence</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.951 0.714       0.941 0.923       0.758     0.265 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.790 0.218       0.918 0.926       0.308     0.116 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.902 0.438       0.955 0.875       0.4       0.196 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.905 0           1     0.896       0         0.098<span style="text-decoration: underline;">0</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.951 0.732       0.912 0.949       0.848     0.265 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.799 0.150       0.959 0.914       0.154     0.116 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.914 0.616       0.945 0.920       0.64      0.196 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.902 0           1     0.896       0         0.098<span style="text-decoration: underline;">0</span></span></span>
 <span></span>
 <span><span class="va">perf_lm</span> <span class="op">&lt;-</span> <span class="va">mrIML_lm</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/mrIMLperformance.html">mrIMLperformance</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -209,10 +213,10 @@ model.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
 <span><span class="co">#&gt;   response     model_name roc_AUC   mcc sensitivity   ppv specificity prevalence</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.951 0.714       0.941 0.923       0.758     0.265 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.790 0.218       0.918 0.926       0.308     0.116 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.902 0.438       0.955 0.875       0.4       0.196 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.905 0           1     0.896       0         0.098<span style="text-decoration: underline;">0</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.951 0.732       0.912 0.949       0.848     0.265 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.799 0.150       0.959 0.914       0.154     0.116 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.914 0.616       0.945 0.920       0.64      0.196 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.902 0           1     0.896       0         0.098<span style="text-decoration: underline;">0</span></span></span></code></pre></div>
 <p>These performance metrics can be compared between different
 <code>mrIML</code> model using <code><a href="../reference/mrPerformancePlot.html">mrPerformancePlot()</a></code>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">

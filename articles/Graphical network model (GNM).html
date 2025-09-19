@@ -213,12 +213,12 @@ logistic regression gave similar predictive performance.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
 <span><span class="co">#&gt;   response     model_name roc_AUC   mcc sensitivity   ppv specificity prevalence</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.951 0.714       0.941 0.923       0.758     0.265 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.790 0.218       0.918 0.926       0.308     0.116 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.902 0.438       0.955 0.875       0.4       0.196 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.905 0           1     0.896       0         0.098<span style="text-decoration: underline;">0</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.951 0.732       0.912 0.949       0.848     0.265 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.799 0.150       0.959 0.914       0.154     0.116 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.914 0.616       0.945 0.920       0.64      0.196 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.902 0           1     0.896       0         0.098<span style="text-decoration: underline;">0</span></span></span>
 <span><span class="va">ModelPerf_rf</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="co">#overall</span></span>
-<span><span class="co">#&gt; [1] 0.3426539</span></span>
+<span><span class="co">#&gt; [1] 0.3746</span></span>
 <span></span>
 <span><span class="va">ModelPerf_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLperformance.html">mrIMLperformance</a></span><span class="op">(</span><span class="va">yhats_lm</span><span class="op">)</span></span>
 <span></span>
@@ -245,21 +245,22 @@ logistic regression gave similar predictive performance.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plots</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 6</span></span></span>
-<span><span class="co">#&gt;   response  metric_metric_logist…¹ metric_metric_rand_f…² outlier_outlier_logi…³</span></span>
+<span><span class="co">#&gt;   response  metric_metric_model1…¹ metric_metric_model2…² outlier_outlier_mode…³</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>                 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzostero…                 0.335                   0.714 <span style="color: #BB0000;">NA</span>                    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillang…                 0.052<span style="text-decoration: underline;">0</span>                  0.218 <span style="color: #BB0000;">NA</span>                    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas                      0.119                   0.438 <span style="color: #BB0000;">NA</span>                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzostero…                 0.335                   0.732 <span style="color: #BB0000;">NA</span>                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillang…                 0.052<span style="text-decoration: underline;">0</span>                  0.150 <span style="color: #BB0000;">NA</span>                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas                      0.119                   0.616 <span style="color: #BB0000;">NA</span>                    </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfil…                 0.362                   0     <span style="color: #BB0000;">NA</span>                    </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ abbreviated names: ¹​metric_metric_logistic_reg, ²​metric_metric_rand_forest,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   ³​outlier_outlier_logistic_reg</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: outlier_outlier_rand_forest &lt;lgl&gt;, diff_mod1_2 &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ abbreviated names: ¹​metric_metric_model1_logistic_reg,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   ²​metric_metric_model2_rand_forest, ³​outlier_outlier_model1_logistic_reg</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: outlier_outlier_model2_rand_forest &lt;lgl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   diff_mod1_2 &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>If we just look at the overall AUC values, model performance appears
 quite similar (0.89 for the RF and 0.78 for the LM). However, when we
 look at the Matthews correlation coefficient (MCC) for each taxon in the
 LM model, we see that for <em>H.killangoi</em> and Plas
 (<em>Plasmodium</em>), the values are much lower (an overall MCC of 0.22
-for LM is basically just a guess, compared to 0.34 for the RF).
+for LM is basically just a guess, compared to 0.37 for the RF).
 Remember, the classes are imbalanced, so AUC tends to be an inflated
 measure. This provides evidence that non-linear relationships can
 improve predictive performance.</p>
@@ -284,18 +285,18 @@ assuming independence between the parasites).</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
 <span><span class="co">#&gt;   response     model_name roc_AUC   mcc sensitivity   ppv specificity prevalence</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.869 0.544       0.891 0.882       0.647     0.265 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.678 0           1     0.948       0         0.116 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.746 0.475       0.889 0.897       0.593     0.196 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.801 0.459       1     0.947       0.222     0.098<span style="text-decoration: underline;">0</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.856 0.511       0.901 0.867       0.588     0.265 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.826 0           1     0.948       0         0.116 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.755 0.475       0.889 0.897       0.593     0.196 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.805 0.459       1     0.947       0.222     0.098<span style="text-decoration: underline;">0</span></span></span>
 <span><span class="va">ModelPerf_rf</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="co">#performance including associations</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
 <span><span class="co">#&gt;   response     model_name roc_AUC   mcc sensitivity   ppv specificity prevalence</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.951 0.714       0.941 0.923       0.758     0.265 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.790 0.218       0.918 0.926       0.308     0.116 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.902 0.438       0.955 0.875       0.4       0.196 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.905 0           1     0.896       0         0.098<span style="text-decoration: underline;">0</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.951 0.732       0.912 0.949       0.848     0.265 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.799 0.150       0.959 0.914       0.154     0.116 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.914 0.616       0.945 0.920       0.64      0.196 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.902 0           1     0.896       0         0.098<span style="text-decoration: underline;">0</span></span></span></code></pre></div>
 <p>You can see that overall, including associations improves model
 performance, particularly for predicting <em>H.killangoi</em> and
 <em>Microfilaria</em>. Using MCC to compare models is problematic
@@ -332,10 +333,10 @@ improves model fit.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
 <span><span class="co">#&gt;   response     model_name roc_AUC   mcc sensitivity   ppv specificity prevalence</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.903 0.600       0.802 0.929       0.844     0.265 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.901 0.430       0.740 1           1         0.116 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.863 0.525       0.739 0.956       0.88      0.196 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.942 0.448       0.760 1           1         0.098<span style="text-decoration: underline;">0</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.883 0.590       0.877 0.888       0.719     0.265 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.903 0.405       0.712 1           1         0.116 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.868 0.525       0.739 0.956       0.88      0.196 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.947 0.430       0.740 1           1         0.098<span style="text-decoration: underline;">0</span></span></span></code></pre></div>
 <p>Look at those PPV values now—much better. <span style="color:red">Our
 false positive rate is down to &lt;6% overall. Now that we are happy
 with the performance of the model, we can interrogate it

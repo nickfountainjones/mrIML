@@ -117,20 +117,50 @@ the <code>target</code> response model.</p></li>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mrIML_rf_PD</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              var     X counts     value label               type bootstrap</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 scale.prop.zos -1.75    449 0.1625835 class partial dependence         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 scale.prop.zos -1.25    449 0.1625835 class partial dependence         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 scale.prop.zos -0.75    449 0.5623608 class partial dependence         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 scale.prop.zos -0.25    449 0.5298441 class partial dependence         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 scale.prop.zos  0.25    449 0.5458797 class partial dependence         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 scale.prop.zos  0.75    449 0.0247216 class partial dependence         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      response</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Hzosteropis</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 Hzosteropis</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 Hzosteropis</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 Hzosteropis</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 Hzosteropis</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $scale.prop.zos</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       X counts     value label               type bootstrap    response</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 -1.75    449 0.1625835 class partial dependence         1 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 -1.25    449 0.1625835 class partial dependence         1 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 -0.75    449 0.5623608 class partial dependence         1 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 -0.25    449 0.5298441 class partial dependence         1 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  0.25    449 0.5458797 class partial dependence         1 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  0.75    449 0.0247216 class partial dependence         1 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7  1.25    449 0.0247216 class partial dependence         1 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8  1.75    449 0.4048998 class partial dependence         1 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9  2.25    449 0.4048998 class partial dependence         1 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $Hkillangoi</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   X counts      value label               type bootstrap    response</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0    449 0.22761693 class partial dependence         1 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 1    449 0.04944321 class partial dependence         1 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $Plas</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   X counts     value label               type bootstrap    response</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0    449 0.2394209 class partial dependence         1 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 1    449 0.1209354 class partial dependence         1 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $Microfilaria</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   X counts     value label               type bootstrap    response</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0    449 0.1302895 class partial dependence         1 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 1    449 0.6171492 class partial dependence         1 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $scale.prop.zos</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       X counts     value label               type bootstrap    response</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 -1.75    449 0.2387528 class partial dependence         2 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 -1.25    449 0.3182628 class partial dependence         2 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 -0.75    449 0.4436526 class partial dependence         2 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 -0.25    449 0.6420935 class partial dependence         2 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  0.25    449 0.7093541 class partial dependence         2 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  0.75    449 0.0935412 class partial dependence         2 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7  1.25    449 0.0935412 class partial dependence         2 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8  1.75    449 0.1757238 class partial dependence         2 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9  2.25    449 0.1757238 class partial dependence         2 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $Hkillangoi</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   X counts      value label               type bootstrap    response</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0    449 0.28151448 class partial dependence         2 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 1    449 0.04521158 class partial dependence         2 Hzosteropis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="va">mrIML_rf_PD</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-plt img"><img src="mrPdPlotBootstrap-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>
