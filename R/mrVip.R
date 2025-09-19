@@ -63,13 +63,13 @@ mrVip <- function(mrIMLobj,
   
   # Reset global_ and local_top_var to the total number of variables if needed
   global_top_var <- ifelse(
-    global_top_var > ncol(dplyr::bind_cols(X, X1)),
-    ncol(dplyr::bind_cols(X, X1)),
+    global_top_var > ncol(cbind(X, X1)),
+    ncol(cbind(X, X1)),
     global_top_var
   )
   local_top_var <- ifelse(
-    local_top_var > ncol(dplyr::bind_cols(X, X1)),
-    ncol(dplyr::bind_cols(X, X1)),
+    local_top_var > ncol(cbind(X, X1)),
+    ncol(cbind(X, X1)),
     local_top_var
   )
   
