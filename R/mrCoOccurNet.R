@@ -102,9 +102,9 @@ mrCoOccurNet <- function(mrBootstrap_obj) {
     dplyr::summarise(sd_value = stats::sd(.data$value), .groups = "drop") %>%
     dplyr::group_by(.data$var, .data$response) %>%
     dplyr::summarise(
-      mean_strength = mean(.data$sd_value),
-      lower_ci = stats::quantile(.data$sd_value, probs = 0.025),
-      upper_ci = stats::quantile(.data$sd_value, probs = 0.974),
+      mean_strength = mean(.data$sd_value, na.rm = TRUE),
+      lower_ci = stats::quantile(.data$sd_value, probs = 0.025, na.rm = TRUE),
+      upper_ci = stats::quantile(.data$sd_value, probs = 0.974, na.rm = TRUE),
       .groups = "drop"
     )
 

@@ -5,7 +5,7 @@
 #' [mrIMLpredicts()] in a way that allows for easy comparison of different models.
 #' For regression models, root mean squared error (RMSE) and R-squared are
 #' reported, while for classification models, area under the ROC curve (AUC),
-#' Matthews correlation coefficient (MCC), positive predictive value (PPV), 
+#' Matthews correlation coefficient (MCC), positive predictive value (PPV),
 #' specificity, and sensitivity are reported.
 #'
 #' @param mrIMLobj A list object created by [mrIMLpredicts()] containing
@@ -32,14 +32,14 @@ mrIMLperformance <- function(mrIMLobj) {
   Model <- mrIMLobj$Model
   Y <- mrIMLobj$Data$Y
   mode <- mrIMLobj$Model$mode
-  
+
   n_response <- length(yhats)
   mod_perf <- NULL
   bList <- yhats %>%
     purrr::map(
       purrr::pluck("last_mod_fit")
     )
-  
+
   if (mode == "classification") {
     performance_function <- mrIMLperformance_classification
     global_metric <- "mcc"
@@ -52,7 +52,7 @@ mrIMLperformance <- function(mrIMLobj) {
       call. = FALSE
     )
   }
-  
+
   model_perf <- performance_function(
     n_response,
     yhats,
@@ -60,10 +60,10 @@ mrIMLperformance <- function(mrIMLobj) {
     Model,
     bList
   )
-  
+
   global_summary <- model_perf[[global_metric]] %>%
     mean(na.rm = TRUE)
-  
+
   return(
     list(
       model_performance = model_perf,
@@ -72,11 +72,13 @@ mrIMLperformance <- function(mrIMLobj) {
   )
 }
 
-mrIMLperformance_classification <- function(n_response,
-                                            yhats,
-                                            Y,
-                                            Model,
-                                            bList) {
+mrIMLperformance_classification <- function(
+  n_response,
+  yhats,
+  Y,
+  Model,
+  bList
+) {
   m_perf <- lapply(
     1:n_response,
     function(i) {
@@ -113,7 +115,7 @@ mrIMLperformance_classification <- function(n_response,
     }
   ) %>%
     dplyr::bind_rows()
-  
+
   # Handling for NAs in MCC
   if (any(is.na(m_perf$mcc))) {
     warning(
@@ -128,15 +130,11 @@ mrIMLperformance_classification <- function(n_response,
         mcc = ifelse(is.na(.data$mcc), 0, .data$mcc)
       )
   }
-  
+
   m_perf
 }
 
-mrIMLperformance_regression <- function(n_response,
-                                        yhats,
-                                        Y,
-                                        Model,
-                                        bList) {
+mrIMLperformance_regression <- function(n_response, yhats, Y, Model, bList) {
   lapply(
     1:n_response,
     function(i) {
