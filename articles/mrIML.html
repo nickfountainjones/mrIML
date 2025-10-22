@@ -181,7 +181,11 @@ case we use all the response variables).</p>
 <span>  prop <span class="op">=</span> <span class="fl">0.6</span>,</span>
 <span>  k <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  racing <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; → <span style="color: #BBBB00; font-weight: bold;">A</span> | <span style="color: #BBBB00;">warning</span>: glm.fit: fitted probabilities numerically 0 or 1 occurred</span></span>
+<span><span class="co">#&gt; There were issues with some computations   <span style="color: #BBBB00; font-weight: bold;">A</span>: x1</span></span>
+<span><span class="co">#&gt; There were issues with some computations   <span style="color: #BBBB00; font-weight: bold;">A</span>: x1</span></span>
+<span><span class="co">#&gt; </span></span></code></pre></div>
 <p>The resulting fitted <code>mrIML</code> model is a list object
 containing the original tidy model, the data, and the fitted response
 models. The remainder of the functions in the <code>mrIML</code> package
@@ -202,10 +206,10 @@ model.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
 <span><span class="co">#&gt;   response     model_name roc_AUC   mcc sensitivity   ppv specificity prevalence</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.951 0.732       0.912 0.949       0.848     0.265 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.799 0.150       0.959 0.914       0.154     0.116 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.914 0.616       0.945 0.920       0.64      0.196 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.902 0           1     0.896       0         0.098<span style="text-decoration: underline;">0</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.931 0.649       0.93  0.894       0.694     0.265 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.780 0.171       0.975 0.893       0.125     0.116 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.850 0.555       0.917 0.909       0.630     0.196 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.921 0.44        0.967 0.928       0.4       0.098<span style="text-decoration: underline;">0</span></span></span>
 <span></span>
 <span><span class="va">perf_lm</span> <span class="op">&lt;-</span> <span class="va">mrIML_lm</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/mrIMLperformance.html">mrIMLperformance</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -213,10 +217,10 @@ model.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
 <span><span class="co">#&gt;   response     model_name roc_AUC   mcc sensitivity   ppv specificity prevalence</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.951 0.732       0.912 0.949       0.848     0.265 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.799 0.150       0.959 0.914       0.154     0.116 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.914 0.616       0.945 0.920       0.64      0.196 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.902 0           1     0.896       0         0.098<span style="text-decoration: underline;">0</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Hzosteropis  rand_fore…   0.931 0.649       0.93  0.894       0.694     0.265 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Hkillangoi   rand_fore…   0.780 0.171       0.975 0.893       0.125     0.116 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Plas         rand_fore…   0.850 0.555       0.917 0.909       0.630     0.196 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Microfilaria rand_fore…   0.921 0.44        0.967 0.928       0.4       0.098<span style="text-decoration: underline;">0</span></span></span></code></pre></div>
 <p>These performance metrics can be compared between different
 <code>mrIML</code> model using <code><a href="../reference/mrPerformancePlot.html">mrPerformancePlot()</a></code>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">

@@ -112,7 +112,7 @@ California.</p>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dials       </span> 1.4.2      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">rsample     </span> 1.3.1 </span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr       </span> 1.1.4      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tailor      </span> 0.1.0 </span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2     </span> 4.0.0      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tidyr       </span> 1.3.1 </span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">infer       </span> 1.0.9      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tune        </span> 2.0.0 </span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">infer       </span> 1.0.9      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tune        </span> 2.0.1 </span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">modeldata   </span> 1.5.1      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">workflows   </span> 1.3.0 </span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">parsnip     </span> 1.3.3      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">workflowsets</span> 1.1.1 </span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">purrr       </span> 1.1.0      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">yardstick   </span> 1.3.2</span></span>
@@ -235,19 +235,19 @@ the population sampled.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 29 × 8</span></span></span>
 <span><span class="co">#&gt;    response model_name roc_AUC    mcc sensitivity     ppv specificity prevalence</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> env_131  rand_fore…   0.625  0            0.5    0.667       0.5        0.421</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> env_163  rand_fore…   0.938  0            0    <span style="color: #BB0000;">NaN</span>           1          0.632</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> env_164  rand_fore…   0.667  0            1      0.5         0          0.421</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> env_167  rand_fore…   0.2   -<span style="color: #BB0000;">0.316</span>        0.6    0.75        0          0.421</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> env_169  rand_fore…   0.875  0            1      0.333       0          0.421</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> env_212  rand_fore…   0      0            0    <span style="color: #BB0000;">NaN</span>           1          0.684</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> env_23   rand_fore…   0.688  0            0    <span style="color: #BB0000;">NaN</span>           1          0.632</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> env_24   rand_fore…   0.625  0            1      0.333       0          0.421</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> env_41   rand_fore…   0.625  0.25         0.75   0.75        0.5        0.474</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> env_47   rand_fore…   0.889  0.707        1      0.75        0.667      0.474</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> env_131  rand_fore…   0.625 0            1       0.571       0          0.421</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> env_163  rand_fore…   0.583 0            0     <span style="color: #BB0000;">NaN</span>           1          0.632</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> env_164  rand_fore…   0.833 0.167        0.5     0.667       0.667      0.421</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> env_167  rand_fore…   0.5   0            1       0.571       0          0.421</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> env_169  rand_fore…   0.333 0            1       0.571       0          0.421</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> env_212  rand_fore…   0.75  0            0     <span style="color: #BB0000;">NaN</span>           1          0.684</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> env_23   rand_fore…   0.583 0            0     <span style="color: #BB0000;">NaN</span>           1          0.632</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> env_24   rand_fore…   0.833 0.091<span style="text-decoration: underline;">3</span>       0.75    0.6         0.333      0.421</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> env_41   rand_fore…   0.5   0.333        0.667   0.667       0.667      0.474</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> env_47   rand_fore…   0.667 0            0.667   0.5         0.333      0.474</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 19 more rows</span></span></span>
 <span><span class="va">ModelPerf_rf</span><span class="op">$</span><span class="va">global_performance_summary</span></span>
-<span><span class="co">#&gt; [1] 0.06520272</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.1360853</span></span></code></pre></div>
 <p>You can compare the predictive performance of random forests with any
 other technique simply by altering the following. Lets try a logistic
 regression. Note that for logistic regression you may need to
@@ -273,9 +273,9 @@ following tidymodel syntax.</p>
 <span><span class="co"># Get performance</span></span>
 <span><span class="va">ModelPerf_glm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrIMLperformance.html">mrIMLperformance</a></span><span class="op">(</span><span class="va">yhats_glm</span><span class="op">)</span></span>
 <span><span class="va">ModelPerf_glm</span><span class="op">$</span><span class="va">global_performance_summary</span></span>
-<span><span class="co">#&gt; [1] 0.1907751</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.2014733</span></span></code></pre></div>
 <p>You can see that the random forests model outperforms the logistic
-regression in this case (0.1907751 versus 0.0652027). Once we are happy
+regression in this case (0.2014733 versus 0.1360853). Once we are happy
 with the underlying model we can then dive in to see how this model
 predicts the SNPs. First we can check variable importance.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -298,9 +298,7 @@ scores.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">glm_impVI_PCA</span> <span class="op">&lt;-</span> <span class="va">glm_impVI</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/mrVipPCA.html">mrVipPCA</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">glm_impVI_PCA</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="co">#&gt; Warning: ggrepel: 1 unlabeled data points (too many overlaps). Consider</span></span>
-<span><span class="co">#&gt; increasing max.overlaps</span></span></code></pre></div>
+<span><span class="va">glm_impVI_PCA</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
 <p><img src="Multi-response%20(classification)_files/figure-html/unnamed-chunk-2-1.png" width="768" style="display: block; margin: auto;"></p>
 <p><span style="color:red">We can see only one outlier was detected on
 PC3 (env24) indicating that this SNP was bets predicted by a different
