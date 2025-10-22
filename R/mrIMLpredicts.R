@@ -183,31 +183,20 @@ mrIML_internal_fit_function <- function(
   racing,
   seed
 ) {
+  # Identify the variable to be predicted
   resp_name <- names(.Y)[i]
-  if (!is.null(.X1)) {
-    data <- list(
-      .Y %>%
-        dplyr::select(tidyselect::any_of(resp_name)),
-      .X,
-      .X1 %>%
-        dplyr::select(-tidyselect::any_of(resp_name))
-    ) %>%
-      purrr::keep(~ nrow(.) > 0) %>%
-      dplyr::bind_cols() %>%
-      tibble::as_tibble()
-  } else {
-    if (!is.null(.X)) {
-      data <- tibble::as_tibble(
-        cbind(
-          .Y %>%
-            dplyr::select(tidyselect::any_of(resp_name)),
-          .X
-        )
-      )
-    } else {
-      stop("At least one of X or X1 must be specified.")
-    }
-  }
+
+  # Greated predictor dataset with handling for if X1 or X are not supplied
+  data <- list(
+    .Y %>%
+      dplyr::select(tidyselect::any_of(resp_name)),
+    .X,
+    .X1 %>%
+      dplyr::select(-tidyselect::any_of(resp_name))
+  ) %>%
+    purrr::keep(~ nrow(.) > 0) %>%
+    dplyr::bind_cols() %>%
+    tibble::as_tibble()
 
   # define response variable
   colnames(data)[1] <- "class"
@@ -216,7 +205,7 @@ mrIML_internal_fit_function <- function(
     data$class <- as.factor(data$class)
   }
 
-  data_split <- rsample::initial_split(data, prop = prop)
+  data_split <- rsample::initial_split(data, prop = prop, strata = class)
 
   # extract training and testing sets
   data_train <- rsample::training(data_split)
