@@ -48,10 +48,7 @@ mrCovar <- function(mrIMLobj, var, sdthresh = 0.05, ...) {
     dplyr::rename(cov_grid = .data[[var]]) %>%
     dplyr::group_by(.data$label) %>%
     dplyr::mutate(
-      sd = stats::sd(.data$value),
-      cov_grad = .data$cov_grid +
-        (0.5 * (dplyr::lead(.data$cov_grid) - .data$cov_grid)),
-      cov_diff = abs(dplyr::lead(.data$value) - .data$value)
+      sd = stats::sd(.data$value)
     )
 
   # Plot partial dependence
@@ -66,8 +63,7 @@ mrCovar <- function(mrIMLobj, var, sdthresh = 0.05, ...) {
     ggplot2::ylab("Prob of occurrence") +
     ggplot2::xlab(var) +
     ggplot2::labs(colour = "Taxa") +
-    ggplot2::ylim(0, 1) +
-    ggplot2::xlim(range(profiles_df$cov_grid))
+    ggplot2::ylim(0, 1)
 
   # Plot global average
   p_pd_avg <- ggplot2::ggplot() +
@@ -91,21 +87,37 @@ mrCovar <- function(mrIMLobj, var, sdthresh = 0.05, ...) {
     ggplot2::theme_bw()
 
   # Plot derivatives
-  p_pd_diff <- profiles_df %>%
-    dplyr::filter(!is.na(.data$cov_diff)) %>%
-    ggplot2::ggplot(
-      ggplot2::aes(
-        x = .data$cov_grad,
-        group = .data$cov_grad,
-        y = .data$cov_diff
-      )
-    ) +
-    ggplot2::geom_boxplot() +
-    ggplot2::theme_bw() +
-    ggplot2::ylab("Change in prob") +
-    ggplot2::xlab(var) +
-    ggplot2::ylim(0, 1) +
-    ggplot2::xlim(range(profiles_df$cov_grid))
+  if (
+    is.factor(profiles_df$cov_grid) &&
+      !is.ordered(profiles_df$cov_grid) &&
+      (nlevels(profiles_df$cov_grid) > 2)
+  ) {
+    p_pd_diff <- NULL
+  } else {
+    p_pd <- p_pd +
+      ggplot2::xlim(range(profiles_df$cov_grid))
+
+    p_pd_diff <- profiles_df %>%
+      dplyr::mutate(
+        cov_diff = abs(dplyr::lead(.data$value) - .data$value),
+        cov_grad = .data$cov_grid +
+          (0.5 * (dplyr::lead(.data$cov_grid) - .data$cov_grid))
+      ) %>%
+      dplyr::filter(!is.na(.data$cov_diff)) %>%
+      ggplot2::ggplot(
+        ggplot2::aes(
+          x = .data$cov_grad,
+          group = .data$cov_grad,
+          y = .data$cov_diff
+        )
+      ) +
+      ggplot2::geom_boxplot() +
+      ggplot2::theme_bw() +
+      ggplot2::ylab("Change in prob") +
+      ggplot2::xlab(var) +
+      ggplot2::ylim(0, 1) +
+      ggplot2::xlim(range(profiles_df$cov_grid))
+  }
 
   list(
     p_pd,
