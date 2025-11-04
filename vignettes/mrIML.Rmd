@@ -56,7 +56,7 @@ future::plan(multisession, workers = 2)
 The first step in the `mrIML` workflow is to define some models that we would like to compare. Thanks to `tidymodels`, we can define a wide range of models using a unified syntax. To demonstrate, we are going to set up two models to compare: a random forest model (RF) and a logistic regression (lm).
 
 ```{r define-tidymodels}
-model_rf <- rand_forest(
+model_rf <- parsnip::rand_forest(
   trees = 100, # 100 trees are set for brevity. Aim to start with 1000.
   mode = "classification",
   mtry = tune(),
@@ -64,7 +64,7 @@ model_rf <- rand_forest(
 ) %>%
   set_engine("randomForest")
 
-model_lm <- logistic_reg() %>%
+model_lm <- parsnip::logistic_reg() %>%
   set_engine("glm")
 ```
 
