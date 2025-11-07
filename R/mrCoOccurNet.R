@@ -114,7 +114,7 @@ mrCoOccurNet <- function(mrBootstrap_obj) {
     dplyr::mutate(direction = .data$present - .data$absent) %>%
     dplyr::group_by(.data$var, .data$response) %>%
     dplyr::summarise(
-      mean_direction = mean(.data$direction),
+      mean_direction = mean(.data$direction, na.rm = TRUE),
       .groups = "drop"
     ) %>%
     dplyr::mutate(
