@@ -11,7 +11,7 @@
 #'
 #' @return A list containing bootstrap samples of variable profiles for each
 #' response variable.
-#' 
+#'
 #' @examplesIf identical(Sys.getenv("NOT_CRAN"), "true")
 #' # Specify a random forest tidy model
 #' mrIML_rf <- mrIML::mrIML_bird_parasites_RF
@@ -24,23 +24,20 @@
 #'   )
 #'
 #' @export
-mrBootstrap <- function(mrIMLobj,
-                        num_bootstrap = 10,
-                        downsample = FALSE) {
-  
+mrBootstrap <- function(mrIMLobj, num_bootstrap = 10, downsample = FALSE) {
   yhats <- mrIMLobj$Fits
   Y <- mrIMLobj$Data$Y
   mode <- mrIMLobj$Model$mode
-  
+
   # Set up flashlight functions for mode
   flashlight_ops <- mrIML_flashlight_setup(mode)
-  
+
   # Determine downsampling frequency
   if (downsample) {
     if (mode == "regression") {
       stop("Downsampling is not suitable for regression models.")
     }
-    
+
     min_class_counts <- lapply(
       seq_along(Y),
       function(k) {
@@ -55,7 +52,7 @@ mrBootstrap <- function(mrIMLobj,
       function(k) NULL
     )
   }
-  
+
   # Set up models and data for future_lapply
   bootstrap_wf <- lapply(
     yhats,
@@ -66,13 +63,13 @@ mrBootstrap <- function(mrIMLobj,
       )
     }
   )
-  
+
   # Set up bootstrapping
   var_ids <- rep(seq_along(bootstrap_wf), each = num_bootstrap)
   boot_ids <- rep(seq_len(num_bootstrap), times = length(bootstrap_wf))
-  
+
   pb <- utils::txtProgressBar(min = 0, max = length(var_ids), style = 3)
-  
+
   bootstrap_results <- future.apply::future_lapply(
     seq_along(var_ids),
     function(i, boot_fun) {
@@ -91,30 +88,32 @@ mrBootstrap <- function(mrIMLobj,
     },
     future.seed = TRUE
   )
-  
+
   # Organize bootstraps into a list
   bstraps_pd_list <- lapply(
     yhats,
     function(i) vector("list", num_bootstrap)
   )
-  
+
   for (i in seq_along(var_ids)) {
     bstraps_pd_list[[var_ids[i]]][[boot_ids[[i]]]] <- bootstrap_results[[i]]
   }
-  
+
   bstraps_pd_list %>%
     structure(
       mode = mode
     )
 }
 
-mrIML_internal_bootstrap_fun <- function(wf,
-                                         data,
-                                         metrics,
-                                         pred_fun,
-                                         downsample_to = NULL,
-                                         response_name,
-                                         boot_id) {
+mrIML_internal_bootstrap_fun <- function(
+  wf,
+  data,
+  metrics,
+  pred_fun,
+  downsample_to = NULL,
+  response_name,
+  boot_id
+) {
   # Resample data
   if (is.null(downsample_to)) {
     bootstrap_sample <- data %>%
@@ -133,7 +132,7 @@ mrIML_internal_bootstrap_fun <- function(wf,
       }
     ) %>%
       dplyr::bind_rows()
-    
+
     if (nrow(bootstrap_sample) < 100) {
       warning(
         paste(
@@ -145,13 +144,13 @@ mrIML_internal_bootstrap_fun <- function(wf,
       )
     }
   }
-  
+
   # Refit model and create flashlight
   model_fit <- workflows::fit(
     wf,
     data = bootstrap_sample
   )
-  
+
   fl <- flashlight::flashlight(
     model = model_fit,
     label = "class",
@@ -160,7 +159,7 @@ mrIML_internal_bootstrap_fun <- function(wf,
     predict_function = pred_fun,
     metrics = metrics
   )
-  
+
   # Get light_profiles for all covariates
   pd_list <- lapply(
     names(bootstrap_sample)[-1],
@@ -173,11 +172,12 @@ mrIML_internal_bootstrap_fun <- function(wf,
         dplyr::mutate(
           bootstrap = boot_id,
           response = response_name
-        )
+        ) %>%
+        dplyr::select(-c("value_"))
     }
   )
-  
+
   names(pd_list) <- names(bootstrap_sample)[-1]
-  
+
   pd_list
 }
