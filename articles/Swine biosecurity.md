@@ -121,7 +121,7 @@ plot(light_profile(fl, v = "Premises_in_3_miles")) +
   theme_bw()
 ```
 
-![](../../../../../../../tmp/RtmpPDWpTF/articles/reference/figures/pdp-1.png)
+![](../../../../../../../tmp/RtmpsyQPlU/articles/reference/figures/pdp-1.png)
 \### Benchmarking: predicted risk
 
 The following function allows you to visualize and compare predicted
