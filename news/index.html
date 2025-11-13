@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mrIML</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,6 +50,16 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.2.0" id="mriml-220">mrIML 2.2.0<a class="anchor" aria-label="anchor" href="#mriml-220"></a></h2>
+<p>Initial bug fixes after major release of mrIML 2 to CRAN.</p>
+<ul><li>
+<code><a href="../reference/mrIMLpredicts.html">mrIMLpredicts()</a></code> properly handles missing <code>X</code> or <code>X1</code>.</li>
+<li>
+<code><a href="../reference/mrCovar.html">mrCovar()</a></code> and <code><a href="../reference/mrVip.html">mrVip()</a></code> can handle factors without throwing a <code>cbind</code> error.</li>
+<li>Stratified test-train splits so that there is always positive and negative observation in the test set for small data sets.</li>
+<li>Improved internal behaviour of <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> from <code>workflow</code> objects.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.1.0" id="mriml-210">mrIML 2.1.0<a class="anchor" aria-label="anchor" href="#mriml-210"></a></h2><p class="text-muted">CRAN release: 2025-07-28</p>
 </div>
     <div class="section level2">
@@ -72,7 +82,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>
