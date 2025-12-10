@@ -56,9 +56,14 @@ library(tune)
 library(nnet)
 library(flashlight)
 library(ggplot2)
-#library(tidyr)
 
-
+library(tidyr)
+library(rlang)
+library(rsample)
+library(recipes)
+library(purrr)
+library(workflows)
+library(yardstick)
 #### User Input Data (this would be improved but is what the user would mainly interact with)
 ## all relevant user settings for the process
 
@@ -72,29 +77,37 @@ data$Plas <- as.factor(data$Plas)
 data$Microfilaria <- as.factor(data$Microfilaria)
 
 
+
 # The following indicate the column names from data. 
 XHeadings <- c("scale.prop.zos")
 YHeadings <- c("Hzosteropis", "Hkillangoi", "Plas", "Microfilaria")
 X1Headings <- c("Hzosteropis", "Hkillangoi", "Plas", "Microfilaria")
 
-# Select model details. Ensure that all setting are done at a length consistent for the model.
 
-modelNames <- c("Model_lm","Model_rf","MLP")
-desiredModels <- c("logistic_reg","rand_forest","mlp")
-desiredEngines <- c("glm","randomForest","nnet")
-modelModes <- c("classification", "classification", "classification")
-stacking <- c(TRUE,TRUE,TRUE)
-trainProp <- c(0.6,0.7,0.7)
-balanceData <- c(FALSE,FALSE,FALSE)
-dummy <- c(TRUE,TRUE,TRUE)
-tune_grid_size <- c(10,10,10)
-k <- c(5,5,5)
-racing <- c(FALSE,FALSE,FALSE)
-modelParameters <- c(
-  ""
-  ,"mtry = tune(), min_n = tune(),trees = 500"
-  ,"hidden_units = tune(), penalty = tune(), epochs = tune()"
-)
+# dataTypes <- list(Hzosteropis= "Factor"
+#                   , Hkillangoi = "Factor"
+#                   , Plas = "Factor"
+#                   , Microfilaria= "Factor"
+#                   , scale.prop.zos = "Numeric")
+
+# Select model details. Ensure that all setting are done at a length consistent for the model.
+# 
+# modelNames <- c("Model_lm","Model_rf","MLP")
+# desiredModels <- c("logistic_reg","rand_forest","mlp")
+# desiredEngines <- c("glm","randomForest","nnet")
+# modelModes <- c("classification", "classification", "classification")
+# stacking <- c(TRUE,TRUE,TRUE)
+# trainProp <- c(0.6,0.7,0.7)
+# balanceData <- c(FALSE,FALSE,FALSE)
+# dummy <- c(TRUE,TRUE,TRUE)
+# tune_grid_size <- c(10,10,10)
+# k <- c(5,5,5)
+# racing <- c(FALSE,FALSE,FALSE)
+# modelParameters <- c(
+#   ""
+#   ,"mtry = tune(), min_n = tune(),trees = 500"
+#   ,"hidden_units = tune(), penalty = tune(), epochs = tune()"
+# )
 
 Mod1 <- list()
 Mod1$modelName <- "Logistic"
@@ -103,12 +116,14 @@ Mod1$modelEngine <- "glm"
 Mod1$modelMode <- "classification"
 Mod1$stacking <- TRUE
 Mod1$prop <- 0.7
-Mod1$balanceData <- FALSE
+Mod1$balanceData <- "no"
 Mod1$dummy <- TRUE
 Mod1$tune_grid_size <- 10
 Mod1$k <- 5
 Mod1$racing <- FALSE
 Mod1$modelParameters <- ""
+Mod1$modelMetric <- "roc_auc"
+#Mod1$tuneMode <- 
 
 Mod2 <- list()
 Mod2$modelName <- "RandomForest"
@@ -117,12 +132,13 @@ Mod2$modelEngine <- "randomForest"
 Mod2$modelMode <- "classification"
 Mod2$stacking <- TRUE
 Mod2$prop <- 0.7
-Mod2$balanceData <- FALSE
+Mod2$balanceData <- "no"
 Mod2$dummy <- TRUE
 Mod2$tune_grid_size <- 10
 Mod2$k <- 5
-Mod2$racing <- FALSE
+Mod2$racing <- TRUE
 Mod2$modelParameters <- "mtry = tune(), min_n = tune(),trees = 500"
+Mod2$modelMetric <- "roc_auc"
 
 Mod3 <- list()
 Mod3$modelName <- "MLP"
@@ -131,78 +147,57 @@ Mod3$modelEngine <- "nnet"
 Mod3$modelMode <- "classification"
 Mod3$stacking <- TRUE
 Mod3$prop <- 0.7
-Mod3$balanceData <- FALSE
+Mod3$balanceData <- "no"
 Mod3$dummy <- TRUE
 Mod3$tune_grid_size <- 10
 Mod3$k <- 5
-Mod3$racing <- FALSE
+Mod3$racing <- TRUE
 Mod3$modelParameters <- "hidden_units = tune(), penalty = tune(), epochs = tune()"
+#Mod3$modelMetric <- "roc_auc"
 
-stacksOnly <- FALSE
-stackMethod <- "control_stack_grid" #control_stack_resamples or control_stack_bayes
-vFolds <- 5
-stackProp <- 0.7
+StackSet <- list()
+StackSet$stacksOnly <- FALSE
+StackSet$stackMethod <- "control_stack_grid" #control_stack_resamples or control_stack_bayes
+StackSet$vFolds <- 5
+StackSet$stackProp <- 0.8
+StackSet$stackMode <- "classification"
+StackSet$modelMetric <- "roc_auc"
 
 # Select processing options
 
-bootstrapping = TRUE
-bootstrapNumber = 10
+ProcessSet <- list()
+ProcessSet$bootstrapping = TRUE
+ProcessSet$bootstrapNumber = 10
 
 # Select visualisation options
 
-partialDependency = TRUE
-partialDNumber = 5 #Give a maximum of top 5 per model.
+VisSet <- list()
+VisSet$partialDependency = TRUE
+VisSet$partialDNumber = 5 #Give a maximum of top 5 per model.
 
 
-#### Typical end of initial Setup.
+#------------------ Typical end of initial Setup.------------------------------
+
+
+
+####------------------------Simple Code Piping --------------------------------
 
 S <- new_mrIMLSObject() %>%
   mrAddModel(Settings = Mod1) %>%
   mrAddModel(Settings = Mod1) %>%
   mrAddModel(Settings = Mod2) %>%
   mrAddModel(Settings = Mod3) %>%
-  mrUpdateSettings(stacksOnly = stacksOnly
-                   , stacksMethod = stacksMethod
-                   , bootstrapping = bootstrapping
-                   , bootstrapNumber = bootstrapNumber
-                   , partialDependency = partialDependency
-                   , vFolds = vFolds
-                   , stackProp = stackProp
-    
-  ) %>%
-  mrAddData(data=data, XHeadings = XHeadings, YHeadings = YHeadings, X1Headings = X1Headings) %>%  
-  mrBuildStack() #%>%
+  mrUpdateSettings(Stack = StackSet) %>%
+  mrAddData(data=data, XHeadings = XHeadings, YHeadings = YHeadings, X1Headings = X1Headings) %>% 
+  mrUpdateSettings(Visual = VisSet) %>%
+  mrUpdateSettings(Process = ProcessSet) %>% 
+  mrBuildModels() #%>%
+
   
   
-
-sTyhat0 <- stats::predict(S$Models$StackedModel, new_data = dStack_test, type = "prob")
-sTyhat <- sTyhat0$.pred_1
-
-
+  #  mrPredictStacks()
+  
+  S<-mrIMLStackPerform_classification(S)
 
 
-
-  # mrAddModels(modelNames = modelNames
-  #             , desiredModels = desiredModels
-  #             , desiredEngines = desiredEngines
-  #             , modelModes = modelModes
-  #             , stacking = stacking
-  #             , trainProp = trainProp
-  #             , balanceData = balanceData
-  #             , dummy = dummy
-  #             , tune_grid_size = tune_grid_size
-  #             , k = k
-  #             , racing = racing
-  #             , modelParameters = modelParameters
-  #             ) %>%
-
-
-
-
-
-
-
-
-
-
-
+  

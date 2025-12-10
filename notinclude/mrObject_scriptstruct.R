@@ -98,9 +98,9 @@ XHeadings <- c("scale.prop.zos")
 YHeadings <- c("Hzosteropis", "Hkillangoi", "Plas", "Microfilaria")
 X1Headings <- c("Hzosteropis", "Hkillangoi", "Plas", "Microfilaria")
 
-modelNames <- c("Model_lm","Model_rf","Model_lm2")
-desiredModels <- c("logistic_reg","rand_forest","logistic_reg")
-desiredEngines <- c("glm","randomForest","glm")
+modelNames <- c("Model_lm","Model_rf","Model_mlp")
+desiredModels <- c("logistic_reg","rand_forest","mlp")
+desiredEngines <- c("glm","randomForest","nnet")
 modelModes <- c("classification", "classification", "classification")
 trainProp <- c(0.6,0.7,0.7)
 balanceData <- c(FALSE,FALSE,FALSE)
@@ -234,14 +234,65 @@ for (i in 1:length(O$Models)){
   O$SummaryStatistics[[O$Methodology$Models$modelNames[[i]]]]$model_performance <- tempPref$model_performance
   O$SummaryStatistics$global_performance_summary[[O$Methodology$Models$modelNames[[i]]]] <- tempPref$global_performance_summary
 
+  
+  ##%%% This should also be in another section but similar to the previous issue there is lots of 
+  ##%%% double handling. 
   tempFL <- mrFlashlight(predictData)
   
   O$Flashlight[[O$Methodology$Models$modelNames[[i]]]] <- tempFL
   
 }
 
-####----------------------mrIMLPerformance Section
+####----------------------mrIMLPerformance Section --------------------
 ## 
+
+
+####----------------------mrTorchlight Section ------------------------
+
+# rearranging Torchlight objects
+
+#tempLightP <- light_profile(data = O$Flashlight$Model_rf$Microfilaria$data, v = "scale.prop.zos")
+
+tempLightP <- light_profile(O$Flashlight$Model_rf$Microfilaria, v = "scale.prop.zos")
+tempLightP <- light_profile(O$Flashlight$Model_rf[[tempOut]], v = "scale.prop.zos")
+
+
+####----------------------Display Section ----------------------------
+
+O$Flashlight$Model_rf$Microfilaria %>%
+  light_profile(data = data, v = "scale.prop.zos") %>%
+  plot() +
+  ggtitle("Effect of scale.prop.zos on Microfilaria") +
+  theme_bw()
+
+## Subplots!
+# Dimensions of subplots are outputs (width of Y) by models.
+for(OPLoop in 1:length(O$Methodology$XHeadings)){
+  windows()
+  plotSpace <- par(mfrow=c(length(O$Methodology$YHeadings),length(O$Methodology$Models$modelNames)))
+  for (i in 1:length(O$Methodology$YHeadings)){
+    for (j in 1:length(O$Methodology$Models$modelNames)){
+      tempIn <- O$Methodology$XHeadings[1]
+      tempOut <- O$Methodology$YHeadings[i]
+      tempMod <- O$Methodology$Models$modelNames[j] 
+      
+    
+      tempLightP <- light_profile(O$Flashlight[[tempMod]][[tempOut]], v = tempIn)
+      
+      xTitle = tempLightP$v 
+      xVals = tempLightP$data[[tempIn]]
+      yVals = tempLightP$data$value
+      subT = paste0(tempLightP$data$label[1], " - ", tempMod)
+  #    plot(tempLightP$data[[tempOut]],tempLightP$data$value,xlab = xTitle, ylab = "Partial")
+      plot(xVals,yVals,xlab = xTitle, ylab = "Partial",main = subT)
+  
+    }
+  }
+}
+
+
+
+
 
 
 
