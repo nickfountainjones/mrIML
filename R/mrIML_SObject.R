@@ -237,8 +237,8 @@ mrBuildModels <- function(Ob){
                                    , data_cv = folds)
 
 
-      Ob$System[[i]][[modelName]]$last_model_fit <- Ob$Models[[i]][[modelName]] %>%
-        tune::last_fit(dStack_split)
+      # Ob$System[[i]][[modelName]]$last_model_fit <- Ob$Models[[i]][[modelName]] %>%
+      #   tune::last_fit(dStack_split)
 
 
       if(Ob$Methodology$Models[[modelName]]$stacking){
@@ -262,10 +262,13 @@ mrBuildModels <- function(Ob){
             
     }
   ## finishing off the stack
-  Ob$Models[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]],) %>%
-    fit_members()
-  Ob$Fits[[i]]$ModelStack <- modelStack[[i]] 
-  
+  Ob$Models[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]] ,)
+  Ob$System[[i]]$ModelStack$recipe <- modelStack[[i]]
+      
+    
+  Ob$Fits[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]],) %>%
+    stacks::fit_members()
+
   
   
   
@@ -340,6 +343,9 @@ mrBuildModels_internal <- function(Ob
     )
   }
   
+  ##
+  
+  
   ## Stacks tune setup 
   #' Note that this needs to have if statements for non grid implementations
   
@@ -372,28 +378,21 @@ mrBuildModels_internal <- function(Ob
     best_m) 
   mod1_k <- final_model %>%
     workflows::fit(data = data_train)
-  last_mod_fit <- tune::last_fit(final_model
-                                 , Ob$Fits$Data$Config$Split)  
-  
 
-  
-  
-  
-  
-  
-  last_model_fit <- tune::last_fit(final_model, data = Ob$Data, split = Ob$Fits$Data$Config$Split)
-
-  # Last fit has been removed from here to avoid the requirement for test data
+  last_model_fit <- tune::last_fit(final_model
+                                   , data = Ob$Data
+                                   , split = Ob$Fits$Data$Config$Split)
 
   ## Repack variables:
   
-  Ob$Models[[yModel]][[modelName]] <- last_mod_fit  
-  
   Ob$System[[yModel]][[modelName]]$recipe <- data_recipe
-#  Ob$System[[yModel]][[modelName]]$workflow <- mod_workflow #unnecessary?
+  Ob$System[[yModel]][[modelName]]$workflow <- mod_workflow #unnecessary?
   Ob$System[[yModel]][[modelName]]$tune_s <- tune_s
-  Ob$Models[[yModel]][[modelName]] <- final_model #moved to perform
+  Ob$System[[yModel]][[modelName]]$tune_m <- tune_m
   Ob$System[[yModel]][[modelName]]$final_fit <- last_model_fit
+  Ob$System[[yModel]][[modelName]]$last_model_fit <- last_model_fit
+  
+  Ob$Models[[yModel]][[modelName]] <- final_model #moved to perform
   return(Ob)
   
 }
@@ -403,26 +402,33 @@ mrPredictStack_internal <- function(Ob){
   data_test <- rsample::testing(Ob$Fits$Data$Config$Split)
   
   response <- Ob$Methodology$Data$YHeadings
-  Ob$System[[i]]$ModelStack$final_fit <- list()
   
   tempArray <- 1:length(Ob$Data[[1]])
   tempRow <- tempArray[-Ob$Fits$Data$Config$Split$in_id]
   
   for (i in response){
-    Ob$System[[i]]$ModelStack <- list()
-    syhatProb <- stats::predict(Ob$Models[[i]]$ModelStack, new_data = data_test, type = "prob")
-    syhatClass <- stats::predict(Ob$Models[[i]]$ModelStack, new_data = data_test, type = "class")
-    Ob$System[[i]]$ModelStack$final_fit$.predictions[[1]] <- data.frame(Outcome = Ob$Data[[i]][tempRow]
+    #Ob$System[[i]]$ModelStack <- list()
+    Ob$System[[i]]$ModelStack$last_model_fit <- list()
+    syhatProb <- stats::predict(Ob$Fits[[i]]$ModelStack, new_data = data_test, type = "prob")
+    syhatClass <- stats::predict(Ob$Fits[[i]]$ModelStack, new_data = data_test, type = "class")
+    Ob$System[[i]]$ModelStack$last_model_fit$.predictions[[1]] <- data.frame(Outcome = Ob$Data[[i]][tempRow]
                                                                         , .pred_class = syhatClass$.pred_class
                                                                         , .pred_0 = syhatProb$.pred_0
                                                                         , .pred_1 = syhatProb$.pred_1
                                                                         , .row = tempRow)
-    colnames(Ob$System[[i]]$ModelStack$final_fit$.predictions[[1]])[1] <- i
+    colnames(Ob$System[[i]]$ModelStack$last_model_fit$.predictions[[1]])[1] <- i
     
   }
   return(Ob)
 }
 
+mrAddData <- function(Ob, data, XHeadings, YHeadings, X1Headings){
+  Ob$Data <- data
+  Ob$Methodology$Data$XHeadings = XHeadings
+  Ob$Methodology$Data$YHeadings = YHeadings
+  Ob$Methodology$Data$X1Headings = X1Headings
+  return(Ob)
+}
 
 # 
 # mrPredictStack_internal <- function(Ob
@@ -483,13 +489,7 @@ mrPredictStack_internal <- function(Ob){
 # }
 # 
 # 
-# mrAddData <- function(Ob, data, XHeadings, YHeadings, X1Headings){
-#   Ob$Data <- data
-#   Ob$Methodology$Data$XHeadings = XHeadings
-#   Ob$Methodology$Data$YHeadings = YHeadings
-#   Ob$Methodology$Data$X1Headings = X1Headings
-#   return(Ob)
-# }
+
 # 
 # 
 
