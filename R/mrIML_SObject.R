@@ -268,9 +268,9 @@ mrBuildModels <- function(Ob){
     
   Ob$Fits[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]],) %>%
     stacks::fit_members()
-
-  
-  
+# This is a bit of code to align where the data is between stacks and other models
+  Ob$Fits[[i]]$ModelStack$last_model_fit <- list()
+  Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- Ob$Fits[[i]]$ModelStack
   
     
   }

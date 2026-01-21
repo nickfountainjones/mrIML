@@ -1,4 +1,4 @@
-mrIML_StackLight <- function(Ob){
+
   #' Lots of checks of previous steps required here now...
   #' - Check for complete stacks object
   #' - Check that predictions have been run successfully.
@@ -16,44 +16,36 @@ mrIML_StackLight <- function(Ob){
   #'
   
   # 
-  
+mrIML_StackLight <- function(Ob){  
   models <- c(attributes(Ob$Methodology$Models)$name,"ModelStack")
   Ob$PD <- list()
   Ob$PD$FL <- list()
   Ob$PD$LP <- list()
-  flPred_fun <- function(m, dat){
-      pred <- stats::predict(m,
-                             new_data = dat,
-                             type = "prob"
-      )
-      return(dplyr::pull(pred,.data$.pred_1))
-    }  
+
+  #' the following does not work for unknown reasons (likely piping?) so instead 
+  #' a non piping version is used.
+  # fl_setup <- mrIML_flashlight_setup(Ob$Methodology$Stacking$stackMode)  
+  
+  
+  flpred_fun <- function(m, dat){
+    pred <- stats::predict(m,
+                           new_data = dat,
+                           type = "prob"
+    )
+    return(dplyr::pull(pred,.data$.pred_1))
+  }
+  
+  
   for (k in models){
-  # k <- "ModelStack"
     Ob$PD$FL[[k]] <- list()
     Ob$PD$LP[[k]] <- list()
     
     for (i in Ob$Methodology$Data$YHeadings){
-      # i <- "Hzosteropis"
-      
-      if (k == "ModelStack"){
-        flModelS <- Ob$Fits[[i]][[k]]
-      } else {
-        flModelS <- Ob$Fits[[i]][[k]]$last_model_fit$.workflow[[1]]
-        
-      }
-  #    flData <- cbind(mrIML_lm$Data$Y, mrIML_lm$Data$X)
-      flData <- Ob$Data
-      flY <- i
-      flLabel <- i
-      flOutput <- flashlight::flashlight(model = flModelS, 
-                                         label = flLabel,
-                                         data = flData,
-                                         y = flY,
-                                         predict_function = flPred_fun)
-      
-      Ob$PD$FL[[i]][[k]] <- flOutput 
-      
+      Ob$PD$FL[[i]][[k]] <- flashlight::flashlight(model = Ob$Fits[[i]][[k]]$last_model_fit$.workflow[[1]], 
+                                         label = i,
+                                         data = Ob$Data,
+                                         y = i,
+                                         predict_function = flpred_fun)
       for (j in Ob$Methodology$Data$XHeadings){
         Ob$PD$LP[[i]][[k]][[j]] <- light_profile(Ob$PD$FL[[i]][[k]], data = Ob$Data, v = j)
       }
@@ -69,7 +61,10 @@ mrIML_StackLight <- function(Ob){
 
 
 
-
+#' Plotting tools.
+#' @description 
+#' mrIML_StackLight_Plot is a basic plot summary for all light profile information
+#' not intended for final plots but should indicate how the process is going.
 
 
 mrIML_StackLight_Plot<- function(Ob){
