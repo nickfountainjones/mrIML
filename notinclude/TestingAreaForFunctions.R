@@ -46,17 +46,15 @@
 #' * `$SummaryStatistics`: A list of all summary statistics for the models.
 #'
 
-### Building the empty structure (likely function going forwards)
+
+### ----------------------------------Libraries --------------------------
+## Basic Libraries
 library(tibble)
 library(parsnip)
 library(dplyr)
 library(tools)
-library(stacks)
 library(tune)
-library(nnet)
 library(flashlight)
-library(ggplot2)
-
 library(tidyr)
 library(rlang)
 library(rsample)
@@ -64,6 +62,26 @@ library(recipes)
 library(purrr)
 library(workflows)
 library(yardstick)
+library(mrIML)
+# stacks also need to be added (will eventually be part of mrIML) current files:
+# mrIML_SObject
+# mrIMLStackPerform
+# mrIMLStackLight
+
+## Graphical Libraries
+library(ggplot2)
+library(patchwork) #extension to ggplot2
+
+## Model Specific libraries
+library(nnet)
+library(stacks)
+
+### ----------------------------------Diagnostic Setup ---------------------
+
+tic <- Sys.time()
+
+### --------------------------------- User Input Section -------------------
+
 #### User Input Data (this would be improved but is what the user would mainly interact with)
 ## all relevant user settings for the process
 
@@ -77,38 +95,12 @@ data$Plas <- as.factor(data$Plas)
 data$Microfilaria <- as.factor(data$Microfilaria)
 
 
-
 # The following indicate the column names from data. 
 XHeadings <- c("scale.prop.zos")
 YHeadings <- c("Hzosteropis", "Hkillangoi", "Plas", "Microfilaria")
 X1Headings <- c("Hzosteropis", "Hkillangoi", "Plas", "Microfilaria")
 
-
-# dataTypes <- list(Hzosteropis= "Factor"
-#                   , Hkillangoi = "Factor"
-#                   , Plas = "Factor"
-#                   , Microfilaria= "Factor"
-#                   , scale.prop.zos = "Numeric")
-
-# Select model details. Ensure that all setting are done at a length consistent for the model.
-# 
-# modelNames <- c("Model_lm","Model_rf","MLP")
-# desiredModels <- c("logistic_reg","rand_forest","mlp")
-# desiredEngines <- c("glm","randomForest","nnet")
-# modelModes <- c("classification", "classification", "classification")
-# stacking <- c(TRUE,TRUE,TRUE)
-# trainProp <- c(0.6,0.7,0.7)
-# balanceData <- c(FALSE,FALSE,FALSE)
-# dummy <- c(TRUE,TRUE,TRUE)
-# tune_grid_size <- c(10,10,10)
-# k <- c(5,5,5)
-# racing <- c(FALSE,FALSE,FALSE)
-# modelParameters <- c(
-#   ""
-#   ,"mtry = tune(), min_n = tune(),trees = 500"
-#   ,"hidden_units = tune(), penalty = tune(), epochs = tune()"
-# )
-
+# Define models one at a time. Each will be added individually
 Mod1 <- list()
 Mod1$modelName <- "Logistic"
 Mod1$modelFunction <- "logistic_reg"
@@ -123,7 +115,6 @@ Mod1$k <- 5
 Mod1$racing <- FALSE
 Mod1$modelParameters <- ""
 Mod1$modelMetric <- "roc_auc"
-#Mod1$tuneMode <- 
 
 Mod2 <- list()
 Mod2$modelName <- "RandomForest"
@@ -153,7 +144,7 @@ Mod3$tune_grid_size <- 10
 Mod3$k <- 5
 Mod3$racing <- TRUE
 Mod3$modelParameters <- "hidden_units = tune(), penalty = tune(), epochs = tune()"
-#Mod3$modelMetric <- "roc_auc"
+Mod3$modelMetric <- "roc_auc"
 
 StackSet <- list()
 StackSet$stacksOnly <- FALSE
@@ -191,13 +182,12 @@ S <- new_mrIMLSObject() %>%
   mrAddData(data=data, XHeadings = XHeadings, YHeadings = YHeadings, X1Headings = X1Headings) %>% 
   mrUpdateSettings(Visual = VisSet) %>%
   mrUpdateSettings(Process = ProcessSet) %>% 
-  mrBuildModels() #%>%
-
-  
+  mrBuildModels() %>%
+  mrIMLStackPerform_classification() %>%
+  mrIML_StackLight() 
   
   #  mrPredictStacks()
   
-  S<-mrIMLStackPerform_classification(S)
+#### ------------------------- End Diagnostics ---------------------------------
 
-
-  
+toc <- Sys.time() - tic

@@ -390,7 +390,8 @@ mrBuildModels_internal <- function(Ob
   Ob$System[[yModel]][[modelName]]$tune_s <- tune_s
   Ob$System[[yModel]][[modelName]]$tune_m <- tune_m
   Ob$System[[yModel]][[modelName]]$final_fit <- last_model_fit
-  Ob$System[[yModel]][[modelName]]$last_model_fit <- last_model_fit
+  
+  Ob$Fits[[yModel]][[modelName]]$last_model_fit <- last_model_fit
   
   Ob$Models[[yModel]][[modelName]] <- final_model #moved to perform
   return(Ob)
@@ -416,7 +417,13 @@ mrPredictStack_internal <- function(Ob){
                                                                         , .pred_0 = syhatProb$.pred_0
                                                                         , .pred_1 = syhatProb$.pred_1
                                                                         , .row = tempRow)
+    Ob$Fits[[i]]$ModelStack$last_model_fit$.predictions[[1]] <- data.frame(Outcome = Ob$Data[[i]][tempRow]
+                                                                             , .pred_class = syhatClass$.pred_class
+                                                                             , .pred_0 = syhatProb$.pred_0
+                                                                             , .pred_1 = syhatProb$.pred_1
+                                                                             , .row = tempRow)
     colnames(Ob$System[[i]]$ModelStack$last_model_fit$.predictions[[1]])[1] <- i
+    colnames(Ob$Fits[[i]]$ModelStack$last_model_fit$.predictions[[1]])[1] <- i
     
   }
   return(Ob)

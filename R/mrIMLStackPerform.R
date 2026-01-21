@@ -25,7 +25,9 @@ mrIMLStackPerform_classification <- function(Ob){
 ## Check for is there a model here and is it valid!
 
  #     predictData <- S$System[[response[i]]][[models[j]]]$final_fit$.predictions[[1]]
-      predictData <- S$System[[response[i]]][[models[j]]]$last_model_fit$.predictions[[1]]
+#      predictData <- S$System[[response[i]]][[models[j]]]$last_model_fit$.predictions[[1]]
+
+      predictData <- Ob$Fits[[response[i]]][[models[j]]]$last_model_fit$.predictions[[1]]
       
       
       sensTemp <- yardstick::sens(data = predictData,
