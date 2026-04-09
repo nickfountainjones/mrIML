@@ -1,0 +1,408 @@
+---
+title: "Hierarchy Absence Presence Example"
+author: "Simon Riley, Ryan Leadbetter, Nick Fountain-Jones"
+date: "2026-04-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+This case study demonstrates *MrIML 2.0* on a larger dataset with
+multiple taxonomic groups across a forest successional gradient. We
+analyze 144 plots established across forest age categories:
+
+-   **Mature forest**: Unharvested with no fire disturbance for ≥60
+    years
+-   **\~45 years post-harvest**
+-   **\~27 years post-harvest**
+-   **\~7 years post-harvest**
+
+At each plot, we recorded ground-active beetles, plants, and birds,
+along with environmental covariates including coarse wood debris, leaf
+litter depth, and soil variables (pH, conductivity).
+
+```{r libraryLoading, echo=TRUE, include=FALSE}
+library(rsample, warn.conflicts=F, quietly=TRUE)
+library(embed, warn.conflicts=F, quietly=TRUE)
+library(dplyr, warn.conflicts=F, quietly=TRUE)
+library(ranger, warn.conflicts=F, quietly=TRUE)
+library(tidyverse, warn.conflicts=F, quietly=TRUE)
+library(tidymodels, warn.conflicts=F, quietly=TRUE)
+library(mrIML, warn.conflicts=F, quietly=TRUE)
+library(future, warn.conflicts=F, quietly=TRUE)
+
+library(patchwork, warn.conflicts=F, quietly=TRUE)
+
+source("C:/Users/sriley0/OneDrive - University of Tasmania/RProjects/mrIML_HR/mrIML_HR/R/mrIMLpredicts.r") # This needs to be removed when updated
+
+# Set up parallel processing
+n_cores <- parallel::detectCores()
+plan("multisession", workers = n_cores-2)
+
+# Value for bootstrapping ()
+bsNum <- 5
+set.seed(1)
+timings <- list()
+```
+
+## Data Loading
+
+Data is supplied with this case study in a single rdata file. There are 4 
+dataframes, one containing all the environmental elements and one for each of 
+the observations types (beetles, birds and plants).
+
+Derived columns are removed and variables are arranged into X (predictor),
+Y (response) and X1 (co-predictor) for each of beetles, birds and plants. 
+
+
+
+```{r data, echo=TRUE}
+load(paste0(getwd(),"/data/XYForrestData.rdata"))
+
+timings$data$start
+X_beetles <- data_site  %>%
+  dplyr::select(
+    -Beetles_Mat_Ratio,
+    -Birds_Mat_Ratio,
+    -Slope_F,
+    -Aspect_Cor)
+
+
+X_birds <- X_beetles
+
+X_plants <- data_site %>%
+  select(
+    -contains("Bryo"),
+    -contains("Moss"),
+    -contains('Plant'),
+    -Vegetation_cover)
+
+
+Y_beetles <- data_beetles %>%
+  dplyr::select(-Site, -Distance, -Transect, -Age) %>%
+  dplyr::mutate_all(~ ifelse(. > 0, 1, .)) %>%
+  mrIML::filterRareCommon(lower = 0.2, higher = 0.7)
+
+
+Y_birds <- data_birds %>%
+  dplyr::select(-Site, -Distance, -Transect, -Age) %>%
+  mutate_all(~ ifelse(. > 0, 1, .)) %>%
+  mrIML::filterRareCommon(lower = 0.2, higher = 0.7)
+
+Y_plants <- data_plants %>%
+  dplyr::select(-Site, -Distance, -Transect, -Age) %>%
+  mutate_all(~ ifelse(. > 0, 1, .))%>%
+  mrIML::filterRareCommon(lower = 0.2, higher = 0.7)
+
+X1_beetles <- Y_beetles
+X1_birds <- Y_birds
+X1_plants <- Y_plants
+
+beetle_data <- cbind(X_beetles,Y_beetles)
+
+timings$data$finish
+
+
+```
+
+## Model Training
+
+A common model tidy model specification is created and applied to each of beetles,
+birds and plants. There is also a separation for checking environment, co-occurance
+only and using both environmental and co-occurrence data. 
+
+Hierarchical models are also created to show the difference at a site level.
+ 
+```{r building models, echo = TRUE, results=FALSE}
+timings$modelTrain$start
+# Model Spec with Tuning Parameters
+rf_spec <- rand_forest(
+  mtry = tune(),
+  min_n = tune(),
+  trees = 1000
+) %>%
+  set_mode("classification") %>%
+  set_engine("randomForest")
+
+
+## Initial models for beetles, environment, co-occurance and all data.
+# Model 1: Environment only
+yhats_beetles_env <- mrIMLpredicts(
+  X = X_beetles,
+  Y = Y_beetles,
+  Model = rf_spec,
+  balance_data = 'no',
+  tune_grid_size = 5,
+  prop = 0.6,
+  k = 5,
+  racing = TRUE
+)
+
+# Model 2: Co-occurrence only
+yhats_beetles_cooccur <- mrIMLpredicts(
+  Y = Y_beetles,
+  X1 = X1_beetles,
+  Model = rf_spec,
+  balance_data = 'no',
+  tune_grid_size = 5,
+  prop = 0.6,
+  k = 5,
+  racing = TRUE
+)
+
+# Model 3: Combined
+yhats_beetles_combined <- mrIMLpredicts(
+  X = X_beetles,
+  Y = Y_beetles,
+  X1 = X1_beetles,
+  Model = rf_spec, 
+  balance_data = 'no',
+  prop = 0.6,
+  k = 5,
+  racing = FALSE
+)
+
+# Model 4: Hierarchical
+yhats_beetles_combined_H <- mrIMLpredicts(
+  X = X_beetles,
+  Y = Y_beetles,
+  X1 = X1_beetles,
+  Model = rf_spec, 
+  balance_data = 'no',
+  prop = 0.6,
+  k = 5,
+  racing = FALSE,
+  hierarchy = "Site"
+)
+
+
+timings$modelTrain$finish
+```
+
+## Bootstrapping 
+
+Bootstrapping is done to the combined data model and the hierarchical data model
+to get a better estimate of the population properties.
+
+```{r Bootstrap, echo=TRUE}
+timings$bs$start = Sys.time()
+
+bs_beetles <- mrBootstrap(yhats_beetles_combined, num_bootstrap = bsNum)
+bs_beetles_H <- mrBootstrap(yhats_beetles_combined_H, num_bootstrap = bsNum)
+
+
+timings$bs$finish = Sys.time()
+
+```
+
+
+## Checking Variable Importance
+
+```{r Variable Importance Checks, echo = TRUE}
+timings$vip_start <- Sys.time()
+# Variable importance
+vi_beetles <- mrVip(
+  yhats_beetles_combined,
+  mrBootstrap_obj = bs_beetles,
+  threshold = 0.5,
+  global_top_var = 10
+)
+
+# Variable importance
+vi_beetles_H <- mrVip(
+  yhats_beetles_combined_H,
+  mrBootstrap_obj = bs_beetles,
+  threshold = 0.5,
+  global_top_var = 10
+)
+timings$vip_end <- Sys.time()
+
+```
+
+
+
+## Evaluation of performance
+Model outputs are evaluated. 
+
+```{r Evaluation of performance, echo=TRUE}
+## Evaluate model performance beetles
+ModelPerf_beetles_env <- mrIMLperformance(yhats_beetles_env)
+ModelPerf_beetles_cooccur <- mrIMLperformance(yhats_beetles_cooccur)
+ModelPerf_beetles_combined <- mrIMLperformance(yhats_beetles_combined)
+
+ModelPerf_beetles_combined_H <- mrIMLperformance(yhats_beetles_combined_H)
+
+perf_comparison_beetles_env <- mrPerformancePlot(
+  ModelPerf1 = ModelPerf_beetles_env,
+  ModelPerf2 = ModelPerf_beetles_combined_H,
+  mode = "classification"
+)
+
+perf_comparison_beetles_cooccur <- mrPerformancePlot(
+  ModelPerf1 = ModelPerf_beetles_cooccur,
+  ModelPerf2 = ModelPerf_beetles_combined_H,
+  mode = "classification"
+)
+
+perf_comparison_beetles_combined <- mrPerformancePlot(
+  ModelPerf1 = ModelPerf_beetles_combined,
+  ModelPerf2 = ModelPerf_beetles_combined_H,
+  mode = "classification"
+)
+
+# Summary table
+beetle_performance <- data.frame(
+  Model = c("Environment only", "Co-occurrence only", "Combined","Hierarchy"),
+  MCC = c(
+    ModelPerf_beetles_env[[2]],
+    ModelPerf_beetles_cooccur[[2]],
+    ModelPerf_beetles_combined[[2]],
+    ModelPerf_beetles_combined_H[[2]]
+  )
+)
+
+
+```
+
+## Co-occurance Networks
+
+```{r Co-occurance Networks, echo=TRUE}
+timings$CN$start = Sys.time()
+
+# Co-occurrence network
+assoc_net_beetles <- mrCoOccurNet(bs_beetles)
+assoc_net_beetles_filtered <- assoc_net_beetles %>%
+  filter(mean_strength > 0.1)
+
+
+assoc_net_beetles <- mrCoOccurNet(bs_beetles_H)
+assoc_net_beetles_filtered <- assoc_net_beetles %>%
+  filter(mean_strength > 0.1)
+
+
+int_beetles <- mrInteractions(
+  yhats_beetles_combined,
+  num_bootstrap = bsNum,
+  feature = 'Acallistuslongus',
+  top_int = 10
+)
+
+timings$CN$end = Sys.time()
+
+```
+
+
+## Summary Tables
+
+From all this information we can get output tables
+
+```{r Table Outputs, echo = TRUE}
+cat("Beetle Performance:\n")
+beetle_performance
+vi_beetles[[3]]
+
+```
+
+
+## Plots
+From the package there are some plots that are prepared.
+
+# Performance Comparison 
+Initially we look at the performance comparison plots
+
+```{r Plots - performance comparision, echo=TRUE}
+perf_comb=list(env = perf_comparison_beetles_env$performance_plot,
+               cooccr = perf_comparison_beetles_cooccur$performance_plot,
+               comb = perf_comparison_beetles_combined$performance_plot)
+
+
+patchwork::wrap_plots(perf_comb)
+```
+
+# Importance Plots
+
+Looking at importance plots between the models with and without hierarchical 
+grouping we can see how the importance of different predictors is made more clear
+for this separation.
+
+```{r Plots - Importance}
+# Importance plots
+vi_beetles[[3]]
+
+# With hierarchy context
+vi_beetles_H[[3]]
+
+
+
+```
+
+# Network Visualisation
+
+Using the associations calculated above they can be visualised as follows:
+
+```{r Plots - Network, echo = TRUE}
+## Network visualization Beetles
+if (nrow(assoc_net_beetles_filtered) > 0) {
+  g_beetles <- graph_from_data_frame(
+    assoc_net_beetles_filtered,
+    directed = TRUE
+  )
+
+  E(g_beetles)$Value <- assoc_net_beetles_filtered$mean_strength
+  E(g_beetles)$Color <- ifelse(
+    assoc_net_beetles_filtered$direction == "negative",
+    no = "blue",
+    yes = "red"
+  )
+
+  gg_beetles <- ggnetwork(g_beetles)
+
+  ggplot(gg_beetles, aes(x = x, y = y, xend = xend, yend = yend)) +
+    geom_edges(
+      aes(color = Color, linewidth = Value),
+      arrow = arrow(length = unit(5, "pt"), type = "closed")
+    ) +
+    geom_nodes(color = "gray", size = 3) +
+    scale_color_identity() +
+    theme_void() +
+    geom_nodelabel_repel(aes(label = name), size = 2) +
+    labs(title = "Beetle Co-occurrence Network")
+  } else {
+    cat("No significant beetle associations detected at threshold 0.1")
+}
+
+
+```
+
+
+
+# Conclusion
+
+From here we can see that stuff happened.
+
+
+```{r Timing, echo = TRUE}
+timings
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

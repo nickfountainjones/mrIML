@@ -97,7 +97,10 @@ mrIMLpredicts <- function(
   prop = 0.7,
   tune_grid_size = 10,
   k = 10,
-  racing = TRUE
+  racing = TRUE,
+  quiet = FALSE,
+  hierarchy = "none"
+  
 ) {
   mode <- Model$mode
 
@@ -129,11 +132,13 @@ mrIMLpredicts <- function(
   }
 
   n_response <- length(Y)
-  pb <- utils::txtProgressBar(min = 0, max = n_response, style = 3)
-
+  # if(!quiet){
+    pb <- utils::txtProgressBar(min = 0, max = n_response, style = 3)
+  # }
   yhats <- future.apply::future_lapply(
     X = seq(1, n_response),
     FUN = function(i) {
+      
       utils::setTxtProgressBar(pb, i)
       mrIML_internal_fit_function(
         i,
@@ -147,7 +152,8 @@ mrIMLpredicts <- function(
         prop = prop,
         tune_grid_size = tune_grid_size,
         k = k,
-        racing = racing
+        racing = racing,
+        hierarchy = hierarchy
       )
     },
     future.seed = TRUE
@@ -181,11 +187,11 @@ mrIML_internal_fit_function <- function(
   tune_grid_size,
   k,
   racing,
-  seed
+  seed,
+  hierarchy = hierarchy
 ) {
   # Identify the variable to be predicted
   resp_name <- names(.Y)[i]
-
   # Greated predictor dataset with handling for if X1 or X are not supplied
   data <- list(
     .Y %>%
@@ -204,15 +210,23 @@ mrIML_internal_fit_function <- function(
   if (mode == "classification") {
     data$class <- as.factor(data$class)
   }
+    data_split <- rsample::initial_split(data, prop = prop, strata = class)
 
-  data_split <- rsample::initial_split(data, prop = prop, strata = class)
-
+  
   # extract training and testing sets
   data_train <- rsample::training(data_split)
   data_test <- rsample::testing(data_split)
 
+  
   # n-fold cross validation
-  data_cv <- rsample::vfold_cv(data_train, v = k)
+  
+  if(hierarchy == "none"){
+      data_cv <- rsample::vfold_cv(data_train, v = k)
+  } else {
+      data_cv <- rsample::group_vfold_cv(data_train, group = hierarchy)
+  }
+  
+  
 
   # Ensure themis is installed
   if (balance_data != "no") {
@@ -258,6 +272,32 @@ mrIML_internal_fit_function <- function(
         one_hot = TRUE
       )
   }
+  
+  if (hierarchy != "none"){
+    if (!requireNamespace("embed", quietly = TRUE)) {
+      message(
+        paste0(
+          "The 'embed' package is required if hierarchy != 'none'. ",
+          "Would you like to install it? (yes/no)"
+        )
+      )
+      response <- readline()
+      if (tolower(response) == "yes") {
+        utils::install.packages("embed")
+      } else {
+        stop(
+          paste0(
+            "The 'embed' package is needed for this function. Please ",
+            "install it to proceed."
+          )
+        )
+      }
+    }
+    data_recipe <- data_recipe %>%
+      step_lencode_mixed(outcome = vars(resp_name))
+  }
+  
+
 
   mod_workflow <- workflows::workflow() %>%
     workflows::add_recipe(data_recipe) %>%
@@ -299,7 +339,7 @@ mrIML_internal_fit_function <- function(
     yhatT <- stats::predict(mod1_k, new_data = data_test, type = "class") %>%
       dplyr::bind_cols(
         data_test %>%
-          dplyr::select("class")
+          dplyr::select(all_of("class"))
       )
 
     truth <- as.numeric(as.character(data$class))
