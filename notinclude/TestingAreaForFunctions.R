@@ -68,6 +68,13 @@ library(mrIML)
 # mrIMLStackPerform
 # mrIMLStackLight
 
+source("C:/Users/sriley0/OneDrive - University of Tasmania/RProjects/mrIML/R/mrIMLStackLight.R", echo = FALSE)
+source("C:/Users/sriley0/OneDrive - University of Tasmania/RProjects/mrIML/R/mrIML_SObject.R", echo = FALSE)
+source("C:/Users/sriley0/OneDrive - University of Tasmania/RProjects/mrIML/R/mrIMLStackPerform.R", echo = FALSE)
+source("C:/Users/sriley0/OneDrive - University of Tasmania/RProjects/mrIML/R/mrStackPlot.R", echo = TRUE)
+source("C:/Users/sriley0/OneDrive - University of Tasmania/RProjects/mrIML/R/mrStackVIP.R", echo = TRUE)
+
+
 ## Graphical Libraries
 library(ggplot2)
 library(patchwork) #extension to ggplot2
@@ -158,14 +165,21 @@ StackSet$modelMetric <- "roc_auc"
 
 ProcessSet <- list()
 ProcessSet$bootstrapping = TRUE
-ProcessSet$bootstrapNumber = 10
+ProcessSet$bootstrapNumber = 2
+ProcessSet$PDSingle = TRUE
+ProcessSet$PDMulti = TRUE
+
+
+
 
 # Select visualisation options
 
 VisSet <- list()
-VisSet$partialDependency = TRUE
-VisSet$partialDNumber = 5 #Give a maximum of top 5 per model.
-
+VisSet$partialDependency <- TRUE
+VisSet$partialDNumber <- 5 #Give a maximum of top 5 per model.
+VisSet$CovPlots <- TRUE
+VisSet$DerivPlots <- TRUE
+VisSet$Importance <- TRUE
 
 #------------------ Typical end of initial Setup.------------------------------
 
@@ -184,10 +198,22 @@ S <- new_mrIMLSObject() %>%
   mrUpdateSettings(Process = ProcessSet) %>% 
   mrBuildModels() %>%
   mrIMLStackPerform_classification() %>%
-  mrIML_StackLight() 
-  
+  mrIML_StackLight() %>%
+  mrIML_StackVIP
+ # S <- mrIML_StackLight(S)
   #  mrPredictStacks()
+
+options <- list()
+options$PDPPlot <- FALSE
+options$DerivativePlots <- FALSE
+options$CovPlots <- FALSE
+options$ImportancePlots <- TRUE
+# 
+S <- mrIMLStack_plots(S, options)
+
   
+# S1 <- mrIMLStack_plots(S1, options)
+
 #### ------------------------- End Diagnostics ---------------------------------
 
 toc <- Sys.time() - tic

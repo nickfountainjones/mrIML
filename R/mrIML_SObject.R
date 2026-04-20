@@ -266,12 +266,14 @@ mrBuildModels <- function(Ob){
   Ob$System[[i]]$ModelStack$recipe <- modelStack[[i]]
       
     
-  Ob$Fits[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]],) %>%
-    stacks::fit_members()
+  # Ob$Fits[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]],) %>%
+  #   stacks::fit_members()
 # This is a bit of code to align where the data is between stacks and other models
   Ob$Fits[[i]]$ModelStack$last_model_fit <- list()
-  Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- Ob$Fits[[i]]$ModelStack
-  
+  # Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- Ob$Fits[[i]]$ModelStack
+  Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- stacks::blend_predictions(modelStack[[i]],) %>%
+      stacks::fit_members()
+  #   stacks::fit_members()
     
   }
   Ob <- mrPredictStack_internal(Ob)
@@ -410,8 +412,8 @@ mrPredictStack_internal <- function(Ob){
   for (i in response){
     #Ob$System[[i]]$ModelStack <- list()
     Ob$System[[i]]$ModelStack$last_model_fit <- list()
-    syhatProb <- stats::predict(Ob$Fits[[i]]$ModelStack, new_data = data_test, type = "prob")
-    syhatClass <- stats::predict(Ob$Fits[[i]]$ModelStack, new_data = data_test, type = "class")
+    syhatProb <- stats::predict(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]], new_data = data_test, type = "prob")
+    syhatClass <- stats::predict(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]], new_data = data_test, type = "class")
     Ob$System[[i]]$ModelStack$last_model_fit$.predictions[[1]] <- data.frame(Outcome = Ob$Data[[i]][tempRow]
                                                                         , .pred_class = syhatClass$.pred_class
                                                                         , .pred_0 = syhatProb$.pred_0
