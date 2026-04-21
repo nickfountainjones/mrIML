@@ -68,11 +68,15 @@ library(mrIML)
 # mrIMLStackPerform
 # mrIMLStackLight
 
-source("C:/Users/sriley0/OneDrive - University of Tasmania/RProjects/mrIML/R/mrIMLStackLight.R", echo = FALSE)
-source("C:/Users/sriley0/OneDrive - University of Tasmania/RProjects/mrIML/R/mrIML_SObject.R", echo = FALSE)
-source("C:/Users/sriley0/OneDrive - University of Tasmania/RProjects/mrIML/R/mrIMLStackPerform.R", echo = FALSE)
-source("C:/Users/sriley0/OneDrive - University of Tasmania/RProjects/mrIML/R/mrStackPlot.R", echo = TRUE)
-source("C:/Users/sriley0/OneDrive - University of Tasmania/RProjects/mrIML/R/mrStackVIP.R", echo = TRUE)
+
+baseDir <- getwd()
+
+source(paste0(baseDir,"/R/mrIMLStackLight.R"), echo = FALSE)
+source(paste0(baseDir,"/R/mrIML_SObject.R"), echo = FALSE)
+source(paste0(baseDir,"/R/mrIMLStackPerform.R"), echo = FALSE)
+source(paste0(baseDir,"/R/mrStackPlot.R"), echo = TRUE)
+source(paste0(baseDir,"/R/mrStackVIP.R"), echo = TRUE)
+
 
 
 ## Graphical Libraries
@@ -199,7 +203,7 @@ S <- new_mrIMLSObject() %>%
   mrBuildModels() %>%
   mrIMLStackPerform_classification() %>%
   mrIML_StackLight() %>%
-  mrIML_StackVIP
+  mrStackVIP
  # S <- mrIML_StackLight(S)
   #  mrPredictStacks()
 
