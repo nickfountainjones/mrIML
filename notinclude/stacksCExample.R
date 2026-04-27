@@ -68,7 +68,6 @@ library(mrIML)
 # mrIMLStackPerform
 # mrIMLStackLight
 
-
 baseDir <- getwd()
 
 source(paste0(baseDir,"/R/mrIMLStackLight.R"), echo = FALSE)
@@ -76,7 +75,6 @@ source(paste0(baseDir,"/R/mrIML_SObject.R"), echo = FALSE)
 source(paste0(baseDir,"/R/mrIMLStackPerform.R"), echo = FALSE)
 source(paste0(baseDir,"/R/mrStackPlot.R"), echo = TRUE)
 source(paste0(baseDir,"/R/mrStackVIP.R"), echo = TRUE)
-
 
 
 ## Graphical Libraries
@@ -90,7 +88,7 @@ library(stacks)
 ### ----------------------------------Diagnostic Setup ---------------------
 
 tic <- Sys.time()
-
+set.seed(1)
 ### --------------------------------- User Input Section -------------------
 
 #### User Input Data (this would be improved but is what the user would mainly interact with)
@@ -99,17 +97,33 @@ tic <- Sys.time()
 #' Data and basic manipulation. Form should be a data.frame an basic data 
 #' cleansing (eg check factors, integers or booleans) 
 
-data <- as_tibble(MRFcov::Bird.parasites)
-data$Hzosteropis <- as.factor(data$Hzosteropis)
-data$Hkillangoi <- as.factor(data$Hkillangoi)
-data$Plas <- as.factor(data$Plas)
-data$Microfilaria <- as.factor(data$Microfilaria)
+XData <- readRDS(paste0(baseDir,"/data/X1000_chaw.rds"))
+YData <- readRDS(paste0(baseDir,"/data/Y1000_chaw.rds"))
+
+data <- cbind(YData,XData)
+data$rs5743618_A <- as.factor(data$rs5743618_A)
+data$rs6819274_G <- as.factor(data$rs6819274_G)
+data$rs703842_G <- as.factor(data$rs703842_G)
+
+# data <- as_tibble(MRFcov::Bird.parasites)
+# data$Hzosteropis <- as.factor(data$Hzosteropis)
+# data$Hkillangoi <- as.factor(data$Hkillangoi)
+# data$Plas <- as.factor(data$Plas)
+# data$Microfilaria <- as.factor(data$Microfilaria)
 
 
-# The following indicate the column names from data. 
-XHeadings <- c("scale.prop.zos")
-YHeadings <- c("Hzosteropis", "Hkillangoi", "Plas", "Microfilaria")
-X1Headings <- c("Hzosteropis", "Hkillangoi", "Plas", "Microfilaria")
+# # The following indicate the column names from data. 
+# XHeadings <- c("scale.prop.zos")
+# YHeadings <- c("Hzosteropis", "Hkillangoi", "Plas", "Microfilaria")
+# X1Headings <- c("Hzosteropis", "Hkillangoi", "Plas", "Microfilaria")
+
+XHeadings <- c("latitude_S", "longitude_S", "UV_S", "dayT_S", "PC1", "PC2", "PC3", "PC4", "PC5"  )
+YHeadings <- c("rs5743618_A", "rs6819274_G", "rs703842_G")
+# YHeadings <- c("rs5743618_A", "rs6819274_G")
+# YHeadings <- c("rs703842_G")
+# YHeadings <- c("rs5743618_A", "rs703842_G")
+X1Headings <- YHeadings
+
 
 # Define models one at a time. Each will be added individually
 Mod1 <- list()
@@ -139,7 +153,7 @@ Mod2$dummy <- TRUE
 Mod2$tune_grid_size <- 10
 Mod2$k <- 5
 Mod2$racing <- TRUE
-Mod2$modelParameters <- "mtry = tune(), min_n = tune(),trees = 500"
+Mod2$modelParameters <- "mtry = tune(), min_n = tune(),trees = 1000"
 Mod2$modelMetric <- "roc_auc"
 
 Mod3 <- list()
@@ -164,7 +178,8 @@ StackSet$vFolds <- 5
 StackSet$stackProp <- 0.8
 StackSet$stackMode <- "classification"
 StackSet$modelMetric <- "roc_auc"
-
+StackSet$penalty <- 0.01
+#StackSet$non_negative <- FALSE
 # Select processing options
 
 ProcessSet <- list()
@@ -192,7 +207,7 @@ VisSet$Importance <- TRUE
 ####------------------------Simple Code Piping --------------------------------
 
 S <- new_mrIMLSObject() %>%
-  mrAddModel(Settings = Mod1) %>%
+  # mrAddModel(Settings = Mod1) %>%
   mrAddModel(Settings = Mod1) %>%
   mrAddModel(Settings = Mod2) %>%
   mrAddModel(Settings = Mod3) %>%
@@ -200,12 +215,20 @@ S <- new_mrIMLSObject() %>%
   mrAddData(data=data, XHeadings = XHeadings, YHeadings = YHeadings, X1Headings = X1Headings) %>% 
   mrUpdateSettings(Visual = VisSet) %>%
   mrUpdateSettings(Process = ProcessSet) %>% 
-  mrBuildModels() %>%
-  mrIMLStackPerform_classification() %>%
-  mrIML_StackLight() %>%
-  mrStackVIP()
- # S <- mrIML_StackLight(S)
-  #  mrPredictStacks()
+  mrBuildModels() # %>%
+  # mrIMLStackPerform_classification() %>%
+  # mrIML_StackLight() %>%
+  # mrStackVIP()
+# S <- mrIML_StackLight(S)
+#  mrPredictStacks()
+
+
+## Diagnostics
+S <- mrIMLStackPerform_classification(S)
+S <- mrIML_StackLight(S)
+S <- mrStackVIP(S)
+# S <- mrPredictStacks(S)
+
 
 options <- list()
 options$PDPPlot <- TRUE
@@ -215,8 +238,10 @@ options$ImportancePlots <- TRUE
 # 
 S <- mrIMLStack_plots(S, options)
 
-  
+
 # S1 <- mrIMLStack_plots(S1, options)
+
+# S <- mrBuildModels(S)
 
 #### ------------------------- End Diagnostics ---------------------------------
 

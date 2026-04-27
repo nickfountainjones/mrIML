@@ -262,8 +262,22 @@ mrBuildModels <- function(Ob){
             
     }
   ## finishing off the stack
-  Ob$Models[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]] ,)
-  Ob$System[[i]]$ModelStack$recipe <- modelStack[[i]]
+  # Insert something to take from Ob$Methodology$Stacking$penalty while checking if it exists  
+  
+  if (!"penalty" %in% attributes(S$Methodology$Stacking)$name){
+    S$Methodology$Stacking$penalty <- 0.01 
+  } 
+
+    if (!"positive_only" %in% attributes(S$Methodology$Stacking)$name){
+      S$Methodology$Stacking$positive_only <- TRUE 
+    }     
+    
+          
+  Ob$Models[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]] ,
+                                                         penalty = S$Methodology$Stacking$penalty,
+                                                         non_negative = S$Methodology$Stacking$positive_only)
+
+  
       
     
   # Ob$Fits[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]],) %>%
@@ -271,8 +285,16 @@ mrBuildModels <- function(Ob){
 # This is a bit of code to align where the data is between stacks and other models
   Ob$Fits[[i]]$ModelStack$last_model_fit <- list()
   # Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- Ob$Fits[[i]]$ModelStack
-  Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- stacks::blend_predictions(modelStack[[i]],) %>%
-      stacks::fit_members()
+  # Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- stacks::blend_predictions(modelStack[[i]],, penalty = 0.001) %>%
+  #     stacks::fit_members()
+  Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- stacks::fit_members(Ob$Models[[i]]$ModelStack)
+  print(length(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]]$member_fits))
+  if(length(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]]$member_fits)<1){
+    Ob$Models[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]] , penalty = S$Methodology$Stacking$penalty, non_negative = FALSE)
+    Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- stacks::fit_members(Ob$Models[[i]]$ModelStack)
+  }
+  
+  Ob$System[[i]]$ModelStack$recipe <- modelStack[[i]]
   #   stacks::fit_members()
     
   }
@@ -411,22 +433,27 @@ mrPredictStack_internal <- function(Ob){
   
   for (i in response){
     #Ob$System[[i]]$ModelStack <- list()
-    Ob$System[[i]]$ModelStack$last_model_fit <- list()
-    syhatProb <- stats::predict(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]], new_data = data_test, type = "prob")
-    syhatClass <- stats::predict(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]], new_data = data_test, type = "class")
-    Ob$System[[i]]$ModelStack$last_model_fit$.predictions[[1]] <- data.frame(Outcome = Ob$Data[[i]][tempRow]
-                                                                        , .pred_class = syhatClass$.pred_class
-                                                                        , .pred_0 = syhatProb$.pred_0
-                                                                        , .pred_1 = syhatProb$.pred_1
-                                                                        , .row = tempRow)
-    Ob$Fits[[i]]$ModelStack$last_model_fit$.predictions[[1]] <- data.frame(Outcome = Ob$Data[[i]][tempRow]
-                                                                             , .pred_class = syhatClass$.pred_class
-                                                                             , .pred_0 = syhatProb$.pred_0
-                                                                             , .pred_1 = syhatProb$.pred_1
-                                                                             , .row = tempRow)
-    colnames(Ob$System[[i]]$ModelStack$last_model_fit$.predictions[[1]])[1] <- i
-    colnames(Ob$Fits[[i]]$ModelStack$last_model_fit$.predictions[[1]])[1] <- i
-    
+    if(length(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]]$member_fits)>0){
+      Ob$System[[i]]$ModelStack$last_model_fit <- list()
+      syhatProb <- stats::predict(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]], new_data = data_test, type = "prob")
+      syhatClass <- stats::predict(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]], new_data = data_test, type = "class")
+      Ob$System[[i]]$ModelStack$last_model_fit$.predictions[[1]] <- data.frame(Outcome = Ob$Data[[i]][tempRow]
+                                                                          , .pred_class = syhatClass$.pred_class
+                                                                          , .pred_0 = syhatProb$.pred_0
+                                                                          , .pred_1 = syhatProb$.pred_1
+                                                                          , .row = tempRow)
+      Ob$Fits[[i]]$ModelStack$last_model_fit$.predictions[[1]] <- data.frame(Outcome = Ob$Data[[i]][tempRow]
+                                                                               , .pred_class = syhatClass$.pred_class
+                                                                               , .pred_0 = syhatProb$.pred_0
+                                                                               , .pred_1 = syhatProb$.pred_1
+                                                                               , .row = tempRow)
+      colnames(Ob$System[[i]]$ModelStack$last_model_fit$.predictions[[1]])[1] <- i
+      colnames(Ob$Fits[[i]]$ModelStack$last_model_fit$.predictions[[1]])[1] <- i
+    } else {
+      
+      
+    }
+      
   }
   return(Ob)
 }
