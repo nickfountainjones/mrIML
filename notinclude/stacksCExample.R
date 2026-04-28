@@ -97,8 +97,10 @@ set.seed(1)
 #' Data and basic manipulation. Form should be a data.frame an basic data 
 #' cleansing (eg check factors, integers or booleans) 
 
-XData <- readRDS(paste0(baseDir,"/data/X1000_chaw.rds"))
-YData <- readRDS(paste0(baseDir,"/data/Y1000_chaw.rds"))
+# XData <- readRDS(paste0(baseDir,"/data/X1000_chaw.rds"))
+XData <- readRDS(paste0(baseDir,"/data/X_mriml.rds"))
+YData <- readRDS(paste0(baseDir,"/data/Y_mriml.rds"))
+# YData <- readRDS(paste0(baseDir,"/data/Y1000_chaw.rds"))
 
 data <- cbind(YData,XData)
 data$rs5743618_A <- as.factor(data$rs5743618_A)
@@ -179,12 +181,12 @@ StackSet$stackProp <- 0.8
 StackSet$stackMode <- "classification"
 StackSet$modelMetric <- "roc_auc"
 StackSet$penalty <- 0.01
-#StackSet$non_negative <- FALSE
+StackSet$positive_only <- FALSE
 # Select processing options
 
 ProcessSet <- list()
 ProcessSet$bootstrapping = TRUE
-ProcessSet$bootstrapNumber = 2
+ProcessSet$bootstrapNumber = 50
 ProcessSet$PDSingle = TRUE
 ProcessSet$PDMulti = TRUE
 
@@ -231,10 +233,10 @@ S <- mrStackVIP(S)
 
 
 options <- list()
-options$PDPPlot <- TRUE
-options$DerivativePlots <- TRUE
+options$PDPPlot <- FALSE
+options$DerivativePlots <- FALSE
 options$CovPlots <- TRUE
-options$ImportancePlots <- TRUE
+options$ImportancePlots <- FALSE
 # 
 S <- mrIMLStack_plots(S, options)
 
