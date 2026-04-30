@@ -264,18 +264,18 @@ mrBuildModels <- function(Ob){
   ## finishing off the stack
   # Insert something to take from Ob$Methodology$Stacking$penalty while checking if it exists  
   
-  if (!"penalty" %in% attributes(S$Methodology$Stacking)$name){
-    S$Methodology$Stacking$penalty <- 0.01 
+  if (!"penalty" %in% attributes(Ob$Methodology$Stacking)$name){
+    Ob$Methodology$Stacking$penalty <- 0.01 
   } 
 
-    if (!"positive_only" %in% attributes(S$Methodology$Stacking)$name){
-      S$Methodology$Stacking$positive_only <- TRUE 
+    if (!"positive_only" %in% attributes(Ob$Methodology$Stacking)$name){
+      Ob$Methodology$Stacking$positive_only <- TRUE 
     }     
     
           
   Ob$Models[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]] ,
-                                                         penalty = S$Methodology$Stacking$penalty,
-                                                         non_negative = S$Methodology$Stacking$positive_only)
+                                                         penalty = Ob$Methodology$Stacking$penalty,
+                                                         non_negative = Ob$Methodology$Stacking$positive_only)
 
   
       
@@ -290,7 +290,7 @@ mrBuildModels <- function(Ob){
   Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- stacks::fit_members(Ob$Models[[i]]$ModelStack)
   print(length(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]]$member_fits))
   if(length(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]]$member_fits)<1){
-    Ob$Models[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]] , penalty = S$Methodology$Stacking$penalty, non_negative = FALSE)
+    Ob$Models[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]] , penalty = Ob$Methodology$Stacking$penalty, non_negative = FALSE)
     Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- stacks::fit_members(Ob$Models[[i]]$ModelStack)
   }
   
