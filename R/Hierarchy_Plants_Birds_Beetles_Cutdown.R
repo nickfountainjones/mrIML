@@ -85,11 +85,11 @@ X_all <- data_site %>%
     -contains('Plant')    
   )
 
-Y_all <- cbind(Y_beetles,Y_birds,Y_plants)
+# Y_all <- cbind(Y_beetles,Y_birds,Y_plants)
 
 FilterList <- c("Dickanta","Grambill","Athemosc","Nemasqua","Monoglau","Hymepelt","Hymeraru","Eucaobli","Rumoadia","Eucrluci","Eucaregn","Anopglan","Nothcunn","Anodbigl","Blecwatt","CRHON","Decilaus_striatus","Nargomorphus_globulus","Oleaargo","GYFAN","Mandalotus_arciferus","Mandalotus_muscivorus","GNROS","Anotylus_TFIC_sp_04","Pomaapet","Phylaspl","Histinci","Anotylus_TFIC_sp_03")
 
-Y_all2 <-  cbind(Y_beetles,Y_birds,Y_plants) %>%
+Y_all <-  cbind(Y_beetles,Y_birds,Y_plants) %>%
   dplyr::select(any_of(FilterList))
 
 X1_beetles <- Y_beetles
@@ -180,7 +180,7 @@ yhats_all_cooccur <- mrIMLpredicts(
 yhats_all_combined <- mrIMLpredicts(
   X = X_all,
   Y = Y_all,
-  X1 = X1_beetles,
+  X1 = X1_all,
   Model = rf_spec, 
   balance_data = 'no',
   prop = 0.6,
@@ -301,7 +301,7 @@ timings$interactions$end <- Sys.time()
 timings$CN$start = Sys.time()
 
 # Co-occurrence network
-filterStrength <- 0.1
+filterStrength <- 0.05
 
 assoc_net_all <- mrCoOccurNet(bs_all)
 assoc_net_all_filtered <- assoc_net_all %>%

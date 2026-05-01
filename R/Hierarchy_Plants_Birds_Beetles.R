@@ -87,6 +87,10 @@ X_all <- data_site %>%
 
 Y_all <- cbind(Y_beetles,Y_birds,Y_plants)
 
+FilterList <- c("Dickanta","Grambill","Athemosc","Nemasqua","Monoglau","Hymepelt","Hymeraru","Eucaobli","Rumoadia","Eucrluci","Eucaregn","Anopglan","Nothcunn","Anodbigl","Blecwatt","CRHON","Decilaus_striatus","Nargomorphus_globulus","Oleaargo","GYFAN","Mandalotus_arciferus","Mandalotus_muscivorus","GNROS","Anotylus_TFIC_sp_04","Pomaapet","Phylaspl","Histinci","Anotylus_TFIC_sp_03")
+
+Y_all2 <-  cbind(Y_beetles,Y_birds,Y_plants) %>%
+  dplyr::select(any_of(FilterList))
 
 X1_beetles <- Y_beetles
 X1_birds <- Y_birds
@@ -202,8 +206,11 @@ timings$modelTrain$finish <- Sys.time()
 timings$bs$start = Sys.time()
 
 bs_all <- mrBootstrap(yhats_all_combined, num_bootstrap = bsNum)
-bs_all_H <- mrBootstrap(yhats_all_combined_H, num_bootstrap = bsNum)
 
+
+plan("sequential")
+bs_all_H <- mrBootstrap(yhats_all_combined_H, num_bootstrap = bsNum)
+plan("multisession", workers = n_cores-2)
 
 timings$bs$finish = Sys.time()
 
@@ -274,14 +281,14 @@ timings$interactions$start <- Sys.time()
 int_all <- mrInteractions(
   yhats_all_combined,
   num_bootstrap = bsNum,
-  feature = 'Athemosc',
+  feature = 'Grambill',
   top_int = 10
 )
 
 int_all_H <- mrInteractions(
   yhats_all_combined_H,
   num_bootstrap = bsNum,
-  feature = 'Athemosc',
+  feature = 'Grambill',
   top_int = 10
 )
 
