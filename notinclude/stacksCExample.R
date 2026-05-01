@@ -100,12 +100,35 @@ set.seed(1)
 # XData <- readRDS(paste0(baseDir,"/data/X1000_chaw.rds"))
 XData <- readRDS(paste0(baseDir,"/data/X_mriml.rds"))
 YData <- readRDS(paste0(baseDir,"/data/Y_mriml.rds"))
+YData <- readRDS(paste0(baseDir,"/data/Y_14snps.rds"))
+
+
 # YData <- readRDS(paste0(baseDir,"/data/Y1000_chaw.rds"))
 
 data <- cbind(YData,XData)
+data <- data[1:1000,]
+# data$rs5743618_A <- as.factor(data$rs5743618_A)
+# data$rs6819274_G <- as.factor(data$rs6819274_G)
+# data$rs703842_G <- as.factor(data$rs703842_G)
+
 data$rs5743618_A <- as.factor(data$rs5743618_A)
-data$rs6819274_G <- as.factor(data$rs6819274_G)
+data$rs6819274_G <- as.factor(data$rs6819274_G) 
 data$rs703842_G <- as.factor(data$rs703842_G)
+data$rs13136820 <- as.factor(data$rs13136820)
+data$rs17051321<- as.factor(data$rs17051321)
+data$rs2705616 <- as.factor(data$rs2705616)
+data$rs2726479 <- as.factor(data$rs2726479)
+data$rs6533052 <- as.factor(data$rs6533052)
+data$rs6837324 <- as.factor(data$rs6837324)
+data$rs72989863 <- as.factor(data$rs72989863)
+data$rs9992763 <- as.factor(data$rs9992763)
+data$rs4325907 <- as.factor(data$rs4325907)
+data$rs2248137 <- as.factor(data$rs2248137)
+data$rs61884005 <- as.factor(data$rs61884005)
+
+
+
+
 
 # data <- as_tibble(MRFcov::Bird.parasites)
 # data$Hzosteropis <- as.factor(data$Hzosteropis)
@@ -120,10 +143,11 @@ data$rs703842_G <- as.factor(data$rs703842_G)
 # X1Headings <- c("Hzosteropis", "Hkillangoi", "Plas", "Microfilaria")
 
 XHeadings <- c("latitude_S", "longitude_S", "UV_S", "dayT_S", "PC1", "PC2", "PC3", "PC4", "PC5"  )
-YHeadings <- c("rs5743618_A", "rs6819274_G", "rs703842_G")
-# YHeadings <- c("rs5743618_A", "rs6819274_G")
+# YHeadings <- c("rs5743618_A", "rs6819274_G", "rs703842_G")
+YHeadings <- c("rs5743618_A", "rs6819274_G")
 # YHeadings <- c("rs703842_G")
 # YHeadings <- c("rs5743618_A", "rs703842_G")
+YHeadings <- c("rs5743618_A", "rs6819274_G", "rs703842_G",  "rs13136820",  "rs17051321",  "rs2705616",   "rs2726479",  "rs6533052",   "rs6837324",   "rs72989863",  "rs9992763",   "rs4325907",   "rs2248137",   "rs61884005")
 X1Headings <- YHeadings
 
 
@@ -180,8 +204,8 @@ StackSet$vFolds <- 5
 StackSet$stackProp <- 0.8
 StackSet$stackMode <- "classification"
 StackSet$modelMetric <- "roc_auc"
-StackSet$penalty <- 0.01
-StackSet$positive_only <- FALSE
+StackSet$penalty <- 0.001
+StackSet$positive_only <- TRUE
 # Select processing options
 
 ProcessSet <- list()
@@ -231,7 +255,7 @@ S <- mrIML_StackLight(S)
 S <- mrStackVIP(S)
 # S <- mrPredictStacks(S)
 
-
+# move this section to the top eventually
 options <- list()
 options$PDPPlot <- FALSE
 options$DerivativePlots <- FALSE
@@ -246,5 +270,19 @@ S <- mrIMLStack_plots(S, options)
 # S <- mrBuildModels(S)
 
 #### ------------------------- End Diagnostics ---------------------------------
+
+
+
+### ------------------------ Manual Checks -----------------------
+
+ModelList = list()
+
+for (i in YHeadings){
+  ModelList[[i]] <- S$Fits[[i]]$ModelStack$last_model_fit$.workflow
+}
+
+
+
+
 
 toc <- Sys.time() - tic
