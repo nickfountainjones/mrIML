@@ -88,7 +88,11 @@ library(stacks)
 ### ----------------------------------Diagnostic Setup ---------------------
 
 tic <- Sys.time()
+n_cores <- parallel::detectCores()
+options(future.globals.maxSize = +Inf) # This is dirty, really needs optimisation
+plan("multisession", workers = n_cores-2)
 set.seed(1)
+
 ### --------------------------------- User Input Section -------------------
 
 #### User Input Data (this would be improved but is what the user would mainly interact with)
@@ -106,7 +110,7 @@ YData <- readRDS(paste0(baseDir,"/data/Y_14snps.rds"))
 # YData <- readRDS(paste0(baseDir,"/data/Y1000_chaw.rds"))
 
 data <- cbind(YData,XData)
-data <- data[1:1000,]
+# data <- data[1:1000,]
 # data$rs5743618_A <- as.factor(data$rs5743618_A)
 # data$rs6819274_G <- as.factor(data$rs6819274_G)
 # data$rs703842_G <- as.factor(data$rs703842_G)
@@ -147,7 +151,10 @@ XHeadings <- c("latitude_S", "longitude_S", "UV_S", "dayT_S", "PC1", "PC2", "PC3
 YHeadings <- c("rs5743618_A", "rs6819274_G")
 # YHeadings <- c("rs703842_G")
 # YHeadings <- c("rs5743618_A", "rs703842_G")
-YHeadings <- c("rs5743618_A", "rs6819274_G", "rs703842_G",  "rs13136820",  "rs17051321",  "rs2705616",   "rs2726479",  "rs6533052",   "rs6837324",   "rs72989863",  "rs9992763",   "rs4325907",   "rs2248137",   "rs61884005")
+# YHeadings <- c("rs5743618_A", "rs6819274_G", "rs703842_G",  "rs13136820",  "rs17051321",  "rs2705616",   "rs2726479",  "rs6533052",   "rs6837324",   "rs72989863",  "rs9992763",   "rs4325907",   "rs2248137",   "rs61884005")
+YHeadings <- c("rs5743618_A", "rs6819274_G",  "rs17051321",  "rs2726479",  "rs6533052",   "rs6837324",   "rs72989863",  "rs9992763",   "rs4325907",   "rs2248137",   "rs61884005")
+
+
 X1Headings <- YHeadings
 
 

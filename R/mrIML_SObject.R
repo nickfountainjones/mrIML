@@ -275,7 +275,8 @@ mrBuildModels <- function(Ob){
           
   Ob$Models[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]] ,
                                                          penalty = Ob$Methodology$Stacking$penalty,
-                                                         non_negative = Ob$Methodology$Stacking$positive_only)
+                                                         non_negative = Ob$Methodology$Stacking$positive_only,
+                                                         metric = metric_set(roc_auc))
 
   
       
@@ -290,7 +291,10 @@ mrBuildModels <- function(Ob){
   Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- stacks::fit_members(Ob$Models[[i]]$ModelStack)
   print(length(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]]$member_fits))
   if(length(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]]$member_fits)<1){
-    Ob$Models[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]] , penalty = Ob$Methodology$Stacking$penalty, non_negative = FALSE)
+    Ob$Models[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]] 
+                                                           , penalty = 0.0001
+                                                           , non_negative = FALSE
+                                                           , metric = metric_set(roc_auc))
     Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- stacks::fit_members(Ob$Models[[i]]$ModelStack)
   }
   
