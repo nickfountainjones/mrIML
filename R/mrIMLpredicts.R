@@ -121,7 +121,9 @@ mrIMLpredicts <- function(
   check_equal_rows(X, X1, Y)
 
   # Check that X1 is identical to cols in Y
-  if ((nrow(X1) != 0) & !identical(dplyr::select(Y, names(X1)), X1)) {
+  # if ((nrow(X1) != 0) & !identical(dplyr::select(Y, names(X1)), X1)) {
+    
+  if ((nrow(X1) != 0) & !identical(dplyr::select(Y, any_of(names(X1))), X1)) {  
     stop(
       "The format of the collumns in X1 do not match the coresponding columns in Y."
     )
@@ -224,6 +226,7 @@ mrIML_internal_fit_function <- function(
       data_cv <- rsample::vfold_cv(data_train, v = k)
   } else {
       data_cv <- rsample::group_vfold_cv(data_train, group = hierarchy)
+      data_train <- dplyr::select(data_train,-tidyselect::any_of(hierarchy))
   }
   
   
@@ -273,6 +276,28 @@ mrIML_internal_fit_function <- function(
       )
   }
   
+
+
+
+  mod_workflow <- workflows::workflow() %>%
+    workflows::add_recipe(data_recipe) %>%
+    workflows::add_model(Model)
+
+  if (racing) {
+    tune_m <- finetune::tune_race_anova(
+      mod_workflow,
+      resamples = data_cv
+    )
+  } else {
+    tune_m <- tune::tune_grid(
+      mod_workflow,
+      resamples = data_cv,
+      grid = tune_grid_size
+    )
+  }
+  
+  
+  
   if (hierarchy != "none"){
     if (!requireNamespace("embed", quietly = TRUE)) {
       message(
@@ -295,27 +320,16 @@ mrIML_internal_fit_function <- function(
     }
     data_recipe <- data_recipe %>%
       step_lencode_mixed(outcome = vars(resp_name))
-  }
-  
-
-
-  mod_workflow <- workflows::workflow() %>%
-    workflows::add_recipe(data_recipe) %>%
-    workflows::add_model(Model)
-
-  if (racing) {
-    tune_m <- finetune::tune_race_anova(
-      mod_workflow,
-      resamples = data_cv
-    )
-  } else {
+    
     tune_m <- tune::tune_grid(
       mod_workflow,
       resamples = data_cv,
-      grid = tune_grid_size
+      grid = 10,
+      control = control_grid(save_pred = TRUE)
     )
+    
   }
-
+  
   if (mode == "classification") {
     best_m <- tune_m %>%
       tune::select_best(metric = "roc_auc")

@@ -1,0 +1,549 @@
+---
+title: "mrIML Case Study 2 - Forest Communities"
+subtitle: "Hierarchical Model"
+author: "Simon Riley, Ryan Leadbetter, Nick Fountain-Jones"
+date: "2026-03-11"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r libraries, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Data Reading
+
+# General Libraries
+library(future)
+library(tidyverse)
+
+# Data Manipulation
+#library(dplyr) # In tidymodels
+library(sf)
+
+# Modelling
+library(tidymodels)
+library(mrIML)
+# Visualisation
+library(ggrepel)
+library(ggplot2)
+
+## User parameters
+bsNum = 5
+
+
+# Set up parallel processing
+n_cores <- parallel::detectCores()
+plan("multisession", workers = n_cores-2)
+
+timings <- list()
+timingsRel <- list()
+
+timings$start <- Sys.time()
+timingsRel$start <- Sys.time()
+```
+
+This case study demonstrates *MrIML 2.0* on a larger dataset with
+multiple taxonomic groups across a forest successional gradient. We
+analyze 144 plots established across forest age categories:
+
+-   **Mature forest**: Unharvested with no fire disturbance for ≥60
+    years
+-   **\~45 years post-harvest**
+-   **\~27 years post-harvest**
+-   **\~7 years post-harvest**
+
+At each plot, we recorded ground-active beetles, plants, and birds,
+along with environmental co-variates including coarse wood debris, leaf
+litter depth, and soil variables (pH, conductivity).
+
+## Data Preparation
+
+```{r data import, echo = FALSE}
+currentDir <- getwd()
+loadFile <- paste0(currentDir,"/data/XYForrestDataA.rdata")
+load(loadFile)
+
+```
+
+For beetle and bird environmental variables we remove all the beetle and
+bird related columns from the predictors.For the plant environmental
+variables all plant or moss related columns are removed.
+
+```{r sorting variables, echo = TRUE}
+X_beetles <- data_site  %>%
+  dplyr::select(
+    # -Beetles_S_Mat_Indval2,
+    # -Beetle_S_Total,
+    # -dist_regrowth,
+    -Beetles_Mat_Ratio,
+    # -Birds_S_Mat_EFL,
+    # -Birds_S_Total,
+    -Birds_Mat_Ratio,
+    -Slope_F,
+    -Aspect_Cor)
+
+
+X_birds <- X_beetles
+
+X_plants <- data_site %>%
+  select(
+    -contains("Bryo"),
+    -contains("Moss"),
+    -contains('Plant'),
+    -Vegetation_cover)
+
+```
+
+For the occurrence data we remove the columns that are either so
+prevalent they would likely always be present or so rare that they would
+be absent.
+
+```{r setting up occurance data, echo = TRUE}
+
+Y_beetles <- data_beetles %>%
+  dplyr::select(-Site, -Distance, -Transect, -Age) %>%
+  dplyr::mutate_all(~ ifelse(. > 0, 1, .)) %>%
+  mrIML::filterRareCommon(lower = 0.2, higher = 0.7)
+
+
+Y_birds <- data_birds %>%
+  dplyr::select(-Site, -Distance, -Transect, -Age) %>%
+  mutate_all(~ ifelse(. > 0, 1, .)) %>%
+  mrIML::filterRareCommon(lower = 0.2, higher = 0.7)
+
+Y_plants <- data_plants %>%
+  dplyr::select(-Site, -Distance, -Transect, -Age) %>%
+  mutate_all(~ ifelse(. > 0, 1, .))%>%
+  mrIML::filterRareCommon(lower = 0.2, higher = 0.7)
+
+X1_beetles <- Y_beetles
+X1_birds <- Y_birds
+X1_plants <- Y_plants
+
+#Put Boruta here if required?
+
+```
+
+```{r Model Setup}
+
+timings$modelStart <- Sys.time()
+timingsRel$modelStart <- Sys.time()-timingsRel$Start
+## build generic random forest
+
+model_rf <- rand_forest(
+  trees = 1000,
+  mode = "classification",
+  mtry = tune(),
+  min_n = tune()
+) %>%
+  set_engine("randomForest")
+```
+
+```{r Application of Models, echo = TRUE, results='hide'}
+
+
+# Applying generic model
+## Building beetles models
+
+# Model 1: Environment only
+yhats_beetles_env <- mrIMLpredicts(
+  X = X_beetles,
+  Y = Y_beetles,
+  Model = model_rf,
+  balance_data = 'no',
+  tune_grid_size = 5,
+  prop = 0.6,
+  k = 5,
+  racing = TRUE
+)
+
+# Model 2: Co-occurrence only
+yhats_beetles_cooccur <- mrIMLpredicts(
+  Y = Y_beetles,
+  X1 = X1_beetles,
+  Model = model_rf,
+  balance_data = 'no',
+  tune_grid_size = 5,
+  prop = 0.6,
+  k = 5,
+  racing = TRUE
+)
+
+# Model 3: Combined
+yhats_beetles_combined <- mrIMLpredicts(
+  X = X_beetles,
+  Y = Y_beetles,
+  X1 = X1_beetles,
+  Model = model_rf,
+  balance_data = 'no',
+  tune_grid_size = 5,
+  prop = 0.6,
+  k = 5,
+  racing = TRUE
+)
+
+## Building bird models
+
+# Model 1: Environment only
+yhats_birds_env <- mrIMLpredicts(
+  X = X_birds,
+  Y = Y_birds,
+  Model = model_rf,
+  balance_data = 'no',
+  tune_grid_size = 5,
+  prop = 0.6,
+  k = 5,
+  racing = TRUE
+)
+
+# Model 2: Co-occurrence only
+yhats_birds_cooccur <- mrIMLpredicts(
+  Y = Y_birds,
+  X1 = X1_birds,
+  Model = model_rf,
+  balance_data = 'no',
+  tune_grid_size = 5,
+  prop = 0.6,
+  k = 5,
+  racing = TRUE
+)
+
+# Model 3: Combined
+yhats_birds_combined <- mrIMLpredicts(
+  X = X_birds,
+  Y = Y_birds,
+  X1 = X1_birds,
+  Model = model_rf,
+  balance_data = 'no',
+  tune_grid_size = 5,
+  prop = 0.6,
+  k = 5,
+  racing = TRUE
+)
+
+
+# Train models
+yhats_plants_env <- mrIMLpredicts(
+  X = X_plants,
+  Y = Y_plants,
+  Model = model_rf,
+  balance_data = 'no',
+  tune_grid_size = 5,
+  prop = 0.6,
+  k = 5,
+  racing = TRUE
+)
+
+yhats_plants_cooccur <- mrIMLpredicts(
+  Y = Y_plants,
+  X1 = X1_plants,
+  Model = model_rf,
+  balance_data = 'no',
+  tune_grid_size = 5,
+  prop = 0.6,
+  k = 5,
+  racing = TRUE
+)
+
+yhats_plants_combined <- mrIMLpredicts(
+  X = X_plants,
+  Y = Y_plants,
+  X1 = X1_plants,
+  Model = model_rf,
+  balance_data = 'no',
+  tune_grid_size = 5,
+  prop = 0.6,
+  k = 5,
+  racing = TRUE
+)
+
+
+
+
+
+timings$modelsTrained = Sys.time()
+
+timings$modelsTrained <- Sys.time()-timingsRel$modelStart
+```
+
+To assess the uncertainty bootstrapping is implemeneted.
+
+```{r bootstrap, echo = TRUE}
+
+
+bs_beetles <- mrBootstrap(yhats_beetles_combined, num_bootstrap = bsNum)
+bs_plants <- mrBootstrap(yhats_plants_combined, num_bootstrap = bsNum)
+bs_birds <- mrBootstrap(yhats_birds_combined, num_bootstrap = bsNum)
+
+timings$bootstrap = Sys.time()
+
+```
+
+Once the processing has been completed we can evaluate the performance
+of the different models
+
+```{r Performance evaluation, echo = TRUE}
+
+# Evaluate model performance beetles
+ModelPerf_beetles_env <- mrIMLperformance(yhats_beetles_env)
+ModelPerf_beetles_cooccur <- mrIMLperformance(yhats_beetles_cooccur)
+ModelPerf_beetles_combined <- mrIMLperformance(yhats_beetles_combined)
+
+
+# Performance comparison Beetles
+perf_comparison_beetles <- mrPerformancePlot(
+  ModelPerf1 = ModelPerf_beetles_combined,
+  ModelPerf2 = ModelPerf_beetles_env,
+  mode = "classification"
+)
+
+
+# Summary table
+beetle_performance <- data.frame(
+  Model = c("Environment only", "Co-occurrence only", "Combined"),
+  MCC = c(
+    ModelPerf_beetles_env[[2]],
+    ModelPerf_beetles_cooccur[[2]],
+    ModelPerf_beetles_combined[[2]]
+  )
+)
+
+
+# Performance assessment
+ModelPerf_birds_env <- mrIMLperformance(yhats_birds_env)
+ModelPerf_birds_cooccur <- mrIMLperformance(yhats_birds_cooccur)
+ModelPerf_birds_combined <- mrIMLperformance(yhats_birds_combined)
+
+
+
+
+bird_performance <- data.frame(
+  Model = c("Environment only", "Co-occurrence only", "Combined"),
+  MCC = c(
+    ModelPerf_birds_env[[2]],
+    ModelPerf_birds_cooccur[[2]],
+    ModelPerf_birds_combined[[2]]
+  )
+)
+
+# Performance assessment
+ModelPerf_plants_env <- mrIMLperformance(yhats_plants_env)
+ModelPerf_plants_cooccur <- mrIMLperformance(yhats_plants_cooccur)
+ModelPerf_plants_combined <- mrIMLperformance(yhats_plants_combined)
+
+plant_performance <- data.frame(
+  Model = c("Environment only", "Co-occurrence only", "Combined"),
+  MCC = c(
+    ModelPerf_plants_env[[2]],
+    ModelPerf_plants_cooccur[[2]],
+    ModelPerf_plants_combined[[2]]
+  )
+)
+
+timings$performance <- Sys.time()
+```
+
+Variable importance is assessed by the following method
+\<<This section needs
+improvement>\>
+
+```{r Variable Importance, echo = TRUE}
+
+
+# Variable importance
+vi_beetles <- mrVip(
+  yhats_beetles_combined,
+  mrBootstrap_obj = bs_beetles,
+  threshold = 0.5,
+  global_top_var = 10
+)
+
+vi_plants <- mrVip(
+  yhats_plants_combined,
+  mrBootstrap_obj = bs_plants,
+  threshold = 0.5,
+  global_top_var = 10
+)
+
+
+timings$vip <- Sys.time()
+
+```
+
+Finding co-occurance networks
+
+```{r Co-occurance, echo = TRUE}
+
+# Co-occurrence network
+assoc_net_beetles <- mrCoOccurNet(bs_beetles)
+assoc_net_beetles_filtered <- assoc_net_beetles %>%
+  filter(mean_strength > 0.1)
+
+assoc_net_plants <- mrCoOccurNet(bs_plants)
+assoc_net_plants_filtered <- assoc_net_plants %>%
+  filter(mean_strength > 0.1)
+
+# Analyze interactions in plant community
+int_plants <- mrInteractions(
+  yhats_plants_combined,
+  num_bootstrap = bsNum,
+  feature = 'Nothcunn',
+  top_int = 10
+)
+
+int_plants[[1]] /
+  int_plants[[2]] /
+  int_plants[[3]] 
+# +
+  # plot_annotation(title = "Plant Community Interactions")
+
+
+```
+
+```{r temporary home for tables}
+cat("Beetle Performance:\n")
+beetle_performance
+vi_beetles[[3]]
+
+cat("Bird Community Performance:\n")
+print(bird_performance)
+vi_plants[[3]] +
+  labs(title = "Plant Community Variable Importance")
+
+cat("Plant Community Performance:\n")
+print(plant_performance)
+
+# Combine performance results
+performance_summary <- data.frame(
+  Community = rep(c("Beetles", "Birds", "Plants"), each = 3),
+  Model = rep(c("Environment only", "Co-occurrence only", "Combined"), 3),
+  MCC = c(
+    beetle_performance$MCC,
+    bird_performance$MCC,
+    plant_performance$MCC
+  )
+)
+
+# Calculate improvement from adding co-occurrence
+improvement_summary <- performance_summary %>%
+  pivot_wider(names_from = Model, values_from = MCC) %>%
+  mutate(
+    Cooccur_improvement = `Co-occurrence only` - `Environment only`,
+    Combined_improvement = Combined - `Environment only`
+  )
+
+# Create summary table
+results_table <- data.frame(
+  Taxonomic_Group = c("Beetles", "Birds", "Plants"),
+  Best_Model_MCC = c(
+    max(beetle_performance$MCC),
+    max(bird_performance$MCC),
+    max(plant_performance$MCC)
+  ),
+  Cooccurrence_Effect = c(
+    improvement_summary$Combined_improvement[1],
+    improvement_summary$Combined_improvement[2],
+    improvement_summary$Combined_improvement[3]
+  ),
+  Primary_Drivers = c(
+    "Soil characteristics, microclimate",
+    "Altitude, unmeasured structural conditions",
+    "Forest age, succession gradient"
+  )
+)
+
+
+print(improvement_summary)
+
+
+
+
+```
+
+```{r temporary home for plots}
+
+perf_comparison_beetles$performance_plot +
+  labs(title = "Beetle Community Model Performance")
+# 
+# ## Network visualization Beetles
+# if (nrow(assoc_net_beetles_filtered) > 0) {
+#   g_beetles <- graph_from_data_frame(
+#     assoc_net_beetles_filtered,
+#     directed = TRUE
+#   )
+# 
+#   E(g_beetles)$Value <- assoc_net_beetles_filtered$mean_strength
+#   E(g_beetles)$Color <- ifelse(
+#     assoc_net_beetles_filtered$direction == "negative",
+#     no = "blue",
+#     yes = "red"
+#   )
+# 
+#   gg_beetles <- ggnetwork(g_beetles)
+# 
+#   ggplot(gg_beetles, aes(x = x, y = y, xend = xend, yend = yend)) +
+#     geom_edges(
+#       aes(color = Color, linewidth = Value),
+#       arrow = arrow(length = unit(5, "pt"), type = "closed")
+#     ) +
+#     geom_nodes(color = "gray", size = 3) +
+#     scale_color_identity() +
+#     theme_void() +
+#     geom_nodelabel_repel(aes(label = name), size = 2) +
+#     labs(title = "Beetle Co-occurrence Network")
+#   } else {
+#     cat("No significant beetle associations detected at threshold 0.1")
+# }
+#   
+# ## Network visualisation Plants (note no if statement?)
+# 
+# g_plants <- graph_from_data_frame(assoc_net_plants_filtered, directed = TRUE)
+# 
+# E(g_plants)$Value <- assoc_net_plants_filtered$mean_strength
+# E(g_plants)$Color <- ifelse(
+#   assoc_net_plants_filtered$direction == "negative",
+#   "blue",
+#   "red"
+# )
+# 
+# # Use circular layout for better visualization
+# circle_layout <- layout_in_circle(g_plants)
+# gg_plants <- ggnetwork(g_plants, layout = circle_layout)
+# 
+# ggplot(gg_plants, aes(x = x, y = y, xend = xend, yend = yend)) +
+#   geom_edges(
+#     aes(color = Color, linewidth = Value),
+#     curvature = 0.1,
+#     arrow = arrow(length = unit(5, "pt"), type = "closed")
+#   ) +
+#   geom_nodes(color = "gray", size = degree(g_plants, mode = "out") + 2) +
+#   scale_color_identity() +
+#   theme_void() +
+#   geom_nodelabel_repel(
+#     aes(label = name),
+#     size = 2,
+#     colour = "white",
+#     fill = "grey36"
+#   ) +
+#   labs(
+#     title = "Plant Co-occurrence Network",
+#     subtitle = "Strong positive associations between epiphytic species"
+#   )
+# 
+# 
+# 
+# ggplot(performance_summary, aes(x = Model, y = MCC, fill = Community)) +
+#   geom_bar(stat = "identity", position = "dodge") +
+#   theme_bw() +
+#   labs(
+#     title = "Model Performance Comparison Across Communities",
+#     x = "Model Type",
+#     y = "Matthews Correlation Coefficient"
+#   ) +
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# 
+timings$end <- Sys.time()
+print(timings)
+```
