@@ -1,5 +1,5 @@
 ---
-title: "Hierarchy Absence Presence Example"
+title: "Example 3: Forest Communities"
 author: "Simon Riley, Ryan Leadbetter, Nick Fountain-Jones"
 date: "2026-04-01"
 output: html_document
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-This case study demonstrates *MrIML 2.0* on a larger dataset with
+This case study demonstrates *MrIML 2.0* on a larger data set with
 multiple taxonomic groups across a forest successional gradient. We
 analyze 144 plots established across forest age categories:
 
@@ -27,6 +27,19 @@ analyze 144 plots established across forest age categories:
 At each plot, we recorded ground-active beetles, plants, and birds,
 along with environmental covariates including coarse wood debris, leaf
 litter depth, and soil variables (pH, conductivity).
+
+The following is a series of random forests models to demonstrate different ways
+models can be interpreted including use of co-occurrences, interactions and 
+highlighting of variable importance.
+
+
+The process within this vignette is:
+-   Importing Data
+-   Data Preparation
+-   Model Creation
+-   Bootstrapping Analysis
+-   Variable Importance Assessment
+-   Creation of co-occurrence networks
 
 ```{r libraryLoading, echo=TRUE, include=FALSE}
 library(rsample, warn.conflicts=F, quietly=TRUE)
@@ -56,14 +69,11 @@ timings <- list()
 ## Data Loading
 
 Data is supplied with this case study in a single rdata file. There are
-4 dataframes, one containing all the environmental elements and one for
+4 data-frames, one containing all the environmental predictors and one for
 each of the observations types (beetles, birds and plants).
 
-Derived columns are removed and variables are arranged into X
-(predictor), Y (response) and X1 (co-predictor) for each of beetles,
-birds and plants.
 
-```{r data, echo=TRUE}
+```{r Data Loading, echo=TRUE}
 
 currentDir <- getwd()
 currentDir <- "C:/Users/Nebula PC/Documents/mrIML_HR"
@@ -74,6 +84,20 @@ load(loadFile)
 
 timings <- list()
 
+```
+
+## Data Preparation
+
+Derived columns are removed and variables are arranged into X
+(predictor), Y (response) and X1 (co-predictor) for each of beetles,
+birds and plants.Data is converted to presence absence data.
+
+Response variables are filtered using a mrIML function to remove species that
+are either too common (over 70% prevalence) or too rare (less than 20% 
+prevalence) to provide value in the analysis.
+
+
+```{r Data Preparation, echo=TRUE}
 timings$data$start <- Sys.time()
 
 X_all <- data_site %>%
@@ -130,8 +154,46 @@ Y_all <- cbind(Y_beetles,Y_birds,Y_plants)
 timings$data$finish <- Sys.time()
 
 ```
+## Data Summaries {.tabset}
+### Data
 
-## Model Training
+Each of these tabs contain a summary either the raw or filtered version of the
+data that will be used in the models. 
+
+### Beetles Raw
+```{r Beetles Raw Table}
+dim(data_beetles)
+summary(data_beetles)
+```
+### Beetles Filtered
+```{r Beetles Filtered Table}
+dim(Y_beetles)
+summary(Y_beetles)
+```
+### Plants Raw
+```{r Plants Raw Table}
+dim(data_plants)
+summary(data_plants)
+```
+### Plants Filtered
+```{r Plants Filtered Table}
+dim(Y_plants)
+summary(Y_plants)
+```
+### Birds Raw
+```{r Birds Raw Table}
+dim(data_birds)
+summary(data_birds)
+```
+### Birds Filtered
+```{r Birds Filtered Table}
+dim(Y_birds)
+summary(Y_birds)
+```
+
+## Model Building {.tabset}
+
+### Model Training
 
 A common model tidy model specification is created.
 
@@ -148,11 +210,16 @@ rf_spec <- rand_forest(
 
 ```
 
-Models are trained for environment without co-occurance, co-occurance
-without the environmental variable, a combined model and a combined
+Models are trained for environment without co-occurrence, co-occurrence
+without the environmental variable, a combined model and a combined model
 grouped by site.
 
-```{r training models, echo= TRUE, results="hide", message= FALSE, warning=FALSE}
+
+### Beetles
+
+The output here is 4 models for prediction of the presence of beetles.
+
+```{r Training Beetle, echo= TRUE, results="hide", message= FALSE, warning=FALSE}
 timings$beetleTrain$start <- Sys.time()
 
 ## Initial models for all response variables, environment, co-occurance and all data.
@@ -208,6 +275,14 @@ yhats_beetles_combined_H <- mrIMLpredicts(
 )
 timings$beetleTrain$finish <- Sys.time()
 
+```
+
+### Birds
+
+The output here is 4 models for prediction of the presence of birds
+
+```{r Training Birds, echo= TRUE, results="hide", message= FALSE, warning=FALSE}
+
 timings$birdTrain$start <- Sys.time()
 
 yhats_birds_env <- mrIMLpredicts(
@@ -260,6 +335,13 @@ yhats_birds_combined_H <- mrIMLpredicts(
 )
 timings$birdTrain$finish <- Sys.time()
 
+```
+
+### Plants
+
+The output here is 4 models for prediction of the presence of plants.
+
+```{r Training Plants, echo= TRUE, results="hide", message= FALSE, warning=FALSE}
 
 timings$plantTrain$start <- Sys.time()
 
@@ -313,8 +395,6 @@ yhats_plants_combined_H <- mrIMLpredicts(
 )
 timings$plantTrain$finish <- Sys.time()
 
-
-
 ```
 
 ## Bootstrapping
@@ -326,40 +406,31 @@ data model to get a better estimate of the population properties.
 timings$bs_beetle$start = Sys.time()
 
 bs_beetles <- mrBootstrap(yhats_beetles_combined, num_bootstrap = bsNum)
-
-
-plan("sequential")
+plan("sequential") 
 bs_beetles_H <- mrBootstrap(yhats_beetles_combined_H, num_bootstrap = bsNum)
 plan("multisession", workers = n_cores-2)
-
 timings$bs_beetle$finish = Sys.time()
 
 timings$bs_bird$start = Sys.time()
-
 bs_birds <- mrBootstrap(yhats_birds_combined, num_bootstrap = bsNum)
-
-
 plan("sequential")
 bs_birds_H <- mrBootstrap(yhats_birds_combined_H, num_bootstrap = bsNum)
 plan("multisession", workers = n_cores-2)
-
 timings$bs_bird$finish = Sys.time()
 
 timings$bs_plants$start = Sys.time()
-
 bs_plants <- mrBootstrap(yhats_plants_combined, num_bootstrap = bsNum)
-
 
 plan("sequential")
 bs_plants_H <- mrBootstrap(yhats_plants_combined_H, num_bootstrap = bsNum)
 plan("multisession", workers = n_cores-2)
 
 timings$bs_plants$finish = Sys.time()
-
-
 ```
 
 ## Checking Variable Importance
+
+Using the bootstrapping information variables are analysed for predictive power.
 
 ```{r Variable Importance Checks, echo = TRUE, warning=FALSE}
 timings$vip_beetles$start <- Sys.time()
@@ -370,7 +441,6 @@ vi_beetles <- mrVip(
   threshold = 0.5,
   global_top_var = 10
 )
-
 
 # Variable importance
 vi_beetles_H <- mrVip(
@@ -399,7 +469,10 @@ timings$vip_plants$finish <- Sys.time()
 
 ```
 
+## Checking for interactions
 
+Using the mrInteractions function the strength of interactions for a specific 
+species. 
 
 ```{r Checking for interations, echo=TRUE}
 timings$interactions$start <- Sys.time()
@@ -434,11 +507,7 @@ int_plants_H <- mrInteractions(
   top_int = 10
 )
 
-
-
 timings$interactions$end <- Sys.time()
-
-
 ```
 
 ## Evaluation of performance
@@ -498,9 +567,6 @@ all_performance_plants <- data.frame(
     ModelPerf_plants_combined_H[[2]]
   )
 )
-
-
-
 
 ```
 
