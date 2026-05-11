@@ -12,7 +12,9 @@ library(ggnetwork)
 
 library(patchwork)
 
-source("C:/Users/sriley0/OneDrive - University of Tasmania/RProjects/mrIML_HR/mrIML_HR/R/mrIMLpredicts.r")
+baseDir <- getwd()
+
+source(paste0(baseDir,"/R/mrIMLpredicts.r"))
 
 bsNum = 5
 # Set up parallel processing
