@@ -191,6 +191,9 @@ dim(Y_birds)
 summary(Y_birds)
 ```
 
+## {.unlisted .unnumbered}
+
+
 ## Model Building {.tabset}
 
 ### Model Training
@@ -396,6 +399,7 @@ yhats_plants_combined_H <- mrIMLpredicts(
 timings$plantTrain$finish <- Sys.time()
 
 ```
+## {.unlisted .unnumbered}
 
 ## Bootstrapping
 
@@ -467,31 +471,68 @@ vi_plants_H <- mrVip(
 )
 timings$vip_plants$finish <- Sys.time()
 
+timings$vip_birds$start <- Sys.time()
+vi_birds <- mrVip(
+  yhats_birds_combined,
+  mrBootstrap_obj = bs_birds,
+  threshold = 0.5,
+  global_top_var = 10
+)
+
+vi_birds_H <- mrVip(
+  yhats_birds_combined_H,
+  mrBootstrap_obj = bs_birds_H,
+  threshold = 0.5,
+  global_top_var = 10
+)
+timings$vip_birds$finish <- Sys.time()
+
 ```
 
-## Checking for interactions
+## Checking for interactions {.tabset}
 
 Using the mrInteractions function the strength of interactions for a specific 
 species. 
 
-```{r Checking for interations, echo=TRUE}
+### Beetle Processing
+```{r Checking for beetle interations, echo=TRUE}
 timings$interactions$start <- Sys.time()
 
 # Analyze interactions in beetle community
 int_beetles <- mrInteractions(
   yhats_beetles_combined,
   num_bootstrap = bsNum,
-  feature = 'Decilaus_nigronotatus',
+  feature = 'Euconnus_TFIC_sp_07',
   top_int = 10
 )
+int_beetles[[2]]$data <- int_beetles[[2]]$data[1:10, , drop = FALSE] 
+int_beetles[[3]]$data <- int_beetles[[3]]$data[1:10, , drop = FALSE] 
+
 
 int_beetles_H <- mrInteractions(
   yhats_beetles_combined_H,
   num_bootstrap = bsNum,
-  feature = 'Decilaus_nigronotatus',
+  feature = 'Euconnus_TFIC_sp_07 ',
   top_int = 10
 )
+int_beetles_H[[2]]$data <- int_beetles_H[[2]]$data[1:10, , drop = FALSE] 
+int_beetles_H[[3]]$data <- int_beetles_H[[3]]$data[1:10, , drop = FALSE] 
 
+
+```
+
+### Beetle Output
+
+```{r Displaying Beetle Interactions}
+int_beetles[1] + int_beetles_H[1] +
+int_beetles[2] + int_beetles_H[2] +
+int_beetles[3] + int_beetles_H[3] +
+  plot_layout(ncol = 2)
+
+```
+
+### Plant Processing
+```{r checking plant interactions, echo = TRUE}
 # Analyze interactions in beetle community
 int_plants <- mrInteractions(
   yhats_plants_combined,
@@ -509,6 +550,8 @@ int_plants_H <- mrInteractions(
 
 timings$interactions$end <- Sys.time()
 ```
+
+## {.unlisted .unnumbered}
 
 ## Evaluation of performance
 
@@ -550,12 +593,40 @@ all_performance_beetles <- data.frame(
   )
 )
 
-## Evaluate model performance beetles
+## Evaluate model performance birds
+ModelPerf_birds_env <- mrIMLperformance(yhats_birds_env)
+ModelPerf_birds_cooccur <- mrIMLperformance(yhats_birds_cooccur)
+ModelPerf_birds_combined <- mrIMLperformance(yhats_birds_combined)
+ModelPerf_birds_combined_H <- mrIMLperformance(yhats_birds_combined_H)
+
+perf_comparison_birds_combined <- mrPerformancePlot(
+  ModelPerf1 = ModelPerf_birds_combined,
+  ModelPerf2 = ModelPerf_birds_combined_H,
+  mode = "classification"
+)
+
+# Summary table
+all_performance_birds <- data.frame(
+  Model = c("Environment only", "Co-occurrence only", "Combined","Hierarchy"),
+  MCC = c(
+    ModelPerf_birds_env[[2]],
+    ModelPerf_birds_cooccur[[2]],
+    ModelPerf_birds_combined[[2]],
+    ModelPerf_birds_combined_H[[2]]
+  )
+)
+
+## Evaluate model performance plants
 ModelPerf_plants_env <- mrIMLperformance(yhats_plants_env)
 ModelPerf_plants_cooccur <- mrIMLperformance(yhats_plants_cooccur)
 ModelPerf_plants_combined <- mrIMLperformance(yhats_plants_combined)
 ModelPerf_plants_combined_H <- mrIMLperformance(yhats_plants_combined_H)
 
+perf_comparison_plants_combined <- mrPerformancePlot(
+  ModelPerf1 = ModelPerf_plants_combined,
+  ModelPerf2 = ModelPerf_plants_combined_H,
+  mode = "classification"
+)
 
 # Summary table
 all_performance_plants <- data.frame(
@@ -757,10 +828,6 @@ if (length(g_plants_H) > 0) {
 ```
 
 
-```{r Timing, echo = TRUE}
-timings
-
-```
 
 ### Performance Patterns
 
@@ -946,6 +1013,13 @@ habitat characterization** particularly for bird communities.
 
 ```{r Performance Patterns}
 
+
+```
+
+
+
+```{r Timing, echo = TRUE}
+timings
 
 ```
 
