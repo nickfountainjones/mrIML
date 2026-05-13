@@ -61,7 +61,7 @@ options(future.globals.maxSize = +Inf) # This is dirty, really needs optimisatio
 plan("multisession", workers = n_cores-2)
 
 # Value for bootstrapping ()
-bsNum <- 5
+bsNum <- 20
 set.seed(1)
 timings <- list()
 ```
@@ -401,6 +401,101 @@ timings$plantTrain$finish <- Sys.time()
 ```
 ## {.unlisted .unnumbered}
 
+
+## Evaluation of performance
+
+Model outputs are evaluated.
+
+```{r Evaluation of performance, echo=TRUE, warning = FALSE}
+## Evaluate model performance beetles
+ModelPerf_beetles_env <- mrIMLperformance(yhats_beetles_env)
+ModelPerf_beetles_cooccur <- mrIMLperformance(yhats_beetles_cooccur)
+ModelPerf_beetles_combined <- mrIMLperformance(yhats_beetles_combined)
+ModelPerf_beetles_combined_H <- mrIMLperformance(yhats_beetles_combined_H)
+
+perf_comparison_beetles_env <- mrPerformancePlot(
+  ModelPerf1 = ModelPerf_beetles_env,
+  ModelPerf2 = ModelPerf_beetles_combined_H,
+  mode = "classification"
+)
+
+perf_comparison_beetles_cooccur <- mrPerformancePlot(
+  ModelPerf1 = ModelPerf_beetles_cooccur,
+  ModelPerf2 = ModelPerf_beetles_combined_H,
+  mode = "classification"
+)
+
+perf_comparison_beetles_combined <- mrPerformancePlot(
+  ModelPerf1 = ModelPerf_beetles_combined,
+  ModelPerf2 = ModelPerf_beetles_combined_H,
+  mode = "classification"
+)
+
+# Summary table
+all_performance_beetles <- data.frame(
+  Model = c("Environment only", "Co-occurrence only", "Combined","Hierarchy"),
+  MCC = c(
+    ModelPerf_beetles_env[[2]],
+    ModelPerf_beetles_cooccur[[2]],
+    ModelPerf_beetles_combined[[2]],
+    ModelPerf_beetles_combined_H[[2]]
+  )
+)
+
+## Evaluate model performance birds
+ModelPerf_birds_env <- mrIMLperformance(yhats_birds_env)
+ModelPerf_birds_cooccur <- mrIMLperformance(yhats_birds_cooccur)
+ModelPerf_birds_combined <- mrIMLperformance(yhats_birds_combined)
+ModelPerf_birds_combined_H <- mrIMLperformance(yhats_birds_combined_H)
+
+perf_comparison_birds_combined <- mrPerformancePlot(
+  ModelPerf1 = ModelPerf_birds_combined,
+  ModelPerf2 = ModelPerf_birds_combined_H,
+  mode = "classification"
+)
+
+# Summary table
+all_performance_birds <- data.frame(
+  Model = c("Environment only", "Co-occurrence only", "Combined","Hierarchy"),
+  MCC = c(
+    ModelPerf_birds_env[[2]],
+    ModelPerf_birds_cooccur[[2]],
+    ModelPerf_birds_combined[[2]],
+    ModelPerf_birds_combined_H[[2]]
+  )
+)
+
+## Evaluate model performance plants
+ModelPerf_plants_env <- mrIMLperformance(yhats_plants_env)
+ModelPerf_plants_cooccur <- mrIMLperformance(yhats_plants_cooccur)
+ModelPerf_plants_combined <- mrIMLperformance(yhats_plants_combined)
+ModelPerf_plants_combined_H <- mrIMLperformance(yhats_plants_combined_H)
+
+perf_comparison_plants_combined <- mrPerformancePlot(
+  ModelPerf1 = ModelPerf_plants_combined,
+  ModelPerf2 = ModelPerf_plants_combined_H,
+  mode = "classification"
+)
+
+# Summary table
+all_performance_plants <- data.frame(
+  Model = c("Environment only", "Co-occurrence only", "Combined","Hierarchy"),
+  MCC = c(
+    ModelPerf_plants_env[[2]],
+    ModelPerf_plants_cooccur[[2]],
+    ModelPerf_plants_combined[[2]],
+    ModelPerf_plants_combined_H[[2]]
+  )
+)
+
+```
+
+```{r Table Outputs, echo = TRUE}
+all_performance_beetles
+all_performance_birds
+all_performance_plants
+```
+
 ## Bootstrapping
 
 Bootstrapping is done to the combined data model and the hierarchical
@@ -502,9 +597,10 @@ timings$interactions$start <- Sys.time()
 int_beetles <- mrInteractions(
   yhats_beetles_combined,
   num_bootstrap = bsNum,
-  feature = 'Euconnus_TFIC_sp_07',
+  feature = 'Rhabdotus_reflexus',
   top_int = 10
 )
+int_beetles[[1]]$data <- int_beetles[[1]]$data[1:10, , drop = FALSE] 
 int_beetles[[2]]$data <- int_beetles[[2]]$data[1:10, , drop = FALSE] 
 int_beetles[[3]]$data <- int_beetles[[3]]$data[1:10, , drop = FALSE] 
 
@@ -512,9 +608,10 @@ int_beetles[[3]]$data <- int_beetles[[3]]$data[1:10, , drop = FALSE]
 int_beetles_H <- mrInteractions(
   yhats_beetles_combined_H,
   num_bootstrap = bsNum,
-  feature = 'Euconnus_TFIC_sp_07 ',
+  feature = 'Rhabdotus_reflexus',
   top_int = 10
 )
+int_beetles_H[[1]]$data <- int_beetles_H[[1]]$data[1:10, , drop = FALSE] 
 int_beetles_H[[2]]$data <- int_beetles_H[[2]]$data[1:10, , drop = FALSE] 
 int_beetles_H[[3]]$data <- int_beetles_H[[3]]$data[1:10, , drop = FALSE] 
 
@@ -524,10 +621,9 @@ int_beetles_H[[3]]$data <- int_beetles_H[[3]]$data[1:10, , drop = FALSE]
 ### Beetle Output
 
 ```{r Displaying Beetle Interactions}
-int_beetles[1] + int_beetles_H[1] +
-int_beetles[2] + int_beetles_H[2] +
-int_beetles[3] + int_beetles_H[3] +
-  plot_layout(ncol = 2)
+int_beetles[[1]] + int_beetles_H[[1]]
+int_beetles[[2]] + int_beetles_H[[2]]
+int_beetles[[3]] + int_beetles_H[[3]]
 
 ```
 
@@ -540,6 +636,8 @@ int_plants <- mrInteractions(
   feature = 'Nothcunn',
   top_int = 10
 )
+int_plants[[2]]$data <- int_plants[[2]]$data[1:10, , drop = FALSE] 
+int_plants[[3]]$data <- int_plants[[3]]$data[1:10, , drop = FALSE] 
 
 int_plants_H <- mrInteractions(
   yhats_plants_combined_H,
@@ -547,105 +645,281 @@ int_plants_H <- mrInteractions(
   feature = 'Nothcunn',
   top_int = 10
 )
+int_plants_H[[2]]$data <- int_plants_H[[2]]$data[1:10, , drop = FALSE] 
+int_plants_H[[3]]$data <- int_plants_H[[3]]$data[1:10, , drop = FALSE] 
 
 timings$interactions$end <- Sys.time()
 ```
 
-## {.unlisted .unnumbered}
+### Plant Output
 
-## Evaluation of performance
-
-Model outputs are evaluated.
-
-```{r Evaluation of performance, echo=TRUE, warning = FALSE}
-## Evaluate model performance beetles
-ModelPerf_beetles_env <- mrIMLperformance(yhats_beetles_env)
-ModelPerf_beetles_cooccur <- mrIMLperformance(yhats_beetles_cooccur)
-ModelPerf_beetles_combined <- mrIMLperformance(yhats_beetles_combined)
-ModelPerf_beetles_combined_H <- mrIMLperformance(yhats_beetles_combined_H)
-
-perf_comparison_beetles_env <- mrPerformancePlot(
-  ModelPerf1 = ModelPerf_beetles_env,
-  ModelPerf2 = ModelPerf_beetles_combined_H,
-  mode = "classification"
-)
-
-perf_comparison_beetles_cooccur <- mrPerformancePlot(
-  ModelPerf1 = ModelPerf_beetles_cooccur,
-  ModelPerf2 = ModelPerf_beetles_combined_H,
-  mode = "classification"
-)
-
-perf_comparison_beetles_combined <- mrPerformancePlot(
-  ModelPerf1 = ModelPerf_beetles_combined,
-  ModelPerf2 = ModelPerf_beetles_combined_H,
-  mode = "classification"
-)
-
-# Summary table
-all_performance_beetles <- data.frame(
-  Model = c("Environment only", "Co-occurrence only", "Combined","Hierarchy"),
-  MCC = c(
-    ModelPerf_beetles_env[[2]],
-    ModelPerf_beetles_cooccur[[2]],
-    ModelPerf_beetles_combined[[2]],
-    ModelPerf_beetles_combined_H[[2]]
-  )
-)
-
-## Evaluate model performance birds
-ModelPerf_birds_env <- mrIMLperformance(yhats_birds_env)
-ModelPerf_birds_cooccur <- mrIMLperformance(yhats_birds_cooccur)
-ModelPerf_birds_combined <- mrIMLperformance(yhats_birds_combined)
-ModelPerf_birds_combined_H <- mrIMLperformance(yhats_birds_combined_H)
-
-perf_comparison_birds_combined <- mrPerformancePlot(
-  ModelPerf1 = ModelPerf_birds_combined,
-  ModelPerf2 = ModelPerf_birds_combined_H,
-  mode = "classification"
-)
-
-# Summary table
-all_performance_birds <- data.frame(
-  Model = c("Environment only", "Co-occurrence only", "Combined","Hierarchy"),
-  MCC = c(
-    ModelPerf_birds_env[[2]],
-    ModelPerf_birds_cooccur[[2]],
-    ModelPerf_birds_combined[[2]],
-    ModelPerf_birds_combined_H[[2]]
-  )
-)
-
-## Evaluate model performance plants
-ModelPerf_plants_env <- mrIMLperformance(yhats_plants_env)
-ModelPerf_plants_cooccur <- mrIMLperformance(yhats_plants_cooccur)
-ModelPerf_plants_combined <- mrIMLperformance(yhats_plants_combined)
-ModelPerf_plants_combined_H <- mrIMLperformance(yhats_plants_combined_H)
-
-perf_comparison_plants_combined <- mrPerformancePlot(
-  ModelPerf1 = ModelPerf_plants_combined,
-  ModelPerf2 = ModelPerf_plants_combined_H,
-  mode = "classification"
-)
-
-# Summary table
-all_performance_plants <- data.frame(
-  Model = c("Environment only", "Co-occurrence only", "Combined","Hierarchy"),
-  MCC = c(
-    ModelPerf_plants_env[[2]],
-    ModelPerf_plants_cooccur[[2]],
-    ModelPerf_plants_combined[[2]],
-    ModelPerf_plants_combined_H[[2]]
-  )
-)
+```{r Displaying Plant Interactions}
+int_plants[[1]] + int_plants_H[[1]]
+int_plants[[2]] + int_plants_H[[2]]
+int_plants[[3]] + int_plants_H[[3]]
 
 ```
 
-## Co-occurance Networks
+### Bird Processing
+```{r checking Bird interactions, echo = TRUE}
+# Analyze interactions in beetle community
+int_birds <- mrInteractions(
+  yhats_birds_combined,
+  num_bootstrap = bsNum,
+  feature = 'CRHON',
+  top_int = 10
+)
+int_birds[[2]]$data <- int_birds[[2]]$data[1:10, , drop = FALSE] 
+int_birds[[3]]$data <- int_birds[[3]]$data[1:10, , drop = FALSE] 
 
-```{r Co-occurance Networks, echo=TRUE}
+int_birds_H <- mrInteractions(
+  yhats_birds_combined_H,
+  num_bootstrap = bsNum,
+  feature = 'CRHON',
+  top_int = 10
+)
+int_birds_H[[2]]$data <- int_birds_H[[2]]$data[1:10, , drop = FALSE] 
+int_birds_H[[3]]$data <- int_birds_H[[3]]$data[1:10, , drop = FALSE] 
 
-timings$CN$start = Sys.time()
+timings$interactions$end <- Sys.time()
+```
+
+### Bird Output
+
+```{r Displaying Bird Interactions}
+int_birds[[1]] + int_birds_H[[1]]
+int_birds[[2]] + int_birds_H[[2]]
+int_birds[[3]] + int_birds_H[[3]]
+```
+
+## {.unlisted .unnumbered}
+
+## Co-occurance Networks {.tabset}
+
+Using the bootstrapping variables from the previous section we can also build 
+co-occurance networks.
+
+## Beetles
+
+```{r Beetles Co-occurance Networks, echo=TRUE}
+
+timings$CN_beetles$start = Sys.time()
+
+# Co-occurrence network
+filterStrength <- 0.05
+
+assoc_net_beetles <- mrCoOccurNet(bs_beetles)
+assoc_net_beetles_filtered <- assoc_net_beetles %>%
+  filter(mean_strength > filterStrength)
+
+
+assoc_net_beetles_H <- mrCoOccurNet(bs_beetles_H)
+assoc_net_beetles_filtered_H <- assoc_net_beetles_H %>%
+  filter(mean_strength > filterStrength)
+
+timings$CN_beetles$end = Sys.time()
+
+```
+
+## Beetles Plot
+
+```{r Plots - Beetles Network, echo = TRUE}
+## Network visualization Beetles
+g_beetles <- graph_from_data_frame(assoc_net_beetles_filtered, directed = TRUE)
+g_beetles_H <- graph_from_data_frame(assoc_net_beetles_filtered_H, directed = TRUE)
+## Network visualization Beetles
+if (length(g_beetles) > 0) {
+
+  
+  E(g_beetles)$Value <- assoc_net_beetles_filtered$mean_strength
+  E(g_beetles)$Color <- ifelse(
+    assoc_net_beetles_filtered$direction == "negative",
+    "blue",
+    "red"
+  )
+  
+  # Use circular layout for better visualization
+  circle_layout <- layout_in_circle(g_beetles)
+  gg_beetles <- ggnetwork(g_beetles, layout = circle_layout)
+  
+  ggplot(gg_beetles, aes(x = x, y = y, xend = xend, yend = yend)) +
+    geom_edges(
+      aes(color = Color, linewidth = Value),
+      curvature = 0.1,
+      arrow = arrow(length = unit(5, "pt"), type = "closed")
+    ) +
+    geom_nodes(color = "gray", size = degree(g_beetles, mode = "out") + 2) +
+    scale_color_identity() +
+    theme_void() +
+    geom_nodelabel_repel(
+      aes(label = name),
+      size = 2,
+      colour = "white",
+      fill = "grey36"
+    ) +
+    labs(
+      title = "Plant Co-occurrence Network",
+      subtitle = "Strong positive associations between epiphytic species"
+    )
+  } else {
+    cat(paste("No significant beetle associations detected at threshold ",filterStrength))
+}
+
+## Network visualization Hierarchy
+if (length(g_beetles_H) > 0) {
+  
+  E(g_beetles_H)$Value <- assoc_net_beetles_filtered_H$mean_strength
+  E(g_beetles_H)$Color <- ifelse(
+    assoc_net_beetles_filtered_H$direction == "negative",
+    "blue",
+    "red"
+  )
+  
+  # Use circular layout for better visualization
+  circle_layout_H <- layout_in_circle(g_beetles_H)
+  gg_beetles_H <- ggnetwork(g_beetles_H, layout = circle_layout_H)
+  
+  ggplot(gg_beetles_H, aes(x = x, y = y, xend = xend, yend = yend)) +
+    geom_edges(
+      aes(color = Color, linewidth = Value),
+      curvature = 0.1,
+      arrow = arrow(length = unit(5, "pt"), type = "closed")
+    ) +
+    geom_nodes(color = "gray", size = degree(g_beetles_H, mode = "out") + 2) +
+    scale_color_identity() +
+    theme_void() +
+    geom_nodelabel_repel(
+      aes(label = name),
+      size = 2,
+      colour = "white",
+      fill = "grey36"
+    ) +
+    labs(
+      title = "Plant Co-occurrence Network",
+      subtitle = "Strong positive associations between epiphytic species"
+    )
+  } else {
+    cat(paste("No significant beetle associations detected at threshold ",filterStrength))
+}
+
+
+```
+
+## Birds
+
+```{r Birds Co-occurance Networks, echo=TRUE}
+
+timings$CN_birds$start = Sys.time()
+
+# Co-occurrence network
+# filterStrength <- 0.1
+
+assoc_net_birds <- mrCoOccurNet(bs_birds)
+assoc_net_birds_filtered <- assoc_net_birds %>%
+  filter(mean_strength > filterStrength)
+
+
+assoc_net_birds_H <- mrCoOccurNet(bs_birds_H)
+assoc_net_birds_filtered_H <- assoc_net_birds_H %>%
+  filter(mean_strength > filterStrength)
+
+timings$CN_birds$end = Sys.time()
+
+```
+
+## Birds Plot
+
+```{r Plots - Birds Network, echo = TRUE}
+## Network visualization Beetles
+g_birds <- graph_from_data_frame(assoc_net_birds_filtered, directed = TRUE)
+g_birds_H <- graph_from_data_frame(assoc_net_birds_filtered_H, directed = TRUE)
+## Network visualization Beetles
+if (length(g_birds) > 0) {
+
+  
+  E(g_birds)$Value <- assoc_net_birds_filtered$mean_strength
+  E(g_birds)$Color <- ifelse(
+    assoc_net_birds_filtered$direction == "negative",
+    "blue",
+    "red"
+  )
+  
+  # Use circular layout for better visualization
+  circle_layout <- layout_in_circle(g_birds)
+  gg_birds <- ggnetwork(g_birds, layout = circle_layout)
+  
+  CoPlot_birds <- ggplot(gg_birds, aes(x = x, y = y, xend = xend, yend = yend)) +
+    geom_edges(
+      aes(color = Color, linewidth = Value),
+      curvature = 0.1,
+      arrow = arrow(length = unit(5, "pt"), type = "closed")
+    ) +
+    geom_nodes(color = "gray", size = degree(g_birds, mode = "out") + 2) +
+    scale_color_identity() +
+    theme_void() +
+    geom_nodelabel_repel(
+      aes(label = name),
+      size = 2,
+      colour = "white",
+      fill = "grey36"
+    ) +
+    labs(
+      title = "Plant Co-occurrence Network",
+      subtitle = "Strong positive associations between epiphytic species"
+    )
+  } else {
+    cat(paste("No significant beetle associations detected at threshold ",filterStrength," "))
+    CoPlot_birds <- plot_spacer()
+}
+
+## Network visualization Hierarchy
+if (length(g_birds_H) > 0) {
+  
+  E(g_birds_H)$Value <- assoc_net_birds_filtered_H$mean_strength
+  E(g_birds_H)$Color <- ifelse(
+    assoc_net_birds_filtered_H$direction == "negative",
+    "blue",
+    "red"
+  )
+  
+  # Use circular layout for better visualization
+  circle_layout_H <- layout_in_circle(g_birds_H)
+  gg_birds_H <- ggnetwork(g_birds_H, layout = circle_layout_H)
+  
+  CoPlot_birds_H <- ggplot(gg_birds_H, aes(x = x, y = y, xend = xend, yend = yend)) +
+    geom_edges(
+      aes(color = Color, linewidth = Value),
+      curvature = 0.1,
+      arrow = arrow(length = unit(5, "pt"), type = "closed")
+    ) +
+    geom_nodes(color = "gray", size = degree(g_birds_H, mode = "out") + 2) +
+    scale_color_identity() +
+    theme_void() +
+    geom_nodelabel_repel(
+      aes(label = name),
+      size = 2,
+      colour = "white",
+      fill = "grey36"
+    ) +
+    labs(
+      title = "Plant Co-occurrence Network",
+      subtitle = "Strong positive associations between epiphytic species"
+    )
+  } else {
+    cat(paste("No significant beetle associations detected at threshold ",filterStrength," "))
+    CoPlot_birds_H <- plot_spacer()
+}
+
+CoPlot_birds + CoPlot_birds_H
+
+
+```
+
+## Plants
+
+```{r Plants Co-occurance Networks, echo=TRUE}
+
+timings$CN_plants$start = Sys.time()
 
 # Co-occurrence network
 filterStrength <- 0.1
@@ -659,16 +933,107 @@ assoc_net_plants_H <- mrCoOccurNet(bs_plants_H)
 assoc_net_plants_filtered_H <- assoc_net_plants_H %>%
   filter(mean_strength > filterStrength)
 
-timings$CN$end = Sys.time()
+timings$CN_plants$end = Sys.time()
 
 ```
+
+## Plants Plot
+
+```{r Plots - Plants Network, echo = TRUE}
+## Network visualization Beetles
+g_plants <- graph_from_data_frame(assoc_net_plants_filtered, directed = TRUE)
+g_plants_H <- graph_from_data_frame(assoc_net_plants_filtered_H, directed = TRUE)
+## Network visualization Beetles
+if (length(g_plants) > 0) {
+
+  
+  E(g_plants)$Value <- assoc_net_plants_filtered$mean_strength
+  E(g_plants)$Color <- ifelse(
+    assoc_net_plants_filtered$direction == "negative",
+    "blue",
+    "red"
+  )
+  
+  # Use circular layout for better visualization
+  circle_layout <- layout_in_circle(g_plants)
+  gg_plants <- ggnetwork(g_plants, layout = circle_layout)
+  
+  CoPlot_plants <- ggplot(gg_plants, aes(x = x, y = y, xend = xend, yend = yend)) +
+    geom_edges(
+      aes(color = Color, linewidth = Value),
+      curvature = 0.1,
+      arrow = arrow(length = unit(5, "pt"), type = "closed")
+    ) +
+    geom_nodes(color = "gray", size = degree(g_plants, mode = "out") + 2) +
+    scale_color_identity() +
+    theme_void() +
+    geom_nodelabel_repel(
+      aes(label = name),
+      size = 2,
+      colour = "white",
+      fill = "grey36"
+    ) +
+    labs(
+      title = "Plant Co-occurrence Network",
+      subtitle = "Strong positive associations between epiphytic species"
+    )
+  } else {
+    cat(paste("No significant beetle associations detected at threshold ",filterStrength))
+    CoPlot_plants <- plot_spacer()
+}
+
+## Network visualization Hierarchy
+if (length(g_plants_H) > 0) {
+  
+  E(g_plants_H)$Value <- assoc_net_plants_filtered_H$mean_strength
+  E(g_plants_H)$Color <- ifelse(
+    assoc_net_plants_filtered_H$direction == "negative",
+    "blue",
+    "red"
+  )
+  
+  # Use circular layout for better visualization
+  circle_layout_H <- layout_in_circle(g_plants_H)
+  gg_plants_H <- ggnetwork(g_plants_H, layout = circle_layout_H)
+  
+  CoPlot_plants_H <- ggplot(gg_plants_H, aes(x = x, y = y, xend = xend, yend = yend)) +
+    geom_edges(
+      aes(color = Color, linewidth = Value),
+      curvature = 0.1,
+      arrow = arrow(length = unit(5, "pt"), type = "closed")
+    ) +
+    geom_nodes(color = "gray", size = degree(g_plants_H, mode = "out") + 2) +
+    scale_color_identity() +
+    theme_void() +
+    geom_nodelabel_repel(
+      aes(label = name),
+      size = 2,
+      colour = "white",
+      fill = "grey36"
+    ) +
+    labs(
+      title = "Plant Co-occurrence Network",
+      subtitle = "Strong positive associations between epiphytic species"
+    )
+  } else {
+    cat(paste("No significant beetle associations detected at threshold ",filterStrength))
+    CoPlot_plants_H <- plot_spacer()
+}
+
+CoPlot_plants + CoPlot_plants_H 
+```
+
+## {.unlisted .unnumbered}
+
+
+
+
 
 ## Importance Summary
 
 From all this information we can get output tables and information on the most important predictors for beetles.
 
-```{r Table Outputs, echo = TRUE}
-all_performance_beetles
+```{r Importance Plots Beetles, echo = TRUE}
 vi_beetles[[3]]
 vi_beetles_H[[3]]
 ```
@@ -678,11 +1043,17 @@ vi_beetles_H[[3]]
 
 From all this information we can get output tables and information on the most important predictors for beetles.
 
-```{r Table Outputs 2, echo = TRUE}
-all_performance_plants
+```{r Importance Plots Birds, echo = TRUE}
+vi_birds[[3]]
+vi_birds_H[[3]]
+```
+
+
+```{r Importance Plots Plants, echo = TRUE}
 vi_plants[[3]]
 vi_plants_H[[3]]
 ```
+
 
 ## Plots
 
@@ -737,93 +1108,6 @@ int_plants_H[[1]] /
   int_plants_H[[2]] /
   int_plants_H[[3]] +
   plot_annotation(title = "Plant Community Interactions")
-
-```
-
-# Network Visualisation
-
-Using the associations calculated above they can be visualised as
-follows:
-
-```{r Plots - Network, echo = TRUE}
-## Network visualization Beetles
-g_plants <- graph_from_data_frame(assoc_net_plants_filtered, directed = TRUE)
-g_plants_H <- graph_from_data_frame(assoc_net_plants_filtered_H, directed = TRUE)
-## Network visualization Beetles
-if (length(g_plants) > 0) {
-
-  
-  E(g_plants)$Value <- assoc_net_plants_filtered$mean_strength
-  E(g_plants)$Color <- ifelse(
-    assoc_net_plants_filtered$direction == "negative",
-    "blue",
-    "red"
-  )
-  
-  # Use circular layout for better visualization
-  circle_layout <- layout_in_circle(g_plants)
-  gg_plants <- ggnetwork(g_plants, layout = circle_layout)
-  
-  ggplot(gg_plants, aes(x = x, y = y, xend = xend, yend = yend)) +
-    geom_edges(
-      aes(color = Color, linewidth = Value),
-      curvature = 0.1,
-      arrow = arrow(length = unit(5, "pt"), type = "closed")
-    ) +
-    geom_nodes(color = "gray", size = degree(g_plants, mode = "out") + 2) +
-    scale_color_identity() +
-    theme_void() +
-    geom_nodelabel_repel(
-      aes(label = name),
-      size = 2,
-      colour = "white",
-      fill = "grey36"
-    ) +
-    labs(
-      title = "Plant Co-occurrence Network",
-      subtitle = "Strong positive associations between epiphytic species"
-    )
-  } else {
-    cat(paste("No significant beetle associations detected at threshold ",filterStrength))
-}
-
-## Network visualization Hierarchy
-if (length(g_plants_H) > 0) {
-  
-  E(g_plants_H)$Value <- assoc_net_plants_filtered_H$mean_strength
-  E(g_plants_H)$Color <- ifelse(
-    assoc_net_plants_filtered_H$direction == "negative",
-    "blue",
-    "red"
-  )
-  
-  # Use circular layout for better visualization
-  circle_layout_H <- layout_in_circle(g_plants_H)
-  gg_plants_H <- ggnetwork(g_plants_H, layout = circle_layout_H)
-  
-  ggplot(gg_plants_H, aes(x = x, y = y, xend = xend, yend = yend)) +
-    geom_edges(
-      aes(color = Color, linewidth = Value),
-      curvature = 0.1,
-      arrow = arrow(length = unit(5, "pt"), type = "closed")
-    ) +
-    geom_nodes(color = "gray", size = degree(g_plants_H, mode = "out") + 2) +
-    scale_color_identity() +
-    theme_void() +
-    geom_nodelabel_repel(
-      aes(label = name),
-      size = 2,
-      colour = "white",
-      fill = "grey36"
-    ) +
-    labs(
-      title = "Plant Co-occurrence Network",
-      subtitle = "Strong positive associations between epiphytic species"
-    )
-  } else {
-    cat(paste("No significant beetle associations detected at threshold ",filterStrength))
-}
-
 
 ```
 
