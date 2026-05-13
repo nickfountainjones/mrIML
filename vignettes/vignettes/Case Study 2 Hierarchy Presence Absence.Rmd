@@ -699,7 +699,7 @@ int_birds[[3]] + int_birds_H[[3]]
 Using the bootstrapping variables from the previous section we can also build 
 co-occurance networks.
 
-## Beetles
+### Beetles
 
 ```{r Beetles Co-occurance Networks, echo=TRUE}
 
@@ -721,7 +721,7 @@ timings$CN_beetles$end = Sys.time()
 
 ```
 
-## Beetles Plot
+### Beetles Plot
 
 ```{r Plots - Beetles Network, echo = TRUE}
 ## Network visualization Beetles
@@ -805,7 +805,7 @@ if (length(g_beetles_H) > 0) {
 
 ```
 
-## Birds
+### Birds
 
 ```{r Birds Co-occurance Networks, echo=TRUE}
 
@@ -827,7 +827,7 @@ timings$CN_birds$end = Sys.time()
 
 ```
 
-## Birds Plot
+### Birds Plot
 
 ```{r Plots - Birds Network, echo = TRUE}
 ## Network visualization Beetles
@@ -915,7 +915,7 @@ CoPlot_birds + CoPlot_birds_H
 
 ```
 
-## Plants
+### Plants
 
 ```{r Plants Co-occurance Networks, echo=TRUE}
 
@@ -937,7 +937,7 @@ timings$CN_plants$end = Sys.time()
 
 ```
 
-## Plants Plot
+### Plants Plot
 
 ```{r Plots - Plants Network, echo = TRUE}
 ## Network visualization Beetles
