@@ -180,7 +180,7 @@ mrInteractions <- function(
     dplyr::filter(.data$response == feature) %>%
     plot_hstat() +
     ggplot2::labs(
-      title = paste0(feature, " tow-way interactions"),
+      title = paste0(feature, " two-way interactions"),
       x = "Interaction",
       y = "Interaction importance"
     )

@@ -42,6 +42,10 @@ The process within this vignette is:
 -   Creation of co-occurrence networks
 
 ```{r libraryLoading, echo=TRUE, include=FALSE}
+
+timings <- list()
+timings$knit$start <- Sys.time()
+
 library(rsample, warn.conflicts=F, quietly=TRUE)
 library(embed, warn.conflicts=F, quietly=TRUE)
 library(dplyr, warn.conflicts=F, quietly=TRUE)
@@ -63,7 +67,6 @@ plan("multisession", workers = n_cores-2)
 # Value for bootstrapping ()
 bsNum <- 20
 set.seed(1)
-timings <- list()
 ```
 
 ## Data Loading
@@ -119,7 +122,12 @@ X_beetles <- data_site %>%
     -any_of("Aspect_Cor")    
   )
 
-X_birds <- X_beetles
+X_birds <- data_site %>%
+  dplyr::select(
+    -any_of("Birds_Mat_Ratio"),
+    -any_of("Slope_F"),
+    -any_of("Aspect_Cor")    
+  )
 
 X_plants <- data_site %>%
   select(
@@ -402,11 +410,12 @@ timings$plantTrain$finish <- Sys.time()
 ## {.unlisted .unnumbered}
 
 
-## Evaluation of performance
-
+## Evaluation of performance {.tabset}
+### Code
 Model outputs are evaluated.
 
 ```{r Evaluation of performance, echo=TRUE, warning = FALSE}
+timings$Evaluation$start <- Sys.time()
 ## Evaluate model performance beetles
 ModelPerf_beetles_env <- mrIMLperformance(yhats_beetles_env)
 ModelPerf_beetles_cooccur <- mrIMLperformance(yhats_beetles_cooccur)
@@ -430,6 +439,9 @@ perf_comparison_beetles_combined <- mrPerformancePlot(
   ModelPerf2 = ModelPerf_beetles_combined_H,
   mode = "classification"
 )
+perf_comparison_beetles_combined$performance_plot$data$model_name <- gsub("model1_rand_forest","Combined",perf_comparison_beetles_combined$performance_plot$data$model_name)
+perf_comparison_beetles_combined$performance_plot$data$model_name <- gsub("model2_rand_forest","Hierarchy",perf_comparison_beetles_combined$performance_plot$data$model_name)
+perf_comparison_beetles_combined$performance_plot$labels$x <- "Models"
 
 # Summary table
 all_performance_beetles <- data.frame(
@@ -453,6 +465,9 @@ perf_comparison_birds_combined <- mrPerformancePlot(
   ModelPerf2 = ModelPerf_birds_combined_H,
   mode = "classification"
 )
+perf_comparison_birds_combined$performance_plot$data$model_name <- gsub("model1_rand_forest","Combined",perf_comparison_birds_combined$performance_plot$data$model_name)
+perf_comparison_birds_combined$performance_plot$data$model_name <- gsub("model2_rand_forest","Hierarchy",perf_comparison_birds_combined$performance_plot$data$model_name)
+perf_comparison_birds_combined$performance_plot$labels$x <- "Models"
 
 # Summary table
 all_performance_birds <- data.frame(
@@ -476,7 +491,9 @@ perf_comparison_plants_combined <- mrPerformancePlot(
   ModelPerf2 = ModelPerf_plants_combined_H,
   mode = "classification"
 )
-
+perf_comparison_plants_combined$performance_plot$data$model_name <- gsub("model1_rand_forest","Combined",perf_comparison_plants_combined$performance_plot$data$model_name)
+perf_comparison_plants_combined$performance_plot$data$model_name <- gsub("model2_rand_forest","Hierarchy",perf_comparison_plants_combined$performance_plot$data$model_name)
+perf_comparison_plants_combined$performance_plot$labels$x <- "Models"
 # Summary table
 all_performance_plants <- data.frame(
   Model = c("Environment only", "Co-occurrence only", "Combined","Hierarchy"),
@@ -487,14 +504,42 @@ all_performance_plants <- data.frame(
     ModelPerf_plants_combined_H[[2]]
   )
 )
-
+timings$Evaluation$finish <- Sys.time()
 ```
 
+### MCC Tables
 ```{r Table Outputs, echo = TRUE}
 all_performance_beetles
 all_performance_birds
 all_performance_plants
 ```
+
+### Beetle Plots
+Initially we look at the performance comparison plots
+
+```{r Plots - performance comparision, echo=TRUE, warning= FALSE}
+
+perf_comparison_beetles_combined$performance_plot +
+  labs(title = "Community Model Performance")
+```
+
+### Bird Plots
+Initially we look at the performance comparison plots
+
+```{r Plots - performance comparision birds, echo=TRUE, warning= FALSE}
+
+perf_comparison_birds_combined$performance_plot +
+  labs(title = "Community Model Performance")
+```
+
+### Plant Plots
+```{r Plots - performance comparision plants, echo=TRUE, warning= FALSE}
+
+perf_comparison_plants_combined$performance_plot +
+  labs(title = "Community Model Performance")
+```
+
+## {.unlisted .unnumbered}
 
 ## Bootstrapping
 
@@ -584,36 +629,50 @@ timings$vip_birds$finish <- Sys.time()
 
 ```
 
+
+
+
+
+
 ## Checking for interactions {.tabset}
 
 Using the mrInteractions function the strength of interactions for a specific 
-species. 
+species which have been selected from the variable importance check done in the
+last segement. 
 
 ### Beetle Processing
 ```{r Checking for beetle interations, echo=TRUE}
-timings$interactions$start <- Sys.time()
+timings$interact_beetles$start <- Sys.time()
+
+beetle_feature <- 'Decilaus_lateralis'#'Rhabdotus_reflexus'#
 
 # Analyze interactions in beetle community
 int_beetles <- mrInteractions(
   yhats_beetles_combined,
   num_bootstrap = bsNum,
-  feature = 'Rhabdotus_reflexus',
+  feature = beetle_feature,
   top_int = 10
 )
 int_beetles[[1]]$data <- int_beetles[[1]]$data[1:10, , drop = FALSE] 
-int_beetles[[2]]$data <- int_beetles[[2]]$data[1:10, , drop = FALSE] 
+int_beetles[[2]]$data <- int_beetles[[2]]$data[1:10, , drop = FALSE]
+int_beetles[[2]]$labels$title <- "One-way Interactions"
 int_beetles[[3]]$data <- int_beetles[[3]]$data[1:10, , drop = FALSE] 
+int_beetles[[3]]$labels$title <- "Two-way Interactions"
 
 
 int_beetles_H <- mrInteractions(
   yhats_beetles_combined_H,
   num_bootstrap = bsNum,
-  feature = 'Rhabdotus_reflexus',
+  feature = beetle_feature,
   top_int = 10
 )
 int_beetles_H[[1]]$data <- int_beetles_H[[1]]$data[1:10, , drop = FALSE] 
-int_beetles_H[[2]]$data <- int_beetles_H[[2]]$data[1:10, , drop = FALSE] 
+int_beetles_H[[2]]$data <- int_beetles_H[[2]]$data[1:10, , drop = FALSE]
+int_beetles_H[[2]]$labels$title <- "One-way Interactions Hierarchy" 
 int_beetles_H[[3]]$data <- int_beetles_H[[3]]$data[1:10, , drop = FALSE] 
+int_beetles_H[[3]]$labels$title <- "Two-way Interactions Hierarchy" 
+timings$interact_beetles$finsh <- Sys.time()
+
 
 
 ```
@@ -629,26 +688,33 @@ int_beetles[[3]] + int_beetles_H[[3]]
 
 ### Plant Processing
 ```{r checking plant interactions, echo = TRUE}
-# Analyze interactions in beetle community
+timings$interact_plants$start <- Sys.time()
+plant_feature <- 'Nothcunn'
 int_plants <- mrInteractions(
   yhats_plants_combined,
   num_bootstrap = bsNum,
-  feature = 'Nothcunn',
+  feature = plant_feature,
   top_int = 10
 )
+
+int_plants[[1]]$data <- int_plants[[1]]$data[1:10, , drop = FALSE] 
 int_plants[[2]]$data <- int_plants[[2]]$data[1:10, , drop = FALSE] 
+int_plants[[2]]$labels$title <- "One-way Interactions" 
 int_plants[[3]]$data <- int_plants[[3]]$data[1:10, , drop = FALSE] 
+int_plants[[2]]$labels$title <- "Two-way Interactions" 
 
 int_plants_H <- mrInteractions(
   yhats_plants_combined_H,
   num_bootstrap = bsNum,
-  feature = 'Nothcunn',
+  feature = plant_feature,
   top_int = 10
 )
-int_plants_H[[2]]$data <- int_plants_H[[2]]$data[1:10, , drop = FALSE] 
+int_plants_H[[1]]$data <- int_plants_H[[1]]$data[1:10, , drop = FALSE] 
+int_plants_H[[2]]$data <- int_plants_H[[2]]$data[1:10, , drop = FALSE]
+int_plants_H[[2]]$labels$title <- "One-way Interactions Hierarchy"  
 int_plants_H[[3]]$data <- int_plants_H[[3]]$data[1:10, , drop = FALSE] 
-
-timings$interactions$end <- Sys.time()
+int_plants_H[[3]]$labels$title <- "Two-way Interactions Hierarchy"  
+timings$interact_plants$finsh <- Sys.time()
 ```
 
 ### Plant Output
@@ -663,6 +729,7 @@ int_plants[[3]] + int_plants_H[[3]]
 ### Bird Processing
 ```{r checking Bird interactions, echo = TRUE}
 # Analyze interactions in beetle community
+timings$interact_birds$start <- Sys.time()
 int_birds <- mrInteractions(
   yhats_birds_combined,
   num_bootstrap = bsNum,
@@ -681,7 +748,7 @@ int_birds_H <- mrInteractions(
 int_birds_H[[2]]$data <- int_birds_H[[2]]$data[1:10, , drop = FALSE] 
 int_birds_H[[3]]$data <- int_birds_H[[3]]$data[1:10, , drop = FALSE] 
 
-timings$interactions$end <- Sys.time()
+timings$interact_birds$finish <- Sys.time()
 ```
 
 ### Bird Output
@@ -758,8 +825,7 @@ if (length(g_beetles) > 0) {
       fill = "grey36"
     ) +
     labs(
-      title = "Plant Co-occurrence Network",
-      subtitle = "Strong positive associations between epiphytic species"
+      title = "Beetles Co-occurrence Network"
     )
   } else {
     cat(paste("No significant beetle associations detected at threshold ",filterStrength))
@@ -795,8 +861,7 @@ if (length(g_beetles_H) > 0) {
       fill = "grey36"
     ) +
     labs(
-      title = "Plant Co-occurrence Network",
-      subtitle = "Strong positive associations between epiphytic species"
+      title = "Beetles Co-occurrence Network with Heirarchy"
     )
   } else {
     cat(paste("No significant beetle associations detected at threshold ",filterStrength))
@@ -864,11 +929,10 @@ if (length(g_birds) > 0) {
       fill = "grey36"
     ) +
     labs(
-      title = "Plant Co-occurrence Network",
-      subtitle = "Strong positive associations between epiphytic species"
+      title = "Bird Co-occurrence Network"
     )
   } else {
-    cat(paste("No significant beetle associations detected at threshold ",filterStrength," "))
+    cat(paste("No significant bird associations detected at threshold ",filterStrength," "))
     CoPlot_birds <- plot_spacer()
 }
 
@@ -902,8 +966,7 @@ if (length(g_birds_H) > 0) {
       fill = "grey36"
     ) +
     labs(
-      title = "Plant Co-occurrence Network",
-      subtitle = "Strong positive associations between epiphytic species"
+      title = "Bird Co-occurrence Network with Heirarchy"
     )
   } else {
     cat(paste("No significant beetle associations detected at threshold ",filterStrength," "))
@@ -1025,12 +1088,9 @@ CoPlot_plants + CoPlot_plants_H
 
 ## {.unlisted .unnumbered}
 
+## Importance Summary {.tabset}
 
-
-
-
-## Importance Summary
-
+### Beetles
 From all this information we can get output tables and information on the most important predictors for beetles.
 
 ```{r Importance Plots Beetles, echo = TRUE}
@@ -1038,42 +1098,18 @@ vi_beetles[[3]]
 vi_beetles_H[[3]]
 ```
 
-
-## Importance Summary
-
-From all this information we can get output tables and information on the most important predictors for beetles.
-
+### Birds
 ```{r Importance Plots Birds, echo = TRUE}
 vi_birds[[3]]
 vi_birds_H[[3]]
 ```
 
-
+### Plants
 ```{r Importance Plots Plants, echo = TRUE}
 vi_plants[[3]]
 vi_plants_H[[3]]
-```
 
-
-## Plots
-
-From the package there are some plots that are prepared.
-
-# Performance Comparison
-
-Initially we look at the performance comparison plots
-
-```{r Plots - performance comparision, echo=TRUE, warning= FALSE}
-
-perf_comb=list(env = perf_comparison_beetles_env$performance_plot,
-               # cooccr = perf_comparison_beetles_cooccur$performance_plot,
-               comb = perf_comparison_beetles_combined$performance_plot)
-
-
-patchwork::wrap_plots(perf_comb)
-
-perf_comparison_beetles_combined$performance_plot +
-  labs(title = "Community Model Performance")
+timings$knit$finish
 ```
 
 # Importance Plots
@@ -1081,36 +1117,6 @@ perf_comparison_beetles_combined$performance_plot +
 Looking at importance plots between the models with and without
 hierarchical grouping we can see how the importance of different
 predictors is made more clear for this separation.
-
-```{r Plots - Importance}
-
-
-int_beetles[[1]] /
-  int_beetles[[2]] /
-  int_beetles[[3]] +
-  plot_annotation(title = "Community Interactions")
-
-
-int_beetles_H[[1]] /
-  int_beetles_H[[2]] /
-  int_beetles_H[[3]] +
-  plot_annotation(title = "Community Interactions with Hierarchy")
-
-
-
-int_plants[[1]] /
-  int_plants[[2]] /
-  int_plants[[3]] +
-  plot_annotation(title = "Plant Community Interactions")
-
-
-int_plants_H[[1]] /
-  int_plants_H[[2]] /
-  int_plants_H[[3]] +
-  plot_annotation(title = "Plant Community Interactions")
-
-```
-
 
 
 ### Performance Patterns
@@ -1293,18 +1299,45 @@ conservation, while highlighting the need for **improved structural
 habitat characterization** particularly for bird communities.
 
 
+## Processing time
+A breakdown of the processing time require for each step is below.
+
+```{r Timing, echo = FALSE}
+
+print("Data Load:")
+print(timings$data$finish - timings$data$start)
+
+print("Beetle Model:")
+print(timings$beetleTrain$finish-timings$beetleTrain$start)
+print("Bird Model:")
+print(timings$birdTrain$finish-timings$birdTrain$start)
+print("Plant Model:")
+print(timings$plantTrain$finish-timings$plantTrain$start)
+
+print("Beetle Bootstrapping")
+print(timings$bs_beetle$finish-timings$bs_beetle$start)
+print("Bird Bootstrapping")
+print(timings$bs_bird$finish-timings$bs_bird$start)
+print("Plant Bootstrapping")
+print(timings$bs_plants$finish-timings$bs_plants$start)
+
+print("Variable Importance Analysis Beetles")
+print(timings$vip_beetles$finish-timings$vip_beetles$start)
+print("Variable Importance Analysis Beetles")
+print(timings$vip_birds$finish-timings$vip_birds$start)
+print("Variable Importance Analysis Beetles")
+print(timings$vip_plants$finish-timings$vip_plants$start)
+
+print("Interactions Beetles")
+print(timings$interact_beetles$finish-timings$interact_beetles$start)
+print("Interactions Birds")
+print(timings$interact_birds$finish-timings$interact_birds$start)
+print("Interactions Plants")
+print(timings$interact_plants$finish-timings$interact_plants$start)
 
 
-```{r Performance Patterns}
-
-
-```
-
-
-
-```{r Timing, echo = TRUE}
-timings
-
+print("Total Time")
+print(timings$knit$end - timings$knit$start)
 ```
 
 ## Session Information
