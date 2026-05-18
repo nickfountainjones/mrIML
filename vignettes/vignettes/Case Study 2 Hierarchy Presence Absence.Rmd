@@ -2,7 +2,9 @@
 title: "Example 3: Forest Communities"
 author: "Simon Riley, Ryan Leadbetter, Nick Fountain-Jones"
 date: "2026-04-01"
-output: html_document
+output:   
+  html_document:
+    self_contained: true
 editor_options: 
   markdown: 
     wrap: 72
@@ -65,7 +67,7 @@ options(future.globals.maxSize = +Inf) # This is dirty, really needs optimisatio
 plan("multisession", workers = n_cores-2)
 
 # Value for bootstrapping ()
-bsNum <- 20
+bsNum <- 3
 set.seed(1)
 ```
 
@@ -79,8 +81,9 @@ each of the observations types (beetles, birds and plants).
 ```{r Data Loading, echo=TRUE}
 
 currentDir <- getwd()
-currentDir <- "C:/Users/Nebula PC/Documents/mrIML_HR"
-sourceFile <- paste0(currentDir,"/R/mrIMLpredicts.R") 
+# currentDir <- "C:/Users/Nebula PC/Documents/mrIML_HR"
+currentDir <- "C:/Users/sriley0/OneDrive - University of Tasmania/RProjects/mrIML_HR/mrIML_HR/"
+sourceFile <- paste0(currentDir,"/R/mrIMLpredicts.R")
 source(sourceFile) #This needs to be removed when file is complete
 loadFile <- paste0(currentDir,"/data/XYForrestData.rdata")
 load(loadFile)
@@ -117,16 +120,16 @@ X_all <- data_site %>%
 
 X_beetles <- data_site %>%
   dplyr::select(
-    -any_of("Beetles_Mat_Ratio"),
-    -any_of("Slope_F"),
-    -any_of("Aspect_Cor")    
+    -any_of("Beetles_Mat_Ratio")#,
+    # -any_of("Slope_F"),
+    # -any_of("Aspect_Cor")    
   )
 
 X_birds <- data_site %>%
   dplyr::select(
-    -any_of("Birds_Mat_Ratio"),
-    -any_of("Slope_F"),
-    -any_of("Aspect_Cor")    
+    -any_of("Birds_Mat_Ratio")#,
+    # -any_of("Slope_F"),
+    # -any_of("Aspect_Cor")    
   )
 
 X_plants <- data_site %>%
@@ -671,7 +674,7 @@ int_beetles_H[[2]]$data <- int_beetles_H[[2]]$data[1:10, , drop = FALSE]
 int_beetles_H[[2]]$labels$title <- "One-way Interactions Hierarchy" 
 int_beetles_H[[3]]$data <- int_beetles_H[[3]]$data[1:10, , drop = FALSE] 
 int_beetles_H[[3]]$labels$title <- "Two-way Interactions Hierarchy" 
-timings$interact_beetles$finsh <- Sys.time()
+timings$interact_beetles$finish <- Sys.time()
 
 
 
@@ -714,7 +717,7 @@ int_plants_H[[2]]$data <- int_plants_H[[2]]$data[1:10, , drop = FALSE]
 int_plants_H[[2]]$labels$title <- "One-way Interactions Hierarchy"  
 int_plants_H[[3]]$data <- int_plants_H[[3]]$data[1:10, , drop = FALSE] 
 int_plants_H[[3]]$labels$title <- "Two-way Interactions Hierarchy"  
-timings$interact_plants$finsh <- Sys.time()
+timings$interact_plants$finish <- Sys.time()
 ```
 
 ### Plant Output
@@ -773,7 +776,7 @@ co-occurance networks.
 timings$CN_beetles$start = Sys.time()
 
 # Co-occurrence network
-filterStrength <- 0.05
+filterStrength <- 0.1
 
 assoc_net_beetles <- mrCoOccurNet(bs_beetles)
 assoc_net_beetles_filtered <- assoc_net_beetles %>%
@@ -1109,7 +1112,7 @@ vi_birds_H[[3]]
 vi_plants[[3]]
 vi_plants_H[[3]]
 
-timings$knit$finish
+timings$knit$finish <- Sys.time()
 ```
 
 # Importance Plots
@@ -1337,7 +1340,7 @@ print(timings$interact_plants$finish-timings$interact_plants$start)
 
 
 print("Total Time")
-print(timings$knit$end - timings$knit$start)
+print(timings$knit$finish - timings$knit$start)
 ```
 
 ## Session Information
