@@ -333,8 +333,11 @@ mrBuildModels_internal <- function(Ob
   
   
   ## Breaking down object for readability and consistency
-  data_train <- rsample::training(Ob$Fits$Data$Config$Split)
+  data_train <- rsample::training(Ob$Fits$Data$Config$Split) %>%
+    select(any_of(c(yModel,Ob$Methodology$Data$XHeadings,Ob$Methodology$Data$X1Headings)))
+  
   data_test <- rsample::training(Ob$Fits$Data$Config$Split)
+  
   
   
   balance_data <- Ob$Methodology$Models[[modelName]]$balanceData
