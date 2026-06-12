@@ -63,6 +63,7 @@ library(purrr)
 library(workflows)
 library(yardstick)
 library(mrIML)
+library(future)
 # stacks also need to be added (will eventually be part of mrIML) current files:
 # mrIML_SObject
 # mrIMLStackPerform
@@ -110,7 +111,7 @@ YData <- readRDS(paste0(baseDir,"/data/Y_14snps.rds"))
 # YData <- readRDS(paste0(baseDir,"/data/Y1000_chaw.rds"))
 
 data <- cbind(YData,XData)
-# data <- data[1:1000,]
+data <- data[1:100,]
 # data$rs5743618_A <- as.factor(data$rs5743618_A)
 # data$rs6819274_G <- as.factor(data$rs6819274_G)
 # data$rs703842_G <- as.factor(data$rs703842_G)
@@ -152,7 +153,7 @@ YHeadings <- c("rs5743618_A", "rs6819274_G")
 # YHeadings <- c("rs703842_G")
 # YHeadings <- c("rs5743618_A", "rs703842_G")
 # YHeadings <- c("rs5743618_A", "rs6819274_G", "rs703842_G",  "rs13136820",  "rs17051321",  "rs2705616",   "rs2726479",  "rs6533052",   "rs6837324",   "rs72989863",  "rs9992763",   "rs4325907",   "rs2248137",   "rs61884005")
-YHeadings <- c("rs5743618_A", "rs6819274_G",  "rs17051321",  "rs2726479",  "rs6533052",   "rs6837324",   "rs72989863",  "rs9992763",   "rs4325907",   "rs2248137",   "rs61884005")
+# YHeadings <- c("rs5743618_A", "rs6819274_G",  "rs17051321",  "rs2726479",  "rs6533052",   "rs6837324",   "rs72989863",  "rs9992763",   "rs4325907",   "rs2248137",   "rs61884005")
 
 
 X1Headings <- YHeadings
@@ -185,8 +186,8 @@ Mod2$balanceData <- "no"
 Mod2$dummy <- TRUE
 Mod2$tune_grid_size <- 10
 Mod2$k <- 5
-Mod2$racing <- TRUE
-Mod2$modelParameters <- "mtry = tune(), min_n = tune(),trees = 1000"
+Mod2$racing <- FALSE
+Mod2$modelParameters <- "mtry = tune(), min_n = tune(), trees = 1000"
 Mod2$modelMetric <- "roc_auc"
 
 Mod3 <- list()
@@ -200,7 +201,7 @@ Mod3$balanceData <- "no"
 Mod3$dummy <- TRUE
 Mod3$tune_grid_size <- 10
 Mod3$k <- 5
-Mod3$racing <- TRUE
+Mod3$racing <- FALSE
 Mod3$modelParameters <- "hidden_units = tune(), penalty = tune(), epochs = tune()"
 Mod3$modelMetric <- "roc_auc"
 
@@ -264,10 +265,11 @@ S <- mrStackVIP(S)
 
 # move this section to the top eventually
 options <- list()
-options$PDPPlot <- FALSE
-options$DerivativePlots <- FALSE
+options$PDPPlot <- TRUE
+options$DerivativePlots <- TRUE
 options$CovPlots <- TRUE
-options$ImportancePlots <- FALSE
+options$ImportancePlots <- TRUE
+options$StackOnly <- TRUE
 # 
 S <- mrIMLStack_plots(S, options)
 

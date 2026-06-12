@@ -289,7 +289,7 @@ mrBuildModels <- function(Ob){
   # Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- stacks::blend_predictions(modelStack[[i]],, penalty = 0.001) %>%
   #     stacks::fit_members()
   Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- stacks::fit_members(Ob$Models[[i]]$ModelStack)
-  print(length(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]]$member_fits))
+
   if(length(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]]$member_fits)<1){
     Ob$Models[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]] 
                                                            , penalty = 0.0001
@@ -342,6 +342,7 @@ mrBuildModels_internal <- function(Ob
   mode <- Ob$Methodology$Models[[modelName]]$modelMode
   tune_grid_size <- Ob$Methodology$Models[[modelName]]$tune_grid_size
   ## Build recipe
+
   data_recipe <- recipes::recipe(as.formula(paste0(yModel,"~."))
                                 , data = data_train)
                 
@@ -361,13 +362,15 @@ mrBuildModels_internal <- function(Ob
   if (racing) {
     tune_m <- finetune::tune_race_anova(
       mod_workflow,
-      resamples = data_cv
+      resamples = data_cv,
+      control = control_grid(save_workflow = TRUE)
     )
   } else {
     tune_m <- tune::tune_grid(
       mod_workflow,
       resamples = data_cv,
-      grid = tune_grid_size
+      grid = tune_grid_size,
+      control = control_grid(save_workflow = TRUE)
     )
   }
   
@@ -399,16 +402,14 @@ mrBuildModels_internal <- function(Ob
     best_m
   )
 
-
-  
-  Ob$Models[[yModel]][[modelName]]$final_model <- tune::finalize_workflow(
-    mod_workflow,
-    best_m) 
+  # modFit <- fit_best()
+  # Ob$Models[[yModel]][[modelName]]$final_model <- tune::finalize_workflow(
+  #   mod_workflow,
+  #   best_m) 
   mod1_k <- final_model %>%
     workflows::fit(data = data_train)
-
   last_model_fit <- tune::last_fit(final_model
-                                   , data = Ob$Data
+                                   # , data = Ob$Data
                                    , split = Ob$Fits$Data$Config$Split)
 
   ## Repack variables:
@@ -417,6 +418,7 @@ mrBuildModels_internal <- function(Ob
   Ob$System[[yModel]][[modelName]]$workflow <- mod_workflow #unnecessary?
   Ob$System[[yModel]][[modelName]]$tune_s <- tune_s
   Ob$System[[yModel]][[modelName]]$tune_m <- tune_m
+  Ob$System[[yModel]][[modelName]]$fitModel <- mod1_k 
   Ob$System[[yModel]][[modelName]]$final_fit <- last_model_fit
   
   Ob$Fits[[yModel]][[modelName]]$last_model_fit <- last_model_fit

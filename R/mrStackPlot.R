@@ -1,16 +1,17 @@
 #' These are generic plots!
 
 
-
-mrIMLStack_plots <- function(Ob, options = list()){
+mrIMLStackPlot <- function(Ob, options = list()){
   if(length(options)==0){
     options$PDPPlot<-FALSE
     options$ALE <-FALSE
     options$CP <- FALSE
     options$DerivativePlots <- FALSE
     options$CovPlots <- FALSE
+    options$StackOnly <- FALSE
   }
-  
+  plotOb <- list()
+
   #' This section is working on plots from the flashlight object.
   #' 
   #' Checks need to be done initially to check if the object has the flashlight objects
@@ -18,8 +19,12 @@ mrIMLStack_plots <- function(Ob, options = list()){
   #' returned.
   
   # Starting with the option of a Partial Derivative Plot section
+  if(StackOnly){
+    models <- c(attributes(Ob$Methodology$Models)$name,"ModelStack")
+  } else {
+    models <- c("ModelStack")
+  }
   
-  models <- c(attributes(Ob$Methodology$Models)$name,"ModelStack")
   
   if(!is.null(options$PDPPlot)&&options$PDPPlot){
     
@@ -43,9 +48,9 @@ mrIMLStack_plots <- function(Ob, options = list()){
       
 
     }
-      PDPPlots <- patchwork::wrap_plots(plotList
+      plotOb$PDPPlots <- patchwork::wrap_plots(plotList
                                        , axes = 'collect')& ylim(miny - 0.1, maxy + 0.1)
-      print(PDPPlots)      
+      print(plotOb$PDPPlots)      
           
     
     
