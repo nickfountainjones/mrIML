@@ -147,9 +147,11 @@ data$rs61884005 <- as.factor(data$rs61884005)
 # YHeadings <- c("Hzosteropis", "Hkillangoi", "Plas", "Microfilaria")
 # X1Headings <- c("Hzosteropis", "Hkillangoi", "Plas", "Microfilaria")
 
-XHeadings <- c("latitude_S", "longitude_S", "UV_S", "dayT_S", "PC1", "PC2", "PC3", "PC4", "PC5"  )
+# XHeadings <- c("latitude_S", "longitude_S", "UV_S", "dayT_S", "PC1", "PC2", "PC3", "PC4", "PC5"  )
+XHeadings <- c("UV_S", "dayT_S", "PC1", "PC2", "PC3", "PC4", "PC5"  )
 # YHeadings <- c("rs5743618_A", "rs6819274_G", "rs703842_G")
 YHeadings <- c("rs5743618_A", "rs6819274_G")
+# YHeadings <- c("rs5743618_A")
 # YHeadings <- c("rs703842_G")
 # YHeadings <- c("rs5743618_A", "rs703842_G")
 # YHeadings <- c("rs5743618_A", "rs6819274_G", "rs703842_G",  "rs13136820",  "rs17051321",  "rs2705616",   "rs2726479",  "rs6533052",   "rs6837324",   "rs72989863",  "rs9992763",   "rs4325907",   "rs2248137",   "rs61884005")
@@ -271,7 +273,8 @@ options$CovPlots <- TRUE
 options$ImportancePlots <- TRUE
 options$StackOnly <- TRUE
 # 
-S <- mrIMLStack_plots(S, options)
+
+P <- mrIMLStackPlot(S, options)
 
 
 # S1 <- mrIMLStack_plots(S1, options)
