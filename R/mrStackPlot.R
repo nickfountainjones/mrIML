@@ -19,10 +19,11 @@ mrIMLStackPlot <- function(Ob, options = list()){
   #' returned.
   
   # Starting with the option of a Partial Derivative Plot section
-  if(StackOnly){
-    models <- c(attributes(Ob$Methodology$Models)$name,"ModelStack")
-  } else {
+  if(!is.null(options$StackOnly)&&options$StackOnly){
     models <- c("ModelStack")
+  } else {
+    models <- c(attributes(Ob$Methodology$Models)$name,"ModelStack")
+
   }
   
   
@@ -33,8 +34,8 @@ mrIMLStackPlot <- function(Ob, options = list()){
       miscList <- list()
       miny <- 0.1
       maxy <- 0.2
-      for(k in models){
-        for(i in Ob$Methodology$Data$YHeading){
+      for(i in Ob$Methodology$Data$YHeading){
+        for(k in models){
           for(j in Ob$Methodology$Data$XHeadings){
             plotName <- paste(i, "-", k) 
             plotPoint <- paste0(i, "-", k) 
@@ -42,15 +43,20 @@ mrIMLStackPlot <- function(Ob, options = list()){
             maxy <- max(maxy,Ob$GMAM$LP_S[[i]][[k]][[j]]$data$value)
             plotList[[plotPoint]] <- plot(Ob$GMAM$LP_S[[i]][[k]][[j]])+
               ggtitle(plotName)
-          } #j
-        } #i
+            plotOb$PDPPlots[[i]][[k]][[j]]<- patchwork::wrap_plots(plotList
+                                             , axes = 'collect')& ylim(miny - 0.1, maxy + 0.1) 
+            
+          } #i
+          
+        } #j
+
       } #k
       
 
     }
-      plotOb$PDPPlots <- patchwork::wrap_plots(plotList
-                                       , axes = 'collect')& ylim(miny - 0.1, maxy + 0.1)
-      print(plotOb$PDPPlots)      
+      # plotOb$PDPPlots <- patchwork::wrap_plots(plotList
+                                       # , axes = 'collect')& ylim(miny - 0.1, maxy + 0.1)
+      # print(plotOb$PDPPlots)      
           
     
     
@@ -69,8 +75,14 @@ mrIMLStackPlot <- function(Ob, options = list()){
   
 ### ------------ All the covariance plots--------------------------------------
   if(!is.null(options$CovPlots)&&options$CovPlots){
+    # Note that this is done across all outputs
     sdthresh <- 0.05 #This needs to be an argument!
     plotListC <- list()
+    plotOb$Covar$Occurance <- list()
+    plotOb$Covar$Effect <- list()
+    plotOb$Covar$Change <- list()
+    
+    
     for(k in models){
       # for(i in Ob$Methodology$Data$YHeading){ # not required
       for(j in Ob$Methodology$Data$XHeadings){
@@ -78,19 +90,19 @@ mrIMLStackPlot <- function(Ob, options = list()){
           dplyr::filter(.data$sd >= sdthresh) 
           plotName <- paste(j,"-", k) 
           plotPoint <- paste0("PD",j,"_",k) 
-          plotListC[[plotPoint]] <- ggplot2::ggplot(p_pd,
+          plotOb$Covar$Occurance[[k]][[j]] <- ggplot2::ggplot(p_pd,
             ggplot2::aes(x = .data$cov_grid, y = .data$value, colour = .data$label)
           ) +
-          ggplot2::geom_line() +
-          ggplot2::geom_point() +
-          ggplot2::theme(legend.position = c(0.80, 0.72),
-                         legend.background = element_rect(fill = alpha(0.5))) +
-          ggplot2::ylab("Prob of occurrence") +
-          ggplot2::xlab(j) +
-          #ggplot2::labs(colour = "Taxa") +
-          ggplot2::ylim(0, 1) +
-          # ggplot2::xlim(range(profiles_df$cov_grid))+
-          ggplot2::ggtitle(plotName)
+            ggplot2::geom_line() +
+            ggplot2::geom_point() +
+            ggplot2::theme(legend.position = c(0.80, 0.72),
+                           legend.background = element_rect(fill = alpha(0.5))) +
+            ggplot2::ylab("Prob of occurrence") +
+            ggplot2::xlab(j) +
+            #ggplot2::labs(colour = "Taxa") +
+            ggplot2::ylim(0, 1) +
+            # ggplot2::xlim(range(profiles_df$cov_grid))+
+            ggplot2::ggtitle(plotName)
       } #j
       # } #i
     } #k
@@ -102,7 +114,7 @@ mrIMLStackPlot <- function(Ob, options = list()){
           dplyr::filter(!is.na(.data$cov_grid))
         plotName <- paste(j,"-", k) 
         plotPoint <- paste0("Ave",j,"_",k) 
-        plotListC[[plotPoint]] <- ggplot2::ggplot() +
+        plotOb$Covar$Effect[[k]][[j]]  <- ggplot2::ggplot() +
           ggplot2::geom_line(
             data = p_pd_avg,
             ggplot2::aes(x = .data$cov_grid, y = .data$value, group = .data$label),
@@ -133,7 +145,7 @@ mrIMLStackPlot <- function(Ob, options = list()){
     
     
     # if(!is.null(options$DerivativePlots)&&options$DerivativePlots){
-      plotListd <- list()
+      # plotListd <- list()
       for(k in models){
         # for(i in Ob$Methodology$Data$YHeading){
         for(j in Ob$Methodology$Data$XHeadings){
@@ -141,7 +153,7 @@ mrIMLStackPlot <- function(Ob, options = list()){
             dplyr::filter(!is.na(.data$cov_diff))
           plotName <- paste(j,"-", k) 
           plotPoint <- paste0("Dev",j,"_",k) 
-          plotListC[[plotPoint]] <- ggplot2::ggplot(p_pd_diff,
+          plotOb$Covar$Change[[k]][[j]]  <- ggplot2::ggplot(p_pd_diff,
                                                     ggplot2::aes(
                                                       x = .data$cov_grad,
                                                       group = .data$cov_grad,
@@ -163,10 +175,11 @@ mrIMLStackPlot <- function(Ob, options = list()){
     
     
     ## Matching the importance plots
-    CovarPlots <- patchwork::wrap_plots(plotListC
-                                             , axes = 'collect')  &
-       ylim(0, 1)
-    print(CovarPlots)    
+    # CovarPlots <- patchwork::wrap_plots(plotListC
+    #                                          , axes = 'collect')  &
+    #    ylim(0, 1)
+    # plotOb$CovarPlots <- CovarPlots
+    # # print(CovarPlots)    
   } # End Covar Plots section
   
 ### -------------------------- Importance Plots ----------------------------
@@ -189,19 +202,24 @@ mrIMLStackPlot <- function(Ob, options = list()){
         coord_flip()
       
       ## Local plots show the importance for each Response 
-        local_plots <- lapply(YHeadings,function(i){
+        # local_plots <- lapply(YHeadings,function(i){
+      local_plots <- sapply(YHeadings,function(i){
           df_local<- data.frame(name = rownames(dft)[!is.na(dft[[i]])], value = dft[[i]][!is.na(dft[[i]])])
           ggplot(df_local, aes(x=reorder(name, value), y=value)) +
             ggplot2::geom_boxplot() +
             ggplot2::labs(y = "Importance", x = "", subtitle = i)  +
             coord_flip()
           
-        })
+        },USE.NAMES = TRUE)
+        
       l_VI_Plots <- patchwork::wrap_plots(local_plots)
       #p_VI_Plots
       
       gl_VI_Plots <- patchwork::wrap_plots(global_plot, l_VI_Plots)
-      print(gl_VI_Plots) 
+      # print(gl_VI_Plots) 
+      plotOb$Importance$Local <- local_plots  
+      plotOb$Importance$Global <- global_plot
+      plotOb$Importance$Overall <- gl_VI_Plots
       
     }  
   
@@ -267,7 +285,18 @@ mrIMLStackPlot <- function(Ob, options = list()){
   #   print(DerivativePlots)
   #   } # DerPlot
   #   
+
   
-  return(Ob) # do we want to return anything?
+  
+  plotOb$SummaryStatistics <- Ob$SummaryStatistics
+  
+  ## This is a section for recording equations. Should probably move somewhere else?
+  plotOb$Equations <- list()
+  for(i in Ob$Methodology$Data$YHeading){
+    plotOb$Equations[[i]] <- Ob$Models[[i]]$ModelStack$equations$class$.pred_class
+  }
+  
+  
+  return(plotOb) # do we want to return anything?
   
 }
