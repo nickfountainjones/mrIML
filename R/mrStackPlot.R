@@ -32,8 +32,8 @@ mrIMLStackPlot <- function(Ob, options = list()){
     if (!is.null(Ob$GMAM$LP_S[[1]]$ModelStack)) {
       plotList <- list()
       miscList <- list()
-      miny <- 0.1
-      maxy <- 0.2
+      miny <- 0
+      maxy <- 1
       for(i in Ob$Methodology$Data$YHeading){
         for(k in models){
           for(j in Ob$Methodology$Data$XHeadings){
@@ -41,10 +41,14 @@ mrIMLStackPlot <- function(Ob, options = list()){
             plotPoint <- paste0(i, "-", k) 
             miny <- min(miny,Ob$GMAM$LP_S[[i]][[k]][[j]]$data$value)
             maxy <- max(maxy,Ob$GMAM$LP_S[[i]][[k]][[j]]$data$value)
-            plotList[[plotPoint]] <- plot(Ob$GMAM$LP_S[[i]][[k]][[j]])+
-              ggtitle(plotName)
-            plotOb$PDPPlots[[i]][[k]][[j]]<- patchwork::wrap_plots(plotList
-                                             , axes = 'collect')& ylim(miny - 0.1, maxy + 0.1) 
+            pdpPlot <- ggplot2::ggplot(Ob$GMAM$LP_S[[i]][[k]][[j]]$data,
+                                       ggplot2::aes(x = .data[[j]], y = .data$value))+
+              ggplot2::geom_line()+
+              geom_point() +
+              ggtitle(plotName) +
+              coord_cartesian(ylim = c(miny, maxy))
+            plotOb$PDPPlots[[i]][[k]][[j]]<- ggpubr::as_ggplot(
+              ggplot2::ggplotGrob(pdpPlot))
             
           } #i
           
@@ -76,7 +80,7 @@ mrIMLStackPlot <- function(Ob, options = list()){
 ### ------------ All the covariance plots--------------------------------------
   if(!is.null(options$CovPlots)&&options$CovPlots){
     # Note that this is done across all outputs
-    sdthresh <- 0.05 #This needs to be an argument!
+    sdthresh <- 0.02 #This needs to be an argument!
     plotListC <- list()
     plotOb$Covar$Occurance <- list()
     plotOb$Covar$Effect <- list()
@@ -90,7 +94,7 @@ mrIMLStackPlot <- function(Ob, options = list()){
           dplyr::filter(.data$sd >= sdthresh) 
           plotName <- paste(j,"-", k) 
           plotPoint <- paste0("PD",j,"_",k) 
-          plotOb$Covar$Occurance[[k]][[j]] <- ggplot2::ggplot(p_pd,
+          covarPlot <- ggplot2::ggplot(p_pd,
             ggplot2::aes(x = .data$cov_grid, y = .data$value, colour = .data$label)
           ) +
             ggplot2::geom_line() +
@@ -103,6 +107,10 @@ mrIMLStackPlot <- function(Ob, options = list()){
             ggplot2::ylim(0, 1) +
             # ggplot2::xlim(range(profiles_df$cov_grid))+
             ggplot2::ggtitle(plotName)
+          
+          plotOb$Covar$Occurance[[k]][[j]] <- ggpubr::as_ggplot(
+            ggplot2::ggplotGrob(covarPlot))
+          
       } #j
       # } #i
     } #k
@@ -114,7 +122,7 @@ mrIMLStackPlot <- function(Ob, options = list()){
           dplyr::filter(!is.na(.data$cov_grid))
         plotName <- paste(j,"-", k) 
         plotPoint <- paste0("Ave",j,"_",k) 
-        plotOb$Covar$Effect[[k]][[j]]  <- ggplot2::ggplot() +
+        effectPlot <- ggplot2::ggplot() +
           ggplot2::geom_line(
             data = p_pd_avg,
             ggplot2::aes(x = .data$cov_grid, y = .data$value, group = .data$label),
@@ -133,9 +141,11 @@ mrIMLStackPlot <- function(Ob, options = list()){
             y = "Average effect"
           ) +
           ggplot2::theme_bw()+
+          ggplot2::ylim(0, 1) +
           ggplot2::ggtitle(plotName)
         
-        
+        plotOb$Covar$Effect[[k]][[j]] <- ggpubr::as_ggplot(
+          ggplot2::ggplotGrob(effectPlot))  
         
         
       } #j
@@ -153,7 +163,7 @@ mrIMLStackPlot <- function(Ob, options = list()){
             dplyr::filter(!is.na(.data$cov_diff))
           plotName <- paste(j,"-", k) 
           plotPoint <- paste0("Dev",j,"_",k) 
-          plotOb$Covar$Change[[k]][[j]]  <- ggplot2::ggplot(p_pd_diff,
+          changePlot <- ggplot2::ggplot(p_pd_diff,
                                                     ggplot2::aes(
                                                       x = .data$cov_grad,
                                                       group = .data$cov_grad,
@@ -164,9 +174,13 @@ mrIMLStackPlot <- function(Ob, options = list()){
             ggplot2::theme_bw() +
             ggplot2::ylab("Change in prob") +
             ggplot2::xlab(j) +
-            # ggplot2::ylim(0, 1) +
+            ggplot2::ylim(0, 1) +
             # ggplot2::xlim(range(profiles_df$cov_grid))+
             ggplot2::ggtitle(plotName)
+          
+          plotOb$Covar$Change[[k]][[j]] <- ggpubr::as_ggplot(
+            ggplot2::ggplotGrob(changePlot))
+          
         } #j
         # } #i
       } #k
@@ -205,12 +219,17 @@ mrIMLStackPlot <- function(Ob, options = list()){
         # local_plots <- lapply(YHeadings,function(i){
       local_plots <- sapply(YHeadings,function(i){
           df_local<- data.frame(name = rownames(dft)[!is.na(dft[[i]])], value = dft[[i]][!is.na(dft[[i]])])
-          ggplot(df_local, aes(x=reorder(name, value), y=value)) +
+          lPlot <- ggplot(df_local, aes(x=reorder(name, value), y=value)) +
             ggplot2::geom_boxplot() +
             ggplot2::labs(y = "Importance", x = "", subtitle = i)  +
             coord_flip()
+            
+            ggpubr::as_ggplot(ggplot2::ggplotGrob(lPlot))
+          
           
         },USE.NAMES = TRUE)
+      
+      
         
       l_VI_Plots <- patchwork::wrap_plots(local_plots)
       #p_VI_Plots
@@ -218,8 +237,10 @@ mrIMLStackPlot <- function(Ob, options = list()){
       gl_VI_Plots <- patchwork::wrap_plots(global_plot, l_VI_Plots)
       # print(gl_VI_Plots) 
       plotOb$Importance$Local <- local_plots  
-      plotOb$Importance$Global <- global_plot
-      plotOb$Importance$Overall <- gl_VI_Plots
+      plotOb$Importance$Global <- ggpubr::as_ggplot(
+        ggplot2::ggplotGrob(global_plot))
+      # plotOb$Importance$Overall <- ggpubr::as_ggplot(
+      #   ggplot2::ggplotGrob(gl_VI_Plots))
       
     }  
   
