@@ -9,8 +9,10 @@ mrIMLStackPlot <- function(Ob, options = list()){
     options$DerivativePlots <- FALSE
     options$CovPlots <- FALSE
     options$StackOnly <- FALSE
+    options$Export <- FALSE
   }
   plotOb <- list()
+  exportOb <- list()
 
   #' This section is working on plots from the flashlight object.
   #' 
@@ -49,6 +51,7 @@ mrIMLStackPlot <- function(Ob, options = list()){
               coord_cartesian(ylim = c(miny, maxy))
             plotOb$PDPPlots[[i]][[k]][[j]]<- ggpubr::as_ggplot(
               ggplot2::ggplotGrob(pdpPlot))
+            exportOb$PDPPlots[[i]][[k]][[j]]<- ggplot2::ggplotGrob(pdpPlot)
             
           } #i
           
@@ -110,7 +113,7 @@ mrIMLStackPlot <- function(Ob, options = list()){
           
           plotOb$Covar$Occurance[[k]][[j]] <- ggpubr::as_ggplot(
             ggplot2::ggplotGrob(covarPlot))
-          
+          exportOb$Covar$Occurance[[k]][[j]] <- ggplot2::ggplotGrob(covarPlot)
       } #j
       # } #i
     } #k
@@ -146,7 +149,7 @@ mrIMLStackPlot <- function(Ob, options = list()){
         
         plotOb$Covar$Effect[[k]][[j]] <- ggpubr::as_ggplot(
           ggplot2::ggplotGrob(effectPlot))  
-        
+        exportOb$Covar$Effect[[k]][[j]] <- ggplot2::ggplotGrob(effectPlot)
         
       } #j
       # } #i
@@ -180,7 +183,7 @@ mrIMLStackPlot <- function(Ob, options = list()){
           
           plotOb$Covar$Change[[k]][[j]] <- ggpubr::as_ggplot(
             ggplot2::ggplotGrob(changePlot))
-          
+          exportOb$Covar$Change[[k]][[j]] <- ggplot2::ggplotGrob(changePlot)
         } #j
         # } #i
       } #k
@@ -229,6 +232,17 @@ mrIMLStackPlot <- function(Ob, options = list()){
           
         },USE.NAMES = TRUE)
       
+      local_exports <- sapply(YHeadings,function(i){
+        df_local<- data.frame(name = rownames(dft)[!is.na(dft[[i]])], value = dft[[i]][!is.na(dft[[i]])])
+        lPlot <- ggplot(df_local, aes(x=reorder(name, value), y=value)) +
+          ggplot2::geom_boxplot() +
+          ggplot2::labs(y = "Importance", x = "", subtitle = i)  +
+          coord_flip()
+        
+        ggplot2::ggplotGrob(lPlot)
+        
+        
+      },USE.NAMES = TRUE)
       
         
       l_VI_Plots <- patchwork::wrap_plots(local_plots)
@@ -239,6 +253,9 @@ mrIMLStackPlot <- function(Ob, options = list()){
       plotOb$Importance$Local <- local_plots  
       plotOb$Importance$Global <- ggpubr::as_ggplot(
         ggplot2::ggplotGrob(global_plot))
+      
+      exportOb$Importance$Local <- local_exports
+      exportOb$Importance$Global <- ggplot2::ggplotGrob(global_plot)      
       # plotOb$Importance$Overall <- ggpubr::as_ggplot(
       #   ggplot2::ggplotGrob(gl_VI_Plots))
       
@@ -316,8 +333,13 @@ mrIMLStackPlot <- function(Ob, options = list()){
   for(i in Ob$Methodology$Data$YHeading){
     plotOb$Equations[[i]] <- Ob$Models[[i]]$ModelStack$equations$class$.pred_class
   }
-  
-  
-  return(plotOb) # do we want to return anything?
-  
+  exportOb$Equations <- list()
+  for(i in Ob$Methodology$Data$YHeading){
+    exportOb$Equations[[i]] <- Ob$Models[[i]]$ModelStack$equations$class$.pred_class
+  }  
+  if(options$Export){
+    return(exportOb)
+  } else {
+    return(plotOb) # do we want to return anything?
+  }
 }
