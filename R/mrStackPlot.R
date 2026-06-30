@@ -1,4 +1,7 @@
 #' These are generic plots!
+#' required libraries in parent functions:
+#'  - ggplot2
+#'  - dplyr
 
 
 mrIMLStackPlot <- function(Ob, options = list()){
@@ -257,7 +260,7 @@ mrIMLStackPlot <- function(Ob, options = list()){
       exportOb$Importance$Local <- local_exports
       exportOb$Importance$Global <- ggplot2::ggplotGrob(global_plot)      
       # plotOb$Importance$Overall <- ggpubr::as_ggplot(
-      #   ggplot2::ggplotGrob(gl_VI_Plots))
+      #   ggplot2::ggplotGrob(gl_VI_Plots))P
       
     }  
   
@@ -327,16 +330,16 @@ mrIMLStackPlot <- function(Ob, options = list()){
   
   
   plotOb$SummaryStatistics <- Ob$SummaryStatistics
-  
+  exportOb$SummaryStatistics <- Ob$SummaryStatistics
   ## This is a section for recording equations. Should probably move somewhere else?
   plotOb$Equations <- list()
+  exportOb$Equations <- list()
+
   for(i in Ob$Methodology$Data$YHeading){
     plotOb$Equations[[i]] <- Ob$Models[[i]]$ModelStack$equations$class$.pred_class
-  }
-  exportOb$Equations <- list()
-  for(i in Ob$Methodology$Data$YHeading){
     exportOb$Equations[[i]] <- Ob$Models[[i]]$ModelStack$equations$class$.pred_class
-  }  
+  }
+ 
   if(options$Export){
     return(exportOb)
   } else {
