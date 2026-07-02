@@ -71,7 +71,7 @@ mrIML_StackLight <- function(Ob, response = "single"){
                                                             , data = Ob$Data
                                                             ,predict_function = setup$pred_fun
                                                             , metrics = setup$metrics) #metrics next?
-      Ob$GMAM$LP_M[[j]][[k]] <- flashlight::light_profile(Ob$GMAM$FL_M[[j]][[k]], data = Ob$Data, v = j)
+      Ob$GMAM$LP_M[[j]][[k]] <- flashlight::light_profile(Ob$GMAM$FL_M[[j]][[k]], data = Ob$Data, v = j, type = "ale")
       
       
       #This section is for covariance. Maybe add an option to avoid this?
