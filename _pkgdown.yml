@@ -23,6 +23,13 @@ articles:
   - articles/Multi-response (regression)
   - articles/Graphical network model (GNM)
 
+- title: Case studies
+  navbar: Case studies
+  contents:
+  - articles/Case study - Avian blood parasites
+  - articles/Case study - Forest communities
+  - articles/Case study - Ostrich gut microbiome
+
 - title: Other
   navbar: Other
   contents:
