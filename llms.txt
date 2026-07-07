@@ -236,6 +236,15 @@ of multiple outcomes using revised stacking algorithms. *Bioinformatics,
 - [Graphical network model
   (GNM)](https://github.com/nickfountainjones/mrIML/articles/Graphical%20network%20model%20(GNM).md):
 
+### Case studies
+
+- [Case study: Avian blood
+  parasites](https://github.com/nickfountainjones/mrIML/articles/Case%20study%20-%20Avian%20blood%20parasites.md):
+- [Case study: Forest communities (beetles, birds and
+  plants)](https://github.com/nickfountainjones/mrIML/articles/Case%20study%20-%20Forest%20communities.md):
+- [Case study: Ostrich gut
+  microbiome](https://github.com/nickfountainjones/mrIML/articles/Case%20study%20-%20Ostrich%20gut%20microbiome.md):
+
 ### Other
 
 - [Common errors in

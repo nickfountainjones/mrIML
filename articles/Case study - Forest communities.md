@@ -1,0 +1,436 @@
+# Case study: Forest communities (beetles, birds and plants)
+
+> This case study is adapted from the mrIML 2.0 supplementary material
+> authored by Ryan K. Leadbetter and Nicholas M. Fountain-Jones
+> ([source](https://rleadbett.github.io/mrIML-paper-supmat/case-studies/02-forest-communities/dummy.html)).
+
+## Overview
+
+This case study applies mrIML 2.0 to a multi-taxonomic dataset spanning
+beetles, birds, and plants across a forest successional gradient in
+Tasmania, Australia. The dataset comprises 144 plots representing four
+forest age categories:
+
+- **Mature forest** — unharvested with no fire disturbance for ≥ 60
+  years
+- **~45 years post-harvest**
+- **~27 years post-harvest**
+- **~7 years post-harvest**
+
+Environmental covariates include coarse wood debris, leaf-litter depth,
+and soil variables (pH, conductivity). For each taxonomic group, three
+model configurations are compared — environment only, co-occurrence
+only, and combined — to assess the relative contributions of abiotic
+filtering and biotic interactions to community assembly.
+
+**Key findings:** Environmental filtering dominates across all groups.
+Plant communities show the strongest responses to successional
+gradients, while bird and beetle communities respond primarily to
+altitude and microclimate.
+
+``` r
+
+library(here)
+library(readxl)
+library(tidyverse)
+library(DT)
+library(mrIML)
+library(tidymodels)
+library(future)
+library(finetune)
+library(flashlight)
+library(igraph)
+library(ggnetwork)
+library(cowplot)
+library(patchwork)
+
+set.seed(123)
+n_cores <- parallel::detectCores()
+plan("multisession", workers = n_cores - 2)
+
+# Path to data files (adjust to your local directory)
+data_dir <- here("case-studies", "02-forest-communities", "data", "raw")
+```
+
+## Data preparation
+
+### Environmental covariates
+
+``` r
+
+raw_predictors <- read_excel(
+  file.path(data_dir, "Site_covariates_decision_making_4.xlsx"),
+  sheet = 4
+) |>
+  column_to_rownames(var = "plot_code") |>
+  rename_all(~ gsub(" ", "_", .)) |>
+  dplyr::select(-plot_code_T_D, -Transect)
+
+datatable(raw_predictors)
+```
+
+### Species matrices
+
+``` r
+
+raw_data_beetles <- read_excel(
+  file.path(data_dir, "all_taxa_all_sp_mat_sp.xlsx"), sheet = "beetles_all"
+) |>
+  dplyr::select(-Site, -Distance, -Transect, -Age) |>
+  rename_all(~ gsub(" ", "_", .)) |>
+  column_to_rownames(var = "Plot") |>
+  mutate_all(~ ifelse(. > 0, 1, .))   # convert abundance to presence/absence
+
+raw_data_birds <- read_excel(
+  file.path(data_dir, "all_taxa_all_sp_mat_sp.xlsx"), sheet = "birds_all"
+) |>
+  dplyr::select(-Site, -Distance, -Transect, -Age) |>
+  rename_all(~ gsub(" ", "_", .)) |>
+  column_to_rownames(var = "Plot") |>
+  mutate_all(~ ifelse(. > 0, 1, .))
+
+raw_data_plants <- read_excel(
+  file.path(data_dir, "all_taxa_all_sp_mat_sp.xlsx"), sheet = "plants_all"
+) |>
+  dplyr::select(-Site, -Distance, -Transect, -Age) |>
+  rename_all(~ gsub(" ", "_", .)) |>
+  column_to_rownames(var = "Plot") |>
+  mutate_all(~ ifelse(. > 0, 1, .))
+```
+
+## Model specification
+
+All three taxonomic groups use the same random-forest base model.
+
+``` r
+
+model_rf <- rand_forest(
+  trees = 1000,
+  mode  = "classification",
+  mtry  = tune(),
+  min_n = tune()
+) |>
+  set_engine("randomForest")
+```
+
+------------------------------------------------------------------------
+
+## Beetle community
+
+### Prepare X and Y
+
+Species with prevalence outside 20–70% are filtered out to avoid
+near-constant responses. Environmental variables are selected via an
+internal selection helper before modelling.
+
+``` r
+
+# Retain species with 20–70% prevalence
+Y_beetles <- filterRareCommon(raw_data_beetles, lower = 0.2, higher = 0.7)
+
+# Remove beetle- and bird-specific columns not relevant as general predictors
+X_beetles <- raw_predictors |>
+  dplyr::select(
+    -Beetles_S_Mat_Indval2, -Beetle_S_Total, -dist_regrowth, -Age,
+    -Beetles_Mat_Ratio, -Birds_S_Mat_EFL, -Birds_S_Total, -Birds_Mat_Ratio,
+    -slope_f_Jayne, -aspect_f_Jayne
+  )
+
+X_beetles$Site     <- as.factor(X_beetles$Site)
+X_beetles$geol_Jayne <- as.factor(X_beetles$geol_Jayne)
+
+# Variable selection (removes low-importance predictors)
+var_sel_beetles <- select_variables(Y = Y_beetles, X = X_beetles)
+X_beetles <- var_sel_beetles[[2]]
+X_beetles$Site <- NULL   # remove site to enable clean model comparison
+
+X1_beetles <- Y_beetles  # co-occurrence predictors = all beetle species
+```
+
+### Fit three models
+
+``` r
+
+# Environment only
+yhats_beetles_env <- mrIMLpredicts(
+  X = X_beetles, Y = Y_beetles,
+  Model = model_rf, balance_data = "no",
+  tune_grid_size = 5, prop = 0.6, k = 5, racing = TRUE
+)
+
+# Co-occurrence only
+yhats_beetles_cooccur <- mrIMLpredicts(
+  Y = Y_beetles, X1 = X1_beetles,
+  Model = model_rf, balance_data = "no",
+  tune_grid_size = 5, prop = 0.6, k = 5, racing = TRUE
+)
+
+# Combined
+yhats_beetles_combined <- mrIMLpredicts(
+  X = X_beetles, Y = Y_beetles, X1 = X1_beetles,
+  Model = model_rf, balance_data = "no",
+  tune_grid_size = 5, prop = 0.6, k = 5, racing = TRUE
+)
+```
+
+### Performance
+
+``` r
+
+ModelPerf_beetles_env      <- mrIMLperformance(yhats_beetles_env)
+ModelPerf_beetles_cooccur  <- mrIMLperformance(yhats_beetles_cooccur)
+ModelPerf_beetles_combined <- mrIMLperformance(yhats_beetles_combined)
+
+# Combined vs. environment-only comparison plot
+perf_comparison_beetles <- mrPerformancePlot(
+  ModelPerf1 = ModelPerf_beetles_combined,
+  ModelPerf2 = ModelPerf_beetles_env,
+  mode       = "classification"
+)
+perf_comparison_beetles$performance_plot +
+  labs(title = "Beetle community model performance")
+
+# MCC summary table
+data.frame(
+  Model = c("Environment only", "Co-occurrence only", "Combined"),
+  MCC   = c(
+    ModelPerf_beetles_env[[2]],
+    ModelPerf_beetles_cooccur[[2]],
+    ModelPerf_beetles_combined[[2]]
+  )
+)
+```
+
+### Variable importance
+
+``` r
+
+bs_beetles <- mrBootstrap(yhats_beetles_combined, num_bootstrap = 100)
+
+vi_beetles <- mrVip(
+  yhats_beetles_combined,
+  mrBootstrap_obj = bs_beetles,
+  threshold       = 0.5,
+  global_top_var  = 10
+)
+
+vi_beetles[[3]] + labs(title = "Beetle community variable importance")
+```
+
+### Co-occurrence network
+
+``` r
+
+assoc_net_beetles <- mrCoOccurNet(bs_beetles)
+mrCoOccurNet_plot(
+  assoc_net_beetles,
+  strength_thresh = 0.1,
+  network_title   = "Beetle co-occurrence network"
+)
+```
+
+### Interactions
+
+``` r
+
+interactions_rf <- yhats_beetles_combined |>
+  mrInteractions(num_bootstrap = 10)
+
+interactions_rf[[1]]
+```
+
+------------------------------------------------------------------------
+
+## Bird community
+
+The bird analysis mirrors the beetle analysis structure. The same
+environmental predictors are used, with variable selection applied
+separately.
+
+``` r
+
+Y_birds <- filterRareCommon(raw_data_birds, lower = 0.2, higher = 0.7)
+
+X_birds <- raw_predictors |>
+  dplyr::select(
+    -Beetles_S_Mat_Indval2, -Beetle_S_Total, -dist_regrowth, -Age,
+    -Beetles_Mat_Ratio, -Birds_S_Mat_EFL, -Birds_S_Total, -Birds_Mat_Ratio,
+    -slope_f_Jayne, -aspect_f_Jayne
+  )
+
+X_birds$Site     <- as.factor(X_birds$Site)
+X_birds$geol_Jayne <- as.factor(X_birds$geol_Jayne)
+X_birds$Site     <- NULL
+
+var_sel_birds <- select_variables(Y = Y_birds, X = X_birds)
+X_birds  <- var_sel_birds[[2]]
+X1_birds <- Y_birds
+```
+
+``` r
+
+yhats_birds_env <- mrIMLpredicts(
+  X = X_birds, Y = Y_birds,
+  Model = model_rf, balance_data = "no",
+  tune_grid_size = 5, prop = 0.6, k = 5, racing = TRUE
+)
+
+yhats_birds_cooccur <- mrIMLpredicts(
+  Y = Y_birds, X1 = X1_birds,
+  Model = model_rf, balance_data = "no",
+  tune_grid_size = 5, prop = 0.6, k = 5, racing = TRUE
+)
+
+yhats_birds_combined <- mrIMLpredicts(
+  X = X_birds, Y = Y_birds, X1 = X1_birds,
+  Model = model_rf, balance_data = "no",
+  tune_grid_size = 5, prop = 0.6, k = 5, racing = TRUE
+)
+```
+
+``` r
+
+ModelPerf_birds_env      <- mrIMLperformance(yhats_birds_env)
+ModelPerf_birds_cooccur  <- mrIMLperformance(yhats_birds_cooccur)
+ModelPerf_birds_combined <- mrIMLperformance(yhats_birds_combined)
+
+perf_comparison_birds <- mrPerformancePlot(
+  ModelPerf1 = ModelPerf_birds_combined,
+  ModelPerf2 = ModelPerf_birds_env,
+  mode       = "classification"
+)
+perf_comparison_birds$performance_plot + labs(title = "Bird community model performance")
+
+data.frame(
+  Model = c("Environment only", "Co-occurrence only", "Combined"),
+  MCC   = c(
+    ModelPerf_birds_env[[2]],
+    ModelPerf_birds_cooccur[[2]],
+    ModelPerf_birds_combined[[2]]
+  )
+)
+```
+
+``` r
+
+bs_birds <- mrBootstrap(yhats_birds_combined, num_bootstrap = 100)
+
+vi_birds <- mrVip(
+  yhats_birds_combined,
+  mrBootstrap_obj = bs_birds,
+  threshold       = 0.5,
+  global_top_var  = 10
+)
+
+vi_birds[[3]] + labs(title = "Bird community variable importance")
+```
+
+``` r
+
+assoc_net_birds <- mrCoOccurNet(bs_birds)
+mrCoOccurNet_plot(
+  assoc_net_birds,
+  strength_thresh = 0.1,
+  network_title   = "Bird co-occurrence network"
+)
+```
+
+------------------------------------------------------------------------
+
+## Plant community
+
+Plants show the strongest response to the successional gradient.
+Additional predictor columns specific to vegetation surveys are removed
+before modelling.
+
+``` r
+
+Y_plants <- filterRareCommon(raw_data_plants, lower = 0.2, higher = 0.7)
+
+X_plants <- raw_predictors |>
+  dplyr::select(
+    -Beetles_S_Mat_Indval2, -Beetle_S_Total, -dist_regrowth, -Age,
+    -Beetles_Mat_Ratio, -Birds_S_Mat_EFL, -Birds_S_Total, -Birds_Mat_Ratio,
+    -slope_f_Jayne, -aspect_f_Jayne,
+    -contains("Bryo"), -contains("Plant"), -contains("Moss"),
+    -Vegetation_cover
+  ) |>
+  rename_with(~ gsub("Jayne", "", .), contains("Jayne"))
+
+X_plants$Site  <- as.factor(X_plants$Site)
+X_plants$geol_ <- as.factor(X_plants$geol_)
+X_plants$Site  <- NULL
+
+var_sel_plants <- select_variables(Y = Y_plants, X = X_plants)
+X_plants  <- var_sel_plants[[2]]
+X1_plants <- Y_plants
+```
+
+``` r
+
+yhats_plants_env <- mrIMLpredicts(
+  X = X_plants, Y = Y_plants,
+  Model = model_rf, balance_data = "no",
+  tune_grid_size = 5, prop = 0.6, k = 5, racing = TRUE
+)
+
+yhats_plants_cooccur <- mrIMLpredicts(
+  Y = Y_plants, X1 = X1_plants,
+  Model = model_rf, balance_data = "no",
+  tune_grid_size = 5, prop = 0.6, k = 5, racing = TRUE
+)
+
+yhats_plants_combined <- mrIMLpredicts(
+  X = X_plants, Y = Y_plants, X1 = X1_plants,
+  Model = model_rf, balance_data = "no",
+  tune_grid_size = 5, prop = 0.6, k = 5, racing = TRUE
+)
+```
+
+``` r
+
+ModelPerf_plants_env      <- mrIMLperformance(yhats_plants_env)
+ModelPerf_plants_cooccur  <- mrIMLperformance(yhats_plants_cooccur)
+ModelPerf_plants_combined <- mrIMLperformance(yhats_plants_combined)
+
+perf_comparison_plants <- mrPerformancePlot(
+  ModelPerf1 = ModelPerf_plants_combined,
+  ModelPerf2 = ModelPerf_plants_env,
+  mode       = "classification"
+)
+perf_comparison_plants$performance_plot + labs(title = "Plant community model performance")
+
+data.frame(
+  Model = c("Environment only", "Co-occurrence only", "Combined"),
+  MCC   = c(
+    ModelPerf_plants_env[[2]],
+    ModelPerf_plants_cooccur[[2]],
+    ModelPerf_plants_combined[[2]]
+  )
+)
+```
+
+``` r
+
+bs_plants <- mrBootstrap(yhats_plants_combined, num_bootstrap = 100)
+
+vi_plants <- mrVip(
+  yhats_plants_combined,
+  mrBootstrap_obj = bs_plants,
+  threshold       = 0.5,
+  global_top_var  = 10
+)
+
+vi_plants[[3]] + labs(title = "Plant community variable importance")
+```
+
+``` r
+
+assoc_net_plants <- mrCoOccurNet(bs_plants)
+mrCoOccurNet_plot(
+  assoc_net_plants,
+  strength_thresh = 0.1,
+  network_title   = "Plant co-occurrence network",
+  nmds_layout     = TRUE
+)
+```
