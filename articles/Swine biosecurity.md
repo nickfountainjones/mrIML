@@ -24,6 +24,7 @@ Please note that the data included in this package is simulated, and is
 not a reflection of any real farm, company or state.
 
 ``` r
+
 set.seed(130) #set the seed to ensure consistency
 load("biosecurity_data.RData")
 data <- biosecurity_vignette_data
@@ -36,6 +37,7 @@ However there are more models available within MrIML and can be found
 [here](https://www.tidymodels.org/find/).
 
 ``` r
+
 #split predictor variables and outcome
 Y <- data %>%
   select(Class)
@@ -56,6 +58,7 @@ cores. If you don’t set up a cluster, the default settings will be used
 and the analysis will run sequentially.
 
 ``` r
+
 future::plan("multisession", workers = 2)
 ```
 
@@ -64,6 +67,7 @@ future::plan("multisession", workers = 2)
 Now we can train and test our model.
 
 ``` r
+
 yhats <- mrIMLpredicts(X=X, #features/predictors 
                        Y=Y, #response data
                        Model=model1, #specify your model
@@ -76,6 +80,7 @@ metrics including area under the curve (AUC), sensitivity, specificity
 and Matthews correlation coefficient (MCC).
 
 ``` r
+
 ModelPerf <- mrIMLperformance(yhats)
 
 ModelPerf[[1]] #predictive performance for individual responses 
@@ -93,6 +98,7 @@ Here we can look at the variable importance. This is the dependence
 between our outcome and biosecurity variables.
 
 ``` r
+
 #calculate variable importance
 #still got a bug here to do with the PCA
 impVI <- mrVip(
@@ -112,6 +118,7 @@ variable. Here we isolate the dependence of one variable and visualize
 how this dependence changes over different observed values.
 
 ``` r
+
 #create a flashlight object
 fl <- mrFlashlight(yhats,
                    response="single", 
@@ -121,13 +128,14 @@ plot(light_profile(fl, v = "Premises_in_3_miles")) +
   theme_bw()
 ```
 
-![](../../../../../../../tmp/Rtmpdy8bPm/articles/reference/figures/pdp-1.png)
+![](../../../../../../../tmp/RtmpHJMvFI/articles/reference/figures/pdp-1.png)
 \### Benchmarking: predicted risk
 
 The following function allows you to visualize and compare predicted
 risk among and within groups
 
 ``` r
+
 #apply the trained model to the entire data set to provide risk of predicted outbreak
 fit_bio <- extract_workflow(yhats$Fits[[1]]$last_mod_fit)
 
@@ -141,6 +149,7 @@ pred_bio <- fit_bio %>%
 ```
 
 ``` r
+
 #plot within group comparison of predicted risk
 mrBenchmark(data = "data1",
             Y = "Class",
@@ -161,6 +170,7 @@ risk, while variables with a phi \< 0 contribute to a decrease in
 predicted outbreak risk.
 
 ``` r
+
 #Use this function to implement the local explainer 
 data<-data%>%
   mutate(Class = revalue(Class,
@@ -177,6 +187,7 @@ plot corresponds to a single farm. An example of a positive farm and a
 negative farm are shown here.
 
 ``` r
+
 LE_indiv_plots[1]
 LE_indiv_plots[2]
 ```

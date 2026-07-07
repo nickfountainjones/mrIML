@@ -163,10 +163,6 @@ GN_model <- mrIMLpredicts(
 #> Warning: No tuning parameters have been detected, performance will be evaluated using
 #> the resamples with no tuning.
 #> Did you want to assign any parameters with a value of `tune()`?
-#> → A | warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-#> There were issues with some computations   A: x1
-#> There were issues with some computations   A: x1
-#> 
 #> Warning: No tuning parameters have been detected, performance will be evaluated using
 #> the resamples with no tuning.
 #> Did you want to assign any parameters with a value of `tune()`?

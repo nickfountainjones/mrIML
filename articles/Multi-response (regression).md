@@ -25,6 +25,7 @@ show that linear models of each loci have slightly greater predictive
 performance.
 
 ``` r
+
 # Read in data file with minor allele freqs & env/space variables
 load("gfData.RData")
 
@@ -55,6 +56,7 @@ set up a cluster using 4 cores. If you don’t set up a cluster, the
 default settings will be used and the analysis will run sequentially.
 
 ``` r
+
 future::plan("multisession", workers = 4)
 ```
 
@@ -68,6 +70,7 @@ for other regression model options. Note that ‘mode’ must be
 ‘regression’.
 
 ``` r
+
 model_lm <- linear_reg() %>%
   set_engine("lm") %>%
   set_mode("regression")
@@ -90,6 +93,7 @@ however the reported performance metrics are different. Running
 on a regression model provides the root mean square error (rmse) and R².
 
 ``` r
+
 ModelPerf_lm <- mrIMLperformance(yhats_lm)
 ModelPerf_lm$model_performance
 #> # A tibble: 20 × 4
@@ -127,16 +131,18 @@ forest. Random forest is the computational engine in gradient forests.
 Notice for random forests we have two hyperparameters to tune: `mtry`
 (number of features to randomly include at each split) and `min_n` (the
 minimum number of data points in a node that are required for the node
-to be split further). The syntax `tune()` acts as a placeholder to tell
-`mrIML` to tune those hyperparameters across a grid of values (defined
-in `mrIMLpredicts` `tune_grid_size` argument). Different algorithms will
-have different hyperparameters; see
+to be split further). The syntax
+[`tune()`](https://hardhat.tidymodels.org/reference/tune.html) acts as a
+placeholder to tell `mrIML` to tune those hyperparameters across a grid
+of values (defined in `mrIMLpredicts` `tune_grid_size` argument).
+Different algorithms will have different hyperparameters; see
 <https://www.tidymodels.org/find/parsnip/> for parameter details. Note
 that large grid sizes (\>10) for algorithms with lots of hyperparameters
 (such as extreme gradient boosting) will be computationally demanding.
 In this case we choose a grid size of 5.
 
 ``` r
+
 model_rf <- rand_forest(
   trees = 100,
   mode = "regression",
@@ -211,6 +217,7 @@ RF model using
 [`mrVip()`](https://github.com/nickfountainjones/mrIML/reference/mrVip.md).
 
 ``` r
+
 VI <- mrVip(
   yhats_rf,
   mrBootstrap_obj = NULL,
@@ -244,6 +251,7 @@ different models to group loci that behave similarly and to identify
 outliers.
 
 ``` r
+
 # PCA
 VI_PCA <- VI %>%
   mrVipPCA()
@@ -272,6 +280,7 @@ annual temperature) and plot the individual and global (average of all
 SNPs) partial dependency (PD) plots.
 
 ``` r
+
 PD_bio1 <- mrCovar(
   yhats_rf,
   var = "bio_1",
@@ -313,6 +322,7 @@ generate ALE plots by supplying `type = "ale"` to
 [`mrCovar()`](https://github.com/nickfountainjones/mrIML/reference/mrCovar.md).
 
 ``` r
+
 ALE_bio1 <- mrCovar(
   yhats_rf,
   var = "bio_1",

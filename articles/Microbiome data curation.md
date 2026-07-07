@@ -15,6 +15,7 @@ making sure columns aren’t identical. This will help when we start to
 create meaningful names for the ASVs.
 
 ``` r
+
 #----------------------------------------------------
 # Prepare ASV table
 #----------------------------------------------------
@@ -58,6 +59,7 @@ Now we can start fomatting our Y (response data) ready for MrIML. This
 includes filtering rare and common taxa.
 
 ``` r
+
 
 #make sure names match
 final_ASV_table <- asv_data

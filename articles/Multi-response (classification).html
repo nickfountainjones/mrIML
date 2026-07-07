@@ -12,8 +12,8 @@
 <link rel="icon" sizes="any" href="../favicon.ico">
 <link rel="manifest" href="../site.webmanifest">
 <script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Multi-response (classification)">
 </head>
@@ -47,6 +47,7 @@
     <li><a class="dropdown-item" href="../articles/Common%20errors%20in%20mrIML.html">Common errors in mrIML</a></li>
     <li><a class="dropdown-item" href="../articles/Microbiome%20data%20curation.html">Microbiome data curation</a></li>
     <li><a class="dropdown-item" href="../articles/Swine%20biosecurity.html">Swine biosecurity</a></li>
+    <li><a class="dropdown-item" href="../articles/Benchmarking%20and%20simulation.html">Benchmarking and simulation</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -107,15 +108,15 @@ California.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nickfountainjones/mrIML">mrIML</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; No methods found in package 'workflows' for request: 'predict.workflow' when loading 'mrIML'</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; ── <span style="font-weight: bold;">Attaching packages</span> ────────────────────────────────────── tidymodels 1.4.1 ──</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">broom       </span> 1.0.10     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">recipes     </span> 1.3.1 </span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dials       </span> 1.4.2      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">rsample     </span> 1.3.1 </span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr       </span> 1.1.4      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tailor      </span> 0.1.0 </span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2     </span> 4.0.0      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tidyr       </span> 1.3.1 </span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">infer       </span> 1.0.9      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tune        </span> 2.0.1 </span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Attaching packages</span> ────────────────────────────────────── tidymodels 1.5.0 ──</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">broom       </span> 1.0.13     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">recipes     </span> 1.3.3 </span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dials       </span> 1.4.4      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">rsample     </span> 1.3.2 </span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr       </span> 1.2.1      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tailor      </span> 0.1.0 </span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2     </span> 4.0.3      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tidyr       </span> 1.3.2 </span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">infer       </span> 1.1.0      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tune        </span> 2.1.0 </span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">modeldata   </span> 1.5.1      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">workflows   </span> 1.3.0 </span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">parsnip     </span> 1.3.3      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">workflowsets</span> 1.1.1 </span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">purrr       </span> 1.2.0      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">yardstick   </span> 1.3.2</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">parsnip     </span> 1.6.0      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">workflowsets</span> 1.1.1 </span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">purrr       </span> 1.2.2      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">yardstick   </span> 1.4.0</span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Conflicts</span> ───────────────────────────────────────── tidymodels_conflicts() ──</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">purrr</span>::<span style="color: #00BB00;">discard()</span> masks <span style="color: #0000BB;">scales</span>::discard()</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">filter()</span>  masks <span style="color: #0000BB;">stats</span>::filter()</span></span>
@@ -193,8 +194,8 @@ classification model to fit each response.</p>
 <code class="sourceCode R"><span><span class="va">model_rf</span> <span class="op">&lt;-</span> <span class="fu">rand_forest</span><span class="op">(</span></span>
 <span>  trees <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  mode <span class="op">=</span> <span class="st">"classification"</span>,</span>
-<span>  mtry <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  min_n <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span></span>
+<span>  mtry <span class="op">=</span> <span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  min_n <span class="op">=</span> <span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span> <span class="fu">set_engine</span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span></code></pre></div>
 <p>Now we can run the model. Hyper parameter tuning (for algorithms that
@@ -287,7 +288,7 @@ predicts the SNPs. First we can check variable importance.</p>
 <span>  model_perf <span class="op">=</span> <span class="va">ModelPerf_glm</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">glm_impVI</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
-<p><img src="Multi-response%20(classification)_files/figure-html/var-imp-1.png" class="r-plt" width="768" style="display: block; margin: auto;"></p>
+<p><img src="Multi-response%20(classification)_files/figure-html/var-imp-1.png" class="r-plt" alt="" width="768" style="display: block; margin: auto;"></p>
 <p>The output of <code><a href="../reference/mrVip.html">mrVip()</a></code> contains a figure summarising
 variable imporance. The main plot on the left shows the global
 importance (what features shape genetic change overall) and the sub
@@ -299,7 +300,7 @@ scores.</p>
 <code class="sourceCode R"><span><span class="va">glm_impVI_PCA</span> <span class="op">&lt;-</span> <span class="va">glm_impVI</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/mrVipPCA.html">mrVipPCA</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">glm_impVI_PCA</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
-<p><img src="Multi-response%20(classification)_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" width="768" style="display: block; margin: auto;"></p>
+<p><img src="Multi-response%20(classification)_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="" width="768" style="display: block; margin: auto;"></p>
 <p><span style="color:red">We can see only one outlier was detected on
 PC3 (env24) indicating that this SNP was bets predicted by a different
 set of predictors. Looking at the indiivudal importance plots shows
@@ -340,7 +341,7 @@ can plot the predicted values of a feature for each response.</p>
 <span>    type <span class="op">=</span> <span class="st">"predicted"</span></span>
 <span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Multi-response%20(classification)_files/figure-html/flashlight-1.png" class="r-plt" width="768" style="display: block; margin: auto;"></p>
+<p><img src="Multi-response%20(classification)_files/figure-html/flashlight-1.png" class="r-plt" alt="" width="768" style="display: block; margin: auto;"></p>
 <p><code>mrIMl</code> also provides a wraper function for some
 flashlight functionality to visualize the marginal (i.e. partial
 dependencies) or conditional (accumulated local effects) effect of a
@@ -360,7 +361,7 @@ genetic-turnover function.</span></p>
 <span><span class="op">)</span></span>
 <span><span class="va">profilePlot_pd</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">xlim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="cn">NA</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Multi-response%20(classification)_files/figure-html/marginal-effects-1.png" class="r-plt" width="768" style="display: block; margin: auto;"></p>
+<p><img src="Multi-response%20(classification)_files/figure-html/marginal-effects-1.png" class="r-plt" alt="" width="768" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Acumulated local effects</span></span>
@@ -372,7 +373,7 @@ genetic-turnover function.</span></p>
 <span><span class="op">)</span></span>
 <span><span class="va">profilePlot_ale</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">xlim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="cn">NA</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Multi-response%20(classification)_files/figure-html/marginal-effects-2.png" class="r-plt" width="768" style="display: block; margin: auto;"></p>
+<p><img src="Multi-response%20(classification)_files/figure-html/marginal-effects-2.png" class="r-plt" alt="" width="768" style="display: block; margin: auto;"></p>
 <p>Finally, we can assess how features interact overall to shape genetic
 change using <code><a href="../reference/mrInteractions.html">mrInteractions()</a></code>. Be warned, this is memory
 intensive. Future updates to this package will enable users to visualize
@@ -389,7 +390,7 @@ for example.</p>
 <span><span class="va">interactions</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">/</span></span>
 <span>  <span class="va">interactions</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">/</span></span>
 <span>  <span class="va">interactions</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
-<p><img src="Multi-response%20(classification)_files/figure-html/interactions-1.png" class="r-plt" width="768" style="display: block; margin: auto;"></p>
+<p><img src="Multi-response%20(classification)_files/figure-html/interactions-1.png" class="r-plt" alt="" width="768" style="display: block; margin: auto;"></p>
 <p>You could easily compare the plots generated above from our random
 forest model with the logistic regression model we fit earlier.</p>
 <p>You can visualize detected interactions by converting the
@@ -413,7 +414,7 @@ most robust results (see Molnar (2019) for more detail)</p>
 <span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Multi-response%20(classification)_files/figure-html/two-way-interaction-1.png" class="r-plt" width="768" style="display: block; margin: auto;"></p>
+<p><img src="Multi-response%20(classification)_files/figure-html/two-way-interaction-1.png" class="r-plt" alt="" width="768" style="display: block; margin: auto;"></p>
 <p>This is just an example of the tools can be applied to better
 interpret multi-response models and in turn gain insights into how
 landscape impacts genetic change. We’ve demonstrated that this package

@@ -1,0 +1,1161 @@
+# Benchmarking and simulation
+
+## Overview
+
+This article benchmarks mrIML’s co-occurrence network inference against
+three widely-used alternatives:
+
+- **Hmsc** (Hierarchical Models of Species Communities) — a joint
+  species distribution model that recovers residual associations via a
+  latent-factor random effect, here using 95% posterior credible
+  intervals to threshold edges.
+- **SPIEC-EASI** — a sparse graphical model designed for compositional
+  microbiome data.
+- **SparCC** — a correlation method corrected for the compositional
+  nature of count data.
+
+All four methods are applied to presence–absence data generated from a
+generalised Lotka–Volterra (GLV) simulator across four ecological
+interaction scenarios: random, mutualistic, competitive, and mixed.
+Network recovery is evaluated with the Spearman Mantel test against the
+known (simulated) interaction matrix.
+
+The simulation framework is adapted from the [mrIML paper supplementary
+material](https://rleadbett.github.io/mrIML-paper-supmat/sim-study/dummy.html).
+The key modification here is that the Hmsc network uses posterior-mean
+OmegaCor values, retaining only edges whose 95% credible intervals
+exclude zero.
+
+------------------------------------------------------------------------
+
+## 1. Setup
+
+``` r
+
+# Data manipulation
+library(here)
+library(readxl)
+library(tidyverse)
+library(DT)
+
+# Modelling
+library(mrIML)
+library(tidymodels)
+library(future)
+library(finetune)
+library(flashlight)
+library(Hmsc)      # Hierarchical Models of Species Communities
+library(coda)      # MCMC diagnostics (Gelman-Rubin R-hat)
+
+# Network construction and visualisation
+library(igraph)
+library(ggnetwork)
+library(cowplot)
+library(patchwork)
+library(seqtime)   # GLV simulator (generateDataSet, glv)
+library(vegan)     # Mantel test
+library(SpiecEasi) # SPIEC-EASI and SparCC
+```
+
+``` r
+
+set.seed(109)
+
+# Use all but two cores for mrIML's internal parallelism.
+# The outer replicate loop remains sequential to avoid resource contention
+# (mrIML already saturates available cores across species).
+n_cores <- parallel::detectCores()
+plan("multisession", workers = n_cores - 2)
+```
+
+------------------------------------------------------------------------
+
+## 2. Helper functions
+
+### 2.1 Simulate presence–absence data
+
+``` r
+
+# Simulate a community from a GLV interaction matrix M.
+# Returns both raw count data (needed by SPIEC-EASI / SparCC) and
+# a presence-absence (PA) data frame (needed by mrIML / Hmsc).
+make_presence_absence_data <- function(M, n_samples = 900, count = NULL, mode = 4) {
+  if (is.null(count)) {
+    # Default total count scales with network size
+    count <- nrow(M) * 10000
+  }
+
+  # seqtime::generateDataSet returns a species × samples matrix
+  raw_species_x_samples <- generateDataSet(n_samples, M, count = count, mode = mode)
+
+  # Transpose to samples × species and binarise to presence (1) / absence (0)
+  pa <- raw_species_x_samples |>
+    t() |>
+    as.data.frame() |>
+    mutate(across(everything(), ~ ifelse(.x < 1, yes = 0, no = 1)))
+
+  list(
+    raw = raw_species_x_samples,  # species × samples; input format for SPIEC-EASI / SparCC
+    pa  = pa                       # samples × species PA; input format for mrIML / Hmsc
+  )
+}
+```
+
+### 2.2 Fit an mrIML co-occurrence network
+
+``` r
+
+# Fit an mrIML random-forest co-occurrence network and convert it to an igraph object.
+# Each species in Y is modelled as a function of all other species (X1 = Y).
+# Edges are retained when mean bootstrapped association strength > mean_strength_cutoff.
+fit_mrIML_network <- function(Y, model_rf, mean_strength_cutoff = 0.1) {
+  X1 <- Y  # use all species as predictors for every other species
+
+  yhats_rf_sim <- mrIMLpredicts(
+    Y     = Y,
+    X     = NULL,  # no environmental predictors in this simulation
+    X1    = X1,
+    Model = model_rf,
+    prop  = 0.7,   # 70 / 30 train–test split per species model
+    k     = 5,     # 5-fold cross-validation
+    racing = FALSE
+  )
+
+  # Bootstrap across cross-validation folds to estimate edge uncertainty
+  bs_sim   <- mrBootstrap(yhats_rf_sim)
+  assoc_net <- mrCoOccurNet(bs_sim)
+
+  # Convert association table to a weighted adjacency matrix.
+  # Sign is encoded in mean_strength_dir (negative = competition / exclusion).
+  mrIML_mat <- assoc_net |>
+    filter(mean_strength > mean_strength_cutoff) |>
+    mutate(
+      mean_strength_dir = ifelse(
+        direction == "negative",
+        yes = -mean_strength,
+        no  =  mean_strength
+      ),
+      # Strip the "sp" prefix added by mrCoOccurNet so row/col names are integers
+      across(contains("taxa"), ~ sub("^sp", "", .x))
+    ) |>
+    graph_from_data_frame(
+      directed = FALSE,
+      vertices = sub("^sp", "", names(Y))
+    ) |>
+    as_adjacency_matrix(attr = "mean_strength_dir", sparse = FALSE)
+
+  g_mrIML <- graph_from_adjacency_matrix(
+    mrIML_mat,
+    mode     = "undirected",
+    weighted = TRUE,
+    diag     = FALSE
+  )
+
+  list(
+    yhats     = yhats_rf_sim,
+    bootstrap = bs_sim,
+    assoc_net = assoc_net,
+    mat       = mrIML_mat,
+    graph     = g_mrIML,
+    edge_col  = ifelse(E(g_mrIML)$weight < 0, yes = "red", no = "blue"),
+    edge_width = rep(0.4, ecount(g_mrIML))
+  )
+}
+```
+
+### 2.3 Fit an Hmsc model
+
+``` r
+
+# Fit a probit Hmsc model with a sample-level random effect.
+# The random effect captures residual species associations (OmegaCor) after
+# accounting for the intercept-only fixed effects.
+# MCMC settings (thin, samples, transient, nChains) trade accuracy for speed;
+# use the defaults for final results and reduce for quick smoke tests.
+fit_hmsc_model <- function(Y,
+                           thin      = 100,
+                           samples   = 5000,
+                           transient = 20000,
+                           nChains   = 4) {
+
+  Y_hmsc <- as.data.frame(Y)
+
+  # Remove any incidental row-index columns that would confuse Hmsc
+  id_cols <- intersect(names(Y_hmsc), c("sample", "site", "row", "id", "X"))
+  if (length(id_cols) > 0) {
+    Y_hmsc <- dplyr::select(Y_hmsc, -dplyr::all_of(id_cols))
+  }
+
+  # Hmsc probit expects a numeric 0/1 matrix (rows = samples, columns = species)
+  Y_hmsc <- as.matrix(dplyr::mutate(Y_hmsc, dplyr::across(dplyr::everything(), as.numeric)))
+
+  # Drop incomplete rows to avoid row-number mismatches with XData / studyDesign
+  keep_rows <- stats::complete.cases(Y_hmsc)
+  Y_hmsc    <- Y_hmsc[keep_rows, , drop = FALSE]
+
+  sample_ids <- paste0("sample_", seq_len(nrow(Y_hmsc)))
+  rownames(Y_hmsc) <- sample_ids
+
+  # Intercept-only fixed effects (no environmental covariates in this simulation)
+  XData      <- data.frame(intercept = rep(1, nrow(Y_hmsc)), row.names = sample_ids)
+  # One random level per sampling unit — this is what produces OmegaCor
+  studyDesign <- data.frame(sample = factor(sample_ids), row.names = sample_ids)
+
+  stopifnot(nrow(Y_hmsc) == nrow(XData))
+  stopifnot(nrow(Y_hmsc) == nrow(studyDesign))
+
+  rL <- HmscRandomLevel(units = levels(studyDesign$sample))
+
+  m_hmsc <- Hmsc(
+    Y           = Y_hmsc,
+    XFormula    = ~1,
+    XData       = XData,
+    distr       = "probit",   # appropriate for binary presence-absence
+    studyDesign = studyDesign,
+    ranLevels   = list("sample" = rL)
+  )
+
+  sampleMcmc(
+    m_hmsc,
+    thin      = thin,
+    samples   = samples,
+    transient = transient,
+    nChains   = nChains,
+    verbose   = 0
+  )
+}
+```
+
+### 2.4 Check Hmsc MCMC convergence
+
+``` r
+
+# Compute the Gelman-Rubin R-hat for OmegaCor parameters.
+# Values > 1.1 suggest the chains have not converged and results should be
+# interpreted cautiously (or MCMC should be run longer).
+check_hmsc_omega_convergence <- function(m_hmsc, rhat_cutoff = 1.1) {
+  mpost <- convertToCodaObject(m_hmsc)
+  psrf  <- gelman.diag(mpost$Omega[[1]], multivariate = FALSE)$psrf
+
+  if (any(psrf[, "Point est."] > rhat_cutoff, na.rm = TRUE)) {
+    warning(
+      "Hmsc convergence concern: one or more Omega parameters have Rhat > ",
+      rhat_cutoff,
+      ". Interpret Hmsc network results cautiously."
+    )
+  }
+
+  psrf
+}
+```
+
+### 2.5 Build an Hmsc credible-interval network
+
+``` r
+
+# Construct an Hmsc residual-association network using 95% posterior credible intervals.
+# Only edges whose 95% CrI for OmegaCor excludes zero are retained —
+# this is more conservative than thresholding by the posterior mean alone.
+make_hmsc_ci_network <- function(m_hmsc,
+                                 mrIML_mat,
+                                 ci           = c(0.025, 0.975),
+                                 random_level = 1) {
+
+  # getPostEstimate returns posterior mean and requested quantiles for OmegaCor
+  post_omega <- getPostEstimate(
+    m_hmsc,
+    parName = "OmegaCor",
+    r       = random_level,
+    q       = ci
+  )
+
+  Omega_mean <- post_omega$mean
+  # Hmsc does not set dimnames for OmegaCor; add species names manually
+  dimnames(Omega_mean) <- list(m_hmsc$spNames, m_hmsc$spNames)
+
+  # post_omega$q is a 3D array: quantile × species × species
+  Omega_lwr <- post_omega$q[1, , ]
+  Omega_upr <- post_omega$q[2, , ]
+  dimnames(Omega_lwr) <- list(m_hmsc$spNames, m_hmsc$spNames)
+  dimnames(Omega_upr) <- list(m_hmsc$spNames, m_hmsc$spNames)
+
+  # Zero out any edge whose 95% CrI spans zero (i.e., not credibly non-zero)
+  Omega_CI <- Omega_mean
+  Omega_CI[Omega_lwr <= 0 & Omega_upr >= 0] <- 0
+  diag(Omega_CI) <- 0
+
+  # Match species names between the Hmsc matrix (uses "sp" prefix) and the
+  # mrIML matrix (prefix stripped). Guard against naming convention mismatches.
+  hmsc_all_names     <- colnames(Omega_mean)
+  candidate_names    <- paste0("sp", rownames(mrIML_mat))
+  hmsc_species_names <- intersect(candidate_names, hmsc_all_names)
+
+  if (length(hmsc_species_names) == 0) {
+    stop(
+      "make_hmsc_ci_network: no species names in common between mrIML matrix (",
+      paste(head(candidate_names), collapse = ", "),
+      ") and Hmsc OmegaCor matrix (",
+      paste(head(hmsc_all_names), collapse = ", "),
+      "). Check species naming conventions."
+    )
+  }
+
+  hmsc_mat <- Omega_CI[hmsc_species_names, hmsc_species_names, drop = FALSE]
+  hmsc_lwr <- Omega_lwr[hmsc_species_names, hmsc_species_names, drop = FALSE]
+  hmsc_upr <- Omega_upr[hmsc_species_names, hmsc_species_names, drop = FALSE]
+
+  # Align row/col names with the mrIML matrix for downstream comparison
+  rownames(hmsc_mat) <- colnames(hmsc_mat) <- rownames(mrIML_mat)
+  rownames(hmsc_lwr) <- colnames(hmsc_lwr) <- rownames(mrIML_mat)
+  rownames(hmsc_upr) <- colnames(hmsc_upr) <- rownames(mrIML_mat)
+
+  g_hmsc <- graph_from_adjacency_matrix(
+    hmsc_mat,
+    mode     = "undirected",
+    weighted = TRUE,
+    diag     = FALSE
+  )
+
+  # Store the credible interval bounds and edge sign on the graph object
+  if (ecount(g_hmsc) > 0) {
+    edge_list       <- as_edgelist(g_hmsc)
+    E(g_hmsc)$ci_lwr <- mapply(function(a, b) hmsc_lwr[a, b], edge_list[, 1], edge_list[, 2])
+    E(g_hmsc)$ci_upr <- mapply(function(a, b) hmsc_upr[a, b], edge_list[, 1], edge_list[, 2])
+    E(g_hmsc)$sign   <- ifelse(E(g_hmsc)$weight > 0, "positive", "negative")
+  }
+
+  list(
+    post      = post_omega,
+    mat       = hmsc_mat,
+    lwr       = hmsc_lwr,
+    upr       = hmsc_upr,
+    graph     = g_hmsc,
+    edge_col  = ifelse(E(g_hmsc)$weight < 0, yes = "red", no = "blue"),
+    edge_width = rep(0.4, ecount(g_hmsc))
+  )
+}
+```
+
+### 2.6 Fit a SPIEC-EASI network
+
+``` r
+
+# Fit a SPIEC-EASI sparse inverse-covariance network (MB = Meinshausen-Bühlmann).
+# SPIEC-EASI was designed for compositional microbiome count data but performs
+# well on other sparse ecological count matrices.
+# raw_species_x_samples must be a species × samples matrix (seqtime convention).
+fit_spiec_network <- function(raw_species_x_samples, Y) {
+  sp_names       <- colnames(Y)                                    # e.g. "sp1", "sp3", ...
+  raw_subset     <- raw_species_x_samples[sp_names, , drop = FALSE]
+  sp_names_clean <- sub("^sp", "", sp_names)
+
+  # SPIEC-EASI expects samples × features; transpose from species × samples
+  se_fit   <- spiec.easi(t(raw_subset), method = "mb",
+                         pulsar.params = list(rep.num = 20))
+  beta_mat <- as.matrix(symBeta(getOptBeta(se_fit), mode = "lower"))
+  diag(beta_mat) <- 0
+  rownames(beta_mat) <- colnames(beta_mat) <- sp_names_clean
+
+  g_spiec <- graph_from_adjacency_matrix(
+    beta_mat,
+    mode     = "undirected",
+    weighted = TRUE,
+    diag     = FALSE
+  )
+
+  list(
+    mat       = beta_mat,
+    graph     = g_spiec,
+    edge_col  = ifelse(E(g_spiec)$weight < 0, "red", "blue"),
+    edge_width = rep(0.4, ecount(g_spiec))
+  )
+}
+```
+
+### 2.7 Fit a SparCC network
+
+``` r
+
+# Fit a SparCC correlation network with bootstrap-based p-values.
+# Edges with p > alpha are set to zero. SparCC corrects for the
+# spurious correlations induced by compositionality in count data.
+fit_sparcc_network <- function(raw_species_x_samples, Y,
+                               alpha = 0.05, n_boot = 50) {
+  sp_names       <- colnames(Y)
+  raw_subset     <- raw_species_x_samples[sp_names, , drop = FALSE]
+  sp_names_clean <- sub("^sp", "", sp_names)
+
+  counts_mat  <- t(raw_subset)       # samples × features for SpiecEasi functions
+  sparcc_out  <- SpiecEasi::sparcc(counts_mat)
+  sparcc_boot <- SpiecEasi::sparccboot(counts_mat, R = n_boot)
+  sparcc_pval <- SpiecEasi::pval.sparccboot(sparcc_boot)
+
+  sparcc_cor <- sparcc_out$Cor
+  sparcc_cor[sparcc_pval$pvals > alpha] <- 0   # retain only significant correlations
+  diag(sparcc_cor) <- 0
+  rownames(sparcc_cor) <- colnames(sparcc_cor) <- sp_names_clean
+
+  g_sparcc <- graph_from_adjacency_matrix(
+    sparcc_cor,
+    mode     = "undirected",
+    weighted = TRUE,
+    diag     = FALSE
+  )
+
+  list(
+    mat       = sparcc_cor,
+    graph     = g_sparcc,
+    edge_col  = ifelse(E(g_sparcc)$weight < 0, "red", "blue"),
+    edge_width = rep(0.4, ecount(g_sparcc))
+  )
+}
+```
+
+### 2.8 Extract the simulated truth network
+
+``` r
+
+# Subset the GLV interaction matrix M to the species retained after
+# mrIML's rare/common filtering. This gives the 'ground truth' sub-network
+# against which all four methods are evaluated.
+make_truth_network <- function(M, mrIML_mat) {
+  matching_indices <- as.numeric(rownames(mrIML_mat))
+  true_mat <- M[matching_indices, matching_indices, drop = FALSE]
+  rownames(true_mat) <- colnames(true_mat) <- rownames(mrIML_mat)
+
+  g_true <- graph_from_adjacency_matrix(
+    true_mat,
+    mode     = "undirected",
+    weighted = TRUE,
+    diag     = FALSE
+  )
+
+  list(
+    mat       = true_mat,
+    graph     = g_true,
+    edge_col  = ifelse(E(g_true)$weight < 0, yes = "red", no = "blue"),
+    edge_width = abs(E(g_true)$weight) * 5,  # edge width proportional to interaction strength
+    layout    = layout_nicely(g_true)          # shared layout for all five panel plots
+  )
+}
+```
+
+### 2.9 Side-by-side network plot
+
+``` r
+
+# Plot all five networks (mrIML, Hmsc, SPIEC-EASI, SparCC, truth) side by side,
+# using the simulated-truth layout so node positions are identical across panels.
+# Red edges = negative (competitive / inhibitory) interactions;
+# blue edges = positive (mutualistic / facilitative) interactions.
+plot_five_networks <- function(mrIML_res, hmsc_res, spiec_res, sparcc_res, truth_res,
+                               title_suffix = "") {
+  par_old <- par(mfrow = c(1, 5), mar = c(1, 1, 2, 1))
+  on.exit(par(par_old), add = TRUE)
+
+  plot(mrIML_res$graph,  layout = truth_res$layout,
+       edge.color = mrIML_res$edge_col,  edge.width = mrIML_res$edge_width,
+       main = paste("mrIML", title_suffix))
+
+  plot(hmsc_res$graph,   layout = truth_res$layout,
+       edge.color = hmsc_res$edge_col,   edge.width = hmsc_res$edge_width,
+       main = paste("Hmsc 95% CrI", title_suffix))
+
+  plot(spiec_res$graph,  layout = truth_res$layout,
+       edge.color = spiec_res$edge_col,  edge.width = spiec_res$edge_width,
+       main = paste("SPIEC-EASI", title_suffix))
+
+  plot(sparcc_res$graph, layout = truth_res$layout,
+       edge.color = sparcc_res$edge_col, edge.width = sparcc_res$edge_width,
+       main = paste("SparCC", title_suffix))
+
+  plot(truth_res$graph,  layout = truth_res$layout,
+       edge.color = truth_res$edge_col,  edge.width = truth_res$edge_width,
+       main = paste("Simulated truth", title_suffix))
+}
+```
+
+### 2.10 Compare inferred networks against the truth (Mantel test)
+
+``` r
+
+# Use the Spearman Mantel test to measure the rank correlation between each
+# method's inferred association matrix and the simulated interaction matrix.
+# Matrices are on different scales, so Spearman (rank-based) correlation is used
+# rather than comparing absolute values directly.
+compare_with_truth <- function(true_mat, mrIML_mat, hmsc_mat, spiec_mat, sparcc_mat,
+                               permutations = 999) {
+  dist_true   <- as.dist(1 - true_mat)
+  dist_mrIML  <- as.dist(1 - mrIML_mat)
+  dist_hmsc   <- as.dist(1 - hmsc_mat)
+  dist_spiec  <- as.dist(1 - spiec_mat)
+  dist_sparcc <- as.dist(1 - sparcc_mat)
+
+  list(
+    mrIML      = vegan::mantel(dist_true, dist_mrIML,  method = "spearman", permutations = permutations),
+    Hmsc       = vegan::mantel(dist_true, dist_hmsc,   method = "spearman", permutations = permutations),
+    SPIEC_EASI = vegan::mantel(dist_true, dist_spiec,  method = "spearman", permutations = permutations),
+    SparCC     = vegan::mantel(dist_true, dist_sparcc, method = "spearman", permutations = permutations)
+  )
+}
+```
+
+### 2.11 Orchestrate one complete simulation scenario
+
+``` r
+
+# Run a single simulation scenario end-to-end:
+#   1. Generate a GLV interaction network of the specified type
+#   2. Simulate presence-absence community data from that network
+#   3. Filter rare / ubiquitous species
+#   4. Fit all four co-occurrence models
+#   5. Plot inferred vs. truth networks
+#   6. Evaluate recovery with Mantel tests
+run_scenario <- function(scenario,
+                         interaction_type,
+                         interact_str_max,
+                         network_size        = 20,
+                         k_average           = 4,
+                         mix_compt_ratio     = 0.5,
+                         self_regulation     = NULL,
+                         model_rf,
+                         hmsc_thin           = 50,
+                         hmsc_samples        = 1000,
+                         hmsc_transient      = 5000,
+                         hmsc_nChains        = 4,
+                         sparcc_alpha        = 0.05,
+                         sparcc_n_boot       = 50,
+                         mantel_permutations = 999) {
+
+  # --- Step 1: generate the simulated interaction network ---
+  # generateM_specific_type returns a list: [[1]] igraph object, [[2]] GLV matrix M
+  simulated_network <- generateM_specific_type(
+    nn             = network_size,
+    k_ave          = k_average,
+    type.network   = "random",
+    type.interact  = interaction_type,
+    interact.str.max = interact_str_max,
+    mix.compt.ratio  = mix_compt_ratio
+  )
+
+  true_network <- simulated_network[[1]]
+  M            <- simulated_network[[2]]
+
+  # Optionally override diagonal (self-regulation terms); needed for competitive scenarios
+  # to prevent the system from diverging
+  if (!is.null(self_regulation)) {
+    diag(M) <- self_regulation
+  }
+
+  # --- Step 2: simulate community data from the GLV model ---
+  data_obj <- make_presence_absence_data(
+    M,
+    n_samples = 900,
+    count     = network_size * 10000,
+    mode      = 4
+  )
+
+  # --- Step 3: remove rare (< 1%) and ubiquitous (> 99%) species ---
+  Y <- filterRareCommon(data_obj$pa, lower = 0.01, higher = 0.99)
+
+  # --- Step 4: fit all four models ---
+  mrIML_res <- fit_mrIML_network(Y = Y, model_rf = model_rf)
+  truth_res <- make_truth_network(M = M, mrIML_mat = mrIML_res$mat)
+
+  m_hmsc <- fit_hmsc_model(
+    Y         = Y,
+    thin      = hmsc_thin,
+    samples   = hmsc_samples,
+    transient = hmsc_transient,
+    nChains   = hmsc_nChains
+  )
+  psrf <- check_hmsc_omega_convergence(m_hmsc)
+
+  hmsc_res   <- make_hmsc_ci_network(m_hmsc = m_hmsc, mrIML_mat = mrIML_res$mat,
+                                     ci = c(0.025, 0.975), random_level = 1)
+  spiec_res  <- fit_spiec_network(data_obj$raw, Y)
+  sparcc_res <- fit_sparcc_network(data_obj$raw, Y,
+                                   alpha = sparcc_alpha, n_boot = sparcc_n_boot)
+
+  # --- Step 5: visualise ---
+  plot_five_networks(mrIML_res, hmsc_res, spiec_res, sparcc_res, truth_res,
+                     title_suffix = paste0("(", scenario, ")"))
+
+  # --- Step 6: evaluate recovery ---
+  mantel_res <- compare_with_truth(
+    true_mat   = truth_res$mat,
+    mrIML_mat  = mrIML_res$mat,
+    hmsc_mat   = hmsc_res$mat,
+    spiec_mat  = spiec_res$mat,
+    sparcc_mat = sparcc_res$mat,
+    permutations = mantel_permutations
+  )
+
+  list(
+    scenario     = scenario,
+    true_network = true_network,
+    M            = M,
+    data         = data_obj,
+    Y            = Y,
+    mrIML        = mrIML_res,
+    hmsc_model   = m_hmsc,
+    hmsc_psrf    = psrf,
+    hmsc         = hmsc_res,
+    spiec        = spiec_res,
+    sparcc       = sparcc_res,
+    truth        = truth_res,
+    mantel       = mantel_res
+  )
+}
+```
+
+------------------------------------------------------------------------
+
+## 3. Network generation helper (`generateM_specific_type`)
+
+The `generateM_specific_type` function (Takemoto et al.) constructs a
+random GLV interaction matrix `M` with a specified topology and
+interaction type.
+
+``` r
+
+# Generate a GLV interaction matrix with a given network topology and interaction type.
+#
+# Parameters:
+#   nn              – number of species (nodes)
+#   k_ave           – average degree (mean edges per node)
+#   type.network    – topology: "random" (Erdős-Rényi), "sf" (scale-free),
+#                               "sw" (small-world), "bipar" (bipartite)
+#   type.interact   – interaction signs: "random", "mutual" (+/+),
+#                                        "compt" (-/-), "pp" (+/- predator-prey),
+#                                        "mix" (mutualism + competition),
+#                                        "mix2" (competition + predator-prey)
+#   interact.str.max – maximum absolute interaction strength
+#   mix.compt.ratio  – proportion of competitive interactions in "mix"/"mix2"
+generateM_specific_type <- function(nn, k_ave,
+                                    type.network     = "random",
+                                    type.interact    = "random",
+                                    interact.str.max = 0.5,
+                                    mix.compt.ratio  = 0.5) {
+  nl <- round(k_ave * nn / 2)  # number of edges
+
+  # Build the graph topology
+  if (type.network == "random") {
+    g <- erdos.renyi.game(nn, nl, type = "gnm")
+  } else if (type.network == "sf") {
+    g <- static.power.law.game(nn, nl, 2.2, -1,
+                                loops = FALSE, multiple = FALSE,
+                                finite.size.correction = TRUE)
+  } else if (type.network == "sw") {
+    g <- sample_smallworld(1, nn, round(k_ave / 2), 0.05,
+                           loops = FALSE, multiple = FALSE)
+  } else if (type.network == "bipar") {
+    g <- sample_bipartite(nn / 2, nn / 2, type = "gnm", m = nl, directed = FALSE)
+  } else {
+    stop("network type is invalid")
+  }
+
+  edgelist <- get.edgelist(g)
+  A        <- matrix(0, nrow = nn, ncol = nn)
+
+  # Assign interaction strengths based on ecological type
+  if (type.interact == "random") {
+    for (i in seq_len(nl)) {
+      A[edgelist[i, 1], edgelist[i, 2]] <- runif(1, -interact.str.max, interact.str.max)
+      A[edgelist[i, 2], edgelist[i, 1]] <- runif(1, -interact.str.max, interact.str.max)
+    }
+  } else if (type.interact == "mutual") {          # mutualism: both signs positive
+    for (i in seq_len(nl)) {
+      A[edgelist[i, 1], edgelist[i, 2]] <- runif(1, max = interact.str.max)
+      A[edgelist[i, 2], edgelist[i, 1]] <- runif(1, max = interact.str.max)
+    }
+  } else if (type.interact == "compt") {           # competition: both signs negative
+    for (i in seq_len(nl)) {
+      A[edgelist[i, 1], edgelist[i, 2]] <- -runif(1, max = interact.str.max)
+      A[edgelist[i, 2], edgelist[i, 1]] <- -runif(1, max = interact.str.max)
+    }
+  } else if (type.interact == "pp") {              # predator-prey: opposing signs
+    for (i in seq_len(nl)) {
+      s <- if (runif(1) < 0.5) c(1, -1) else c(-1, 1)
+      A[edgelist[i, 1], edgelist[i, 2]] <-  s[1] * runif(1, max = interact.str.max)
+      A[edgelist[i, 2], edgelist[i, 1]] <-  s[2] * runif(1, max = interact.str.max)
+    }
+  } else if (type.interact == "mix") {             # mix of mutualism and competition
+    for (i in seq_len(nl)) {
+      sgn <- if (runif(1) < mix.compt.ratio) -1 else 1
+      A[edgelist[i, 1], edgelist[i, 2]] <- sgn * runif(1, max = interact.str.max)
+      A[edgelist[i, 2], edgelist[i, 1]] <- sgn * runif(1, max = interact.str.max)
+    }
+  }
+
+  diag(A) <- -1  # self-regulation (can be overridden via run_scenario)
+  list(g, A)
+}
+```
+
+------------------------------------------------------------------------
+
+## 4. Model specification
+
+``` r
+
+network_size <- 20
+k_average    <- 4
+
+# Random forest used by mrIML. mtry and min_n are tuned by cross-validation.
+model_rf <- rand_forest(
+  trees = 100,
+  mode  = "classification",
+  mtry  = tune(),
+  min_n = tune()
+) |>
+  set_engine("randomForest")
+```
+
+------------------------------------------------------------------------
+
+## 5. Population dynamics visualisation (optional)
+
+Before running the full benchmarking simulations, it can be helpful to
+visualise the GLV population dynamics that generate the community data.
+
+``` r
+
+# Generate one random network and simulate its dynamics using the GLV model.
+# The resulting time-series shows how species abundances fluctuate and interact
+# before we sample the final community and convert to presence-absence.
+simulated_network_demo <- generateM_specific_type(
+  nn               = network_size,
+  k_ave            = k_average,
+  type.network     = "random",
+  type.interact    = "random",
+  interact.str.max = 0.4,
+  mix.compt.ratio  = 0.5
+)
+
+M_demo  <- simulated_network_demo[[2]]
+y_demo  <- rpois(network_size, lambda = 100)   # random initial abundances
+r_demo  <- runif(network_size)                 # random intrinsic growth rates
+res_demo <- glv(network_size, M_demo, r_demo, y_demo)
+
+# Plot species abundances over the last 980 time steps
+tsplot(10 * res_demo[, 20:min(1000, ncol(res_demo))], time.given = TRUE)
+```
+
+------------------------------------------------------------------------
+
+## 6. Single-replicate scenarios
+
+Run each of the four ecological scenarios once, producing network
+visualisations and Mantel statistics.
+
+``` r
+
+random_res <- run_scenario(
+  scenario         = "Random",
+  interaction_type = "random",
+  interact_str_max = 0.4,
+  network_size     = network_size,
+  k_average        = k_average,
+  mix_compt_ratio  = 0.5,
+  model_rf         = model_rf
+)
+
+mutual_res <- run_scenario(
+  scenario         = "Mutualistic",
+  interaction_type = "mutual",
+  interact_str_max = 0.3,
+  network_size     = network_size,
+  k_average        = k_average,
+  mix_compt_ratio  = 0.5,
+  model_rf         = model_rf
+)
+
+competitive_res <- run_scenario(
+  scenario         = "Competitive",
+  interaction_type = "compt",
+  interact_str_max = 0.5,
+  network_size     = network_size,
+  k_average        = k_average,
+  mix_compt_ratio  = 0.5,
+  self_regulation  = -0.5,   # stronger self-regulation prevents divergence under pure competition
+  model_rf         = model_rf
+)
+
+mixed_res <- run_scenario(
+  scenario         = "Mixed",
+  interaction_type = "mix",
+  interact_str_max = 0.4,
+  network_size     = network_size,
+  k_average        = k_average,
+  mix_compt_ratio  = 0.5,
+  model_rf         = model_rf
+)
+```
+
+### Summary table (single replicate)
+
+``` r
+
+scenarios <- list(random_res, mutual_res, competitive_res, mixed_res)
+
+comparison_table <- tibble(
+  Scenario = c("Random", "Mutualistic", "Competitive", "Mixed"),
+  mrIML_r  = round(sapply(scenarios, \(s) s$mantel$mrIML$statistic),      3),
+  mrIML_p  =       sapply(scenarios, \(s) s$mantel$mrIML$signif),
+  Hmsc_r   = round(sapply(scenarios, \(s) s$mantel$Hmsc$statistic),       3),
+  Hmsc_p   =       sapply(scenarios, \(s) s$mantel$Hmsc$signif),
+  SPIEC_r  = round(sapply(scenarios, \(s) s$mantel$SPIEC_EASI$statistic), 3),
+  SPIEC_p  =       sapply(scenarios, \(s) s$mantel$SPIEC_EASI$signif),
+  SparCC_r = round(sapply(scenarios, \(s) s$mantel$SparCC$statistic),     3),
+  SparCC_p =       sapply(scenarios, \(s) s$mantel$SparCC$signif)
+)
+
+DT::datatable(
+  comparison_table,
+  colnames = c(
+    "Scenario",
+    "mrIML r", "mrIML p",
+    "Hmsc 95% CrI r", "Hmsc 95% CrI p",
+    "SPIEC-EASI r", "SPIEC-EASI p",
+    "SparCC r", "SparCC p"
+  ),
+  options = list(pageLength = 10, dom = "t")
+)
+```
+
+------------------------------------------------------------------------
+
+## 7. Replicated simulations
+
+A single replicate is sensitive to the random network draw. The
+`run_scenarios_replicated()` wrapper repeats each scenario `n_reps`
+times, accumulating Mantel statistics and summarising them as means with
+95% quantile confidence intervals.
+
+**Parallelism note:** mrIML saturates available cores within each
+replicate (one worker per species model), so the outer replicate loop is
+kept sequential to avoid resource contention.
+
+**Checkpointing:** Each completed replicate is saved to disk. If the
+session crashes, re-running the same call will skip already-completed
+replicates automatically.
+
+``` r
+
+# Load the replicated-scenario wrapper and default scenario configurations
+source("generateM_specific_type.R")
+source("run_scenarios_replicated.R")
+
+library(future)
+library(furrr)
+
+plan(multisession, workers = parallel::detectCores() - 2)
+```
+
+``` r
+
+# Run each scenario n_reps = 5 times.
+# Reduce hmsc_* settings for a quick smoke test; use defaults for final results.
+rep_results <- run_scenarios_replicated(
+  scenarios_config    = default_scenarios_config,
+  n_reps              = 5,
+  model_rf            = model_rf,
+  mantel_permutations = 99,
+  hmsc_thin           = 10,
+  hmsc_samples        = 500,
+  hmsc_transient      = 2000,
+  hmsc_nChains        = 2,
+  checkpoint_dir      = "sim_checkpoints"  # saved per-rep RDS files go here
+)
+```
+
+### Inspect results
+
+``` r
+
+# Long table: one row per scenario × rep × model
+rep_results$raw
+
+# Summary: mean Mantel r [95% quantile CI], mean p [95% CI], proportion significant
+rep_results$summary
+
+# Wide format: one row per scenario, all models as columns
+rep_results$wide
+
+# Interactive DT table with colour-coded significance bars
+pretty_ci_table(rep_results$summary)
+```
+
+### Publication-ready table (Word)
+
+``` r
+
+library(flextable)
+library(officer)
+
+pub_table <- rep_results$summary |>
+  select(scenario, model, n_reps_ok, r_95CI, p_95CI, prop_sig_p) |>
+  rename(
+    Scenario                = scenario,
+    Model                   = model,
+    `Reps (OK)`             = n_reps_ok,
+    `r (mean [95% CI])`     = r_95CI,
+    `p (mean [95% CI])`     = p_95CI,
+    `Prop. sig. (p < 0.05)` = prop_sig_p
+  )
+
+ft <- flextable(pub_table) |>
+  merge_v(j = "Scenario") |>               # merge repeated scenario labels
+  valign(j = "Scenario", valign = "top") |>
+  theme_booktabs() |>
+  bold(part = "header") |>
+  autofit() |>
+  set_caption(paste(
+    "Table 1. Summary of co-occurrence model performance across simulation scenarios.",
+    "r: Spearman Mantel correlation between predicted and true co-occurrence network;",
+    "p: associated p-value;",
+    "Prop. sig.: proportion of replicates with p < 0.05."
+  ))
+
+doc <- read_docx() |>
+  body_add_flextable(ft)
+
+print(doc, target = "results_summary_table.docx")
+```
+
+------------------------------------------------------------------------
+
+## 8. `run_scenarios_replicated()` internals
+
+This section documents the helper functions sourced from
+`run_scenarios_replicated.R`.
+
+### Extract Mantel statistics
+
+``` r
+
+# Return a small data frame of r and p for all four models in one replicate.
+.extract_mantel_df <- function(mantel_list, scenario, rep) {
+  models <- c("mrIML", "Hmsc", "SPIEC_EASI", "SparCC")
+  data.frame(
+    scenario = scenario,
+    rep      = rep,
+    model    = models,
+    r        = sapply(models, \(m) mantel_list[[m]]$statistic),
+    p        = sapply(models, \(m) mantel_list[[m]]$signif),
+    error    = NA_character_,
+    row.names = NULL, stringsAsFactors = FALSE
+  )
+}
+```
+
+### Run one replicate with error handling and checkpointing
+
+``` r
+
+# Execute a single scenario × rep, wrapping run_scenario() in tryCatch so
+# that one failed replicate does not abort the whole simulation.
+# Plots are redirected to a null device to avoid opening dozens of windows.
+# Heavy objects (Hmsc MCMC chains, mrIML bootstraps, raw count data) are
+# explicitly freed before returning to keep peak memory low.
+.run_one_rep <- function(sc_name, sc_args, rep, model_rf, mantel_permutations,
+                         checkpoint_dir, seed) {
+
+  checkpoint_file <- if (!is.null(checkpoint_dir)) {
+    file.path(checkpoint_dir, paste0(sc_name, "_rep", rep, ".rds"))
+  } else NULL
+
+  # Return cached result without re-running
+  if (!is.null(checkpoint_file) && file.exists(checkpoint_file)) {
+    message("  [cached] ", sc_name, " rep ", rep)
+    return(readRDS(checkpoint_file))
+  }
+
+  call_args <- c(
+    list(scenario            = paste0(sc_name, "_rep", rep),
+         model_rf            = model_rf,
+         mantel_permutations = mantel_permutations),
+    sc_args
+  )
+
+  result <- tryCatch({
+    grDevices::pdf(file = nullfile())     # suppress plot output
+    null_dev <- grDevices::dev.cur()
+    on.exit(grDevices::dev.off(null_dev), add = TRUE)
+
+    res <- do.call(run_scenario, call_args)
+    out <- .extract_mantel_df(res$mantel, sc_name, rep)
+
+    rm(res); gc(verbose = FALSE, full = TRUE)  # free large objects immediately
+    out
+  },
+  error = function(e) {
+    msg <- conditionMessage(e)
+    message("ERROR — Scenario '", sc_name, "' rep ", rep, ": ", msg)
+    models <- c("mrIML", "Hmsc", "SPIEC_EASI", "SparCC")
+    data.frame(scenario = sc_name, rep = rep, model = models,
+               r = NA_real_, p = NA_real_, error = msg,
+               row.names = NULL, stringsAsFactors = FALSE)
+  })
+
+  # Only cache successful results; skip caching failures so they can be retried
+  if (!is.null(checkpoint_file) && !any(is.na(result$r))) {
+    saveRDS(result, checkpoint_file)
+  }
+
+  result
+}
+```
+
+### Main wrapper
+
+``` r
+
+# Main entry point. Loops over all scenario × rep combinations sequentially,
+# then summarises Mantel r and p with quantile confidence intervals.
+run_scenarios_replicated <- function(scenarios_config,
+                                     n_reps,
+                                     model_rf,
+                                     ci_alpha            = 0.05,
+                                     sig_alpha           = 0.05,
+                                     seed                = NULL,
+                                     mantel_permutations = 499,
+                                     hmsc_thin           = 50,
+                                     hmsc_samples        = 1000,
+                                     hmsc_transient      = 5000,
+                                     hmsc_nChains        = 4,
+                                     checkpoint_dir      = "sim_checkpoints",
+                                     verbose             = TRUE) {
+
+  stopifnot(is.list(scenarios_config), length(scenarios_config) > 0)
+  stopifnot(n_reps >= 2)
+
+  if (!is.null(checkpoint_dir) && !dir.exists(checkpoint_dir)) {
+    dir.create(checkpoint_dir, recursive = TRUE)
+    if (verbose) message("Created checkpoint directory: ", checkpoint_dir)
+  }
+
+  n_jobs   <- length(scenarios_config) * n_reps
+  raw_list <- vector("list", n_jobs)
+  idx      <- 1L
+
+  for (sc_name in names(scenarios_config)) {
+    for (rep in seq_len(n_reps)) {
+      if (verbose) message("[", idx, "/", n_jobs, "] ", sc_name, " rep ", rep)
+      if (!is.null(seed)) set.seed(seed + idx - 1L)
+
+      raw_list[[idx]] <- .run_one_rep(
+        sc_name             = sc_name,
+        sc_args             = c(scenarios_config[[sc_name]],
+                                list(hmsc_thin      = hmsc_thin,
+                                     hmsc_samples   = hmsc_samples,
+                                     hmsc_transient = hmsc_transient,
+                                     hmsc_nChains   = hmsc_nChains)),
+        rep                 = rep,
+        model_rf            = model_rf,
+        mantel_permutations = mantel_permutations,
+        checkpoint_dir      = checkpoint_dir,
+        seed                = NULL
+      )
+      idx <- idx + 1L
+    }
+  }
+
+  raw <- do.call(rbind, raw_list)
+
+  # Summarise: quantile CI for r and p, proportion of replicates with p < sig_alpha
+  probs_lo <- ci_alpha / 2
+  probs_hi <- 1 - ci_alpha / 2
+
+  summary_tbl <- raw |>
+    dplyr::group_by(scenario, model) |>
+    dplyr::summarise(
+      n_reps_ok  = sum(!is.na(r)),
+      mean_r     = mean(r,  na.rm = TRUE),
+      ci_lo_r    = quantile(r, probs_lo, na.rm = TRUE),
+      ci_hi_r    = quantile(r, probs_hi, na.rm = TRUE),
+      mean_p     = mean(p,  na.rm = TRUE),
+      ci_lo_p    = quantile(p, probs_lo, na.rm = TRUE),
+      ci_hi_p    = quantile(p, probs_hi, na.rm = TRUE),
+      prop_sig_p = mean(p < sig_alpha, na.rm = TRUE),
+      .groups    = "drop"
+    ) |>
+    dplyr::mutate(
+      dplyr::across(c(mean_r, ci_lo_r, ci_hi_r, mean_p, ci_lo_p, ci_hi_p),
+                    \(x) round(x, 3)),
+      prop_sig_p = round(prop_sig_p, 2),
+      r_95CI = paste0(mean_r, " [", ci_lo_r, ", ", ci_hi_r, "]"),
+      p_95CI = paste0(mean_p, " [", ci_lo_p, ", ", ci_hi_p, "]")
+    )
+
+  wide_tbl <- summary_tbl |>
+    dplyr::select(scenario, model, r_95CI, p_95CI, prop_sig_p) |>
+    tidyr::pivot_wider(
+      names_from  = model,
+      values_from = c(r_95CI, p_95CI, prop_sig_p),
+      names_glue  = "{model}_{.value}"
+    )
+
+  if (verbose) message("Done.")
+  list(raw = raw, summary = summary_tbl, wide = wide_tbl)
+}
+```
+
+### Default scenario configurations
+
+``` r
+
+# Four scenarios matching the original supplementary page.
+# Each list element is passed as extra arguments to run_scenario().
+default_scenarios_config <- list(
+  Random = list(
+    interaction_type = "random",
+    interact_str_max = 0.4,
+    mix_compt_ratio  = 0.5
+  ),
+  Mutualistic = list(
+    interaction_type = "mutual",
+    interact_str_max = 0.3,
+    mix_compt_ratio  = 0.5
+  ),
+  Competitive = list(
+    interaction_type = "compt",
+    interact_str_max = 0.5,
+    mix_compt_ratio  = 0.5,
+    self_regulation  = -0.5
+  ),
+  Mixed = list(
+    interaction_type = "mix",
+    interact_str_max = 0.4,
+    mix_compt_ratio  = 0.5
+  )
+)
+```
+
+------------------------------------------------------------------------
+
+## Notes on MCMC settings
+
+For final published results, use the longer Hmsc MCMC settings:
+
+``` r
+
+random_res_long <- run_scenario(
+  scenario         = "Random - longer Hmsc",
+  interaction_type = "random",
+  interact_str_max = 0.4,
+  network_size     = network_size,
+  k_average        = k_average,
+  mix_compt_ratio  = 0.5,
+  model_rf         = model_rf,
+  hmsc_thin        = 100,
+  hmsc_samples     = 2000,
+  hmsc_transient   = 10000,
+  hmsc_nChains     = 4
+)
+```
+
+Check convergence diagnostics (Gelman-Rubin R-hat) before interpreting
+Hmsc results — values consistently below 1.1 across all Omega parameters
+suggest adequate mixing.

@@ -20,18 +20,19 @@ nucleotide polymorphism (SNP) data from a virus (feline immunodeficiency
 virus, FIV) infecting bobcats in Southern California.
 
 ``` r
+
 library(mrIML)
 #> No methods found in package 'workflows' for request: 'predict.workflow' when loading 'mrIML'
 library(tidymodels)
-#> ── Attaching packages ────────────────────────────────────── tidymodels 1.4.1 ──
-#> ✔ broom        1.0.10     ✔ recipes      1.3.1 
-#> ✔ dials        1.4.2      ✔ rsample      1.3.1 
-#> ✔ dplyr        1.1.4      ✔ tailor       0.1.0 
-#> ✔ ggplot2      4.0.0      ✔ tidyr        1.3.1 
-#> ✔ infer        1.0.9      ✔ tune         2.0.1 
+#> ── Attaching packages ────────────────────────────────────── tidymodels 1.5.0 ──
+#> ✔ broom        1.0.13     ✔ recipes      1.3.3 
+#> ✔ dials        1.4.4      ✔ rsample      1.3.2 
+#> ✔ dplyr        1.2.1      ✔ tailor       0.1.0 
+#> ✔ ggplot2      4.0.3      ✔ tidyr        1.3.2 
+#> ✔ infer        1.1.0      ✔ tune         2.1.0 
 #> ✔ modeldata    1.5.1      ✔ workflows    1.3.0 
-#> ✔ parsnip      1.3.3      ✔ workflowsets 1.1.1 
-#> ✔ purrr        1.2.0      ✔ yardstick    1.3.2
+#> ✔ parsnip      1.6.0      ✔ workflowsets 1.1.1 
+#> ✔ purrr        1.2.2      ✔ yardstick    1.4.0
 #> ── Conflicts ───────────────────────────────────────── tidymodels_conflicts() ──
 #> ✖ purrr::discard() masks scales::discard()
 #> ✖ dplyr::filter()  masks stats::filter()
@@ -43,6 +44,7 @@ set.seed(7007)
 ```
 
 ``` r
+
 load("Features.RData")
 load("Responsedata.RData")
 
@@ -77,6 +79,7 @@ remaining. In practice, these filtering steps are stringent, so \<20%
 and \>80% may be more appropriate.
 
 ``` r
+
 # Define the responses
 Y <- filterRareCommon(
   Responsedata,
@@ -98,6 +101,7 @@ needed. There were no resistance surfaces here, but if there were, we
 could load them as follows:
 
 ``` r
+
 R <- resist_components(
   filename = "FILE_PATH", p_val = 0.01
 )
@@ -117,6 +121,7 @@ glms (generalized linear models). Here we will specify an RF
 classification model to fit each response.
 
 ``` r
+
 model_rf <- rand_forest(
   trees = 100,
   mode = "classification",
@@ -136,10 +141,12 @@ implement parallel processing for larger data sets to speed up the
 `mrIML` workflow.
 
 ``` r
+
 future::plan("multisession", workers = 4)
 ```
 
 ``` r
+
 yhats_rf <- mrIMLpredicts(
   X = X,
   Y = Y,
@@ -164,6 +171,7 @@ mutation at that loci). We also provide “prevalence”, which tells you
 how common that SNP was in the population sampled.
 
 ``` r
+
 ModelPerf_rf <- mrIMLperformance(yhats_rf)
 ModelPerf_rf$model_performance
 #> # A tibble: 29 × 8
@@ -192,6 +200,7 @@ categorical variables. These steps can easily be added to the pipeline
 following tidymodel syntax.
 
 ``` r
+
 # Define LM
 model_glm <- logistic_reg() %>%
   set_engine("glm")
@@ -219,6 +228,7 @@ with the underlying model we can then dive in to see how this model
 predicts the SNPs. First we can check variable importance.
 
 ``` r
+
 glm_impVI <- mrVip(
   yhats_glm,
   threshold = 0.5,
@@ -241,6 +251,7 @@ functionality to assess outlier SNPs utilizing a PCA on importance
 scores.
 
 ``` r
+
 glm_impVI_PCA <- glm_impVI %>%
   mrVipPCA()
 glm_impVI_PCA[[1]]
@@ -259,6 +270,7 @@ interpret variable importance plots. The order of the groups should
 match the order of the columns in the X data, for example:
 
 ``` r
+
 groupCov <- c(
   rep("Host_characteristics", 1),
   rep("Urbanisation", 3),
@@ -283,6 +295,7 @@ For example, once we create the flashlight objects, we can plot the
 predicted values of a feature for each response.
 
 ``` r
+
 fl <- mrFlashlight(
   yhats_rf,
   response = "single",
@@ -312,6 +325,7 @@ collinearity (e.g., rho = 0.6). The second plot is the overall smoothed
 genetic-turnover function.
 
 ``` r
+
 # Partial dependencies
 profilePlot_pd <- mrCovar(
   yhats_rf,
@@ -325,6 +339,7 @@ profilePlot_pd[[1]] +
 ![](Multi-response%20(classification)_files/figure-html/marginal-effects-1.png)
 
 ``` r
+
 
 # Acumulated local effects
 profilePlot_ale <- mrCovar(
@@ -347,6 +362,7 @@ enable users to visualize these interactions and explore them in more
 detail using 2D ALE plots for example.
 
 ``` r
+
 interactions <- mrInteractions(
   yhats_rf,
   feature = "pol_105",
@@ -373,6 +389,7 @@ and partial dependencies can be used - but we highly recommend using
 ALEs for the most robust results (see Molnar (2019) for more detail)
 
 ``` r
+
 fl <- mrFlashlight(
   yhats_rf,
   response = "single",

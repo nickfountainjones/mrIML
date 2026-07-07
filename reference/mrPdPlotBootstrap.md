@@ -73,48 +73,58 @@ mrIML_rf_PD <- mrPdPlotBootstrap(
 
 head(mrIML_rf_PD[[1]])
 #> $scale.prop.zos
-#>       X counts_ label_              type_     value label bootstrap    response
-#> 1 -1.75     449  class partial dependence 0.1625835 class         1 Hzosteropis
-#> 2 -1.25     449  class partial dependence 0.1625835 class         1 Hzosteropis
-#> 3 -0.75     449  class partial dependence 0.5623608 class         1 Hzosteropis
-#> 4 -0.25     449  class partial dependence 0.5298441 class         1 Hzosteropis
-#> 5  0.25     449  class partial dependence 0.5458797 class         1 Hzosteropis
-#> 6  0.75     449  class partial dependence 0.0247216 class         1 Hzosteropis
-#> 7  1.25     449  class partial dependence 0.0247216 class         1 Hzosteropis
-#> 8  1.75     449  class partial dependence 0.4048998 class         1 Hzosteropis
-#> 9  2.25     449  class partial dependence 0.4048998 class         1 Hzosteropis
+#>       X counts_ label_              type_      value label bootstrap
+#> 1 -1.75     449  class partial dependence 0.19866370 class         1
+#> 2 -1.25     449  class partial dependence 0.50111359 class         1
+#> 3 -0.75     449  class partial dependence 0.50111359 class         1
+#> 4 -0.25     449  class partial dependence 0.56592428 class         1
+#> 5  0.25     449  class partial dependence 0.64409800 class         1
+#> 6  0.75     449  class partial dependence 0.04253898 class         1
+#> 7  1.25     449  class partial dependence 0.04253898 class         1
+#> 8  1.75     449  class partial dependence 0.21670379 class         1
+#> 9  2.25     449  class partial dependence 0.21670379 class         1
+#>      response
+#> 1 Hzosteropis
+#> 2 Hzosteropis
+#> 3 Hzosteropis
+#> 4 Hzosteropis
+#> 5 Hzosteropis
+#> 6 Hzosteropis
+#> 7 Hzosteropis
+#> 8 Hzosteropis
+#> 9 Hzosteropis
 #> 
 #> $Hkillangoi
 #>   X counts_ label_              type_      value label bootstrap    response
-#> 1 0     449  class partial dependence 0.22761693 class         1 Hzosteropis
-#> 2 1     449  class partial dependence 0.04944321 class         1 Hzosteropis
+#> 1 0     449  class partial dependence 0.31380846 class         1 Hzosteropis
+#> 2 1     449  class partial dependence 0.08062361 class         1 Hzosteropis
 #> 
 #> $Plas
 #>   X counts_ label_              type_     value label bootstrap    response
-#> 1 0     449  class partial dependence 0.2394209 class         1 Hzosteropis
-#> 2 1     449  class partial dependence 0.1209354 class         1 Hzosteropis
+#> 1 0     449  class partial dependence 0.3242762 class         1 Hzosteropis
+#> 2 1     449  class partial dependence 0.2187082 class         1 Hzosteropis
 #> 
 #> $Microfilaria
 #>   X counts_ label_              type_     value label bootstrap    response
-#> 1 0     449  class partial dependence 0.1302895 class         1 Hzosteropis
-#> 2 1     449  class partial dependence 0.6171492 class         1 Hzosteropis
+#> 1 0     449  class partial dependence 0.2334076 class         1 Hzosteropis
+#> 2 1     449  class partial dependence 0.4271715 class         1 Hzosteropis
 #> 
 #> $scale.prop.zos
 #>       X counts_ label_              type_     value label bootstrap    response
-#> 1 -1.75     449  class partial dependence 0.2387528 class         2 Hzosteropis
-#> 2 -1.25     449  class partial dependence 0.3182628 class         2 Hzosteropis
-#> 3 -0.75     449  class partial dependence 0.4436526 class         2 Hzosteropis
-#> 4 -0.25     449  class partial dependence 0.6420935 class         2 Hzosteropis
-#> 5  0.25     449  class partial dependence 0.7093541 class         2 Hzosteropis
-#> 6  0.75     449  class partial dependence 0.0935412 class         2 Hzosteropis
-#> 7  1.25     449  class partial dependence 0.0935412 class         2 Hzosteropis
-#> 8  1.75     449  class partial dependence 0.1757238 class         2 Hzosteropis
-#> 9  2.25     449  class partial dependence 0.1757238 class         2 Hzosteropis
+#> 1 -1.75     449  class partial dependence 0.2385301 class         2 Hzosteropis
+#> 2 -1.25     449  class partial dependence 0.5879733 class         2 Hzosteropis
+#> 3 -0.75     449  class partial dependence 0.3683742 class         2 Hzosteropis
+#> 4 -0.25     449  class partial dependence 0.5396437 class         2 Hzosteropis
+#> 5  0.25     449  class partial dependence 0.5097996 class         2 Hzosteropis
+#> 6  0.75     449  class partial dependence 0.0000000 class         2 Hzosteropis
+#> 7  1.25     449  class partial dependence 0.0000000 class         2 Hzosteropis
+#> 8  1.75     449  class partial dependence 0.3191537 class         2 Hzosteropis
+#> 9  2.25     449  class partial dependence 0.3191537 class         2 Hzosteropis
 #> 
 #> $Hkillangoi
 #>   X counts_ label_              type_      value label bootstrap    response
-#> 1 0     449  class partial dependence 0.28151448 class         2 Hzosteropis
-#> 2 1     449  class partial dependence 0.04521158 class         2 Hzosteropis
+#> 1 0     449  class partial dependence 0.29755011 class         2 Hzosteropis
+#> 2 1     449  class partial dependence 0.05612472 class         2 Hzosteropis
 #> 
 mrIML_rf_PD[[2]]
 ```

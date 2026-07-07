@@ -8,6 +8,7 @@ very useful for applications in community ecology and ecological
 genomics.
 
 ``` r
+
 library(mrIML)
 library(tidymodels)
 library(flashlight)
@@ -24,6 +25,7 @@ Plas, and Microfilaria*–in New Caledonian birds and a scaled continuous
 variable representing host relative abundance: *scale.prop.zos*.
 
 ``` r
+
 data <- MRFcov::Bird.parasites
 head(data)
 #> # A tibble: 6 × 5
@@ -42,6 +44,7 @@ responses, the variables we wish to predict, and the covariates, the
 variables used only as predictors.
 
 ``` r
+
 # Responses
 Y <- select(data, "Hzosteropis", "Hkillangoi", "Plas", "Microfilaria")
 # Covariates
@@ -53,6 +56,7 @@ greatly sped up by using parallel processing. To do this, we just need
 to set up a cluster using the `future` package.
 
 ``` r
+
 future::plan(multisession, workers = 2)
 ```
 
@@ -65,6 +69,7 @@ set up two models to compare: a random forest model (RF) and a logistic
 regression (lm).
 
 ``` r
+
 model_rf <- rand_forest(
   trees = 100, # 100 trees are set for brevity. Aim to start with 1000.
   mode = "classification",
@@ -87,6 +92,7 @@ to also use as predictors; which results in a co-ocurance model (in this
 case we use all the response variables).
 
 ``` r
+
 mrIML_rf <- mrIMLpredicts(
   X = X,
   Y = Y,
@@ -130,6 +136,7 @@ for each of the fitted response models inside the multi-response `mrIML`
 model.
 
 ``` r
+
 perf_rf <- mrIML_rf %>%
   mrIMLperformance()
 perf_rf$model_performance
@@ -158,6 +165,7 @@ model using
 [`mrPerformancePlot()`](https://github.com/nickfountainjones/mrIML/reference/mrPerformancePlot.md).
 
 ``` r
+
 perf_comp <- mrPerformancePlot(perf_rf, perf_lm)
 perf_comp$performance_plot + perf_comp$performance_diff_plot
 ```
@@ -178,6 +186,7 @@ function can be used to convert a `mrIML` model into a `flashlight`
 object in order to apply most of the `flashlight` functions.
 
 ``` r
+
 fl_rf <- mrIML_rf %>%
   mrFlashlight()
 
@@ -199,6 +208,7 @@ to quickly compare the effect of a predictive covariate across the many
 response models.
 
 ``` r
+
 PD_scale.prop.zos_rf <- mrIML_rf %>%
   mrCovar(var = "scale.prop.zos", sdthresh = 0)
 
@@ -216,6 +226,7 @@ with the LM bellow. We could even compare a Neural Net if we had enough
 data to fit it!
 
 ``` r
+
 PD_scale.prop.zos_lm <- mrIML_lm %>%
   mrCovar(var = "scale.prop.zos", sdthresh = 0)
 
@@ -234,6 +245,7 @@ compares variable importance across the response models inside a `mrIML`
 model.
 
 ``` r
+
 vip_rf <- mrIML_rf %>%
   mrVip()
 
@@ -258,6 +270,7 @@ bootstraps the PDs. The output can then be passed to
 to visualize the PDs.
 
 ``` r
+
 mrIML_boot_rf <- mrIML_rf %>%
   mrBootstrap()
 #>   |                                                                              |                                                                      |   0%  |                                                                              |==                                                                    |   2%  |                                                                              |====                                                                  |   5%  |                                                                              |=====                                                                 |   8%  |                                                                              |=======                                                               |  10%  |                                                                              |=========                                                             |  12%  |                                                                              |==========                                                            |  15%  |                                                                              |============                                                          |  18%  |                                                                              |==============                                                        |  20%  |                                                                              |================                                                      |  22%  |                                                                              |==================                                                    |  25%  |                                                                              |===================                                                   |  28%  |                                                                              |=====================                                                 |  30%  |                                                                              |=======================                                               |  32%  |                                                                              |========================                                              |  35%  |                                                                              |==========================                                            |  38%  |                                                                              |============================                                          |  40%  |                                                                              |==============================                                        |  42%  |                                                                              |================================                                      |  45%  |                                                                              |=================================                                     |  48%  |                                                                              |===================================                                   |  50%  |                                                                              |=====================================                                 |  52%  |                                                                              |======================================                                |  55%  |                                                                              |========================================                              |  58%  |                                                                              |==========================================                            |  60%  |                                                                              |============================================                          |  62%  |                                                                              |==============================================                        |  65%  |                                                                              |===============================================                       |  68%  |                                                                              |=================================================                     |  70%  |                                                                              |===================================================                   |  72%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================                |  78%  |                                                                              |========================================================              |  80%  |                                                                              |==========================================================            |  82%  |                                                                              |============================================================          |  85%  |                                                                              |=============================================================         |  88%  |                                                                              |===============================================================       |  90%  |                                                                              |=================================================================     |  92%  |                                                                              |==================================================================    |  95%  |                                                                              |====================================================================  |  98%  |                                                                              |======================================================================| 100%
@@ -278,6 +291,7 @@ to
 to include uncertainty bounds in the plots.
 
 ``` r
+
 vip_boot_rf <- mrVip(
   mrIMLobj = mrIML_rf,
   mrBootstrap_obj = mrIML_boot_rf
@@ -296,6 +310,7 @@ interactions between predictors, which predictors have the most
 interactive effects, and which interactions are the strongest.
 
 ``` r
+
 interactions_rf <- mrIML_rf %>%
   mrInteractions(feature = "Plas", num_bootstrap = 10)
 

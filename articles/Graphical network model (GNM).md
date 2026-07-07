@@ -23,6 +23,7 @@ reflects the relative abundance of *Zosterops* species among different
 sample sites.
 
 ``` r
+
 library(mrIML)
 library(tidymodels)
 library(flashlight)
@@ -36,6 +37,7 @@ set.seed(7007)
 ```
 
 ``` r
+
 data <- MRFcov::Bird.parasites
 Y <-  data %>%
   dplyr::select(-scale.prop.zos) %>%
@@ -65,10 +67,12 @@ processing, so we set it up here to run on 5 cores. These steps are the
 same as in `mrIML (< 2.0.0)`.
 
 ``` r
+
 future::plan("multisession", workers = 5)
 ```
 
 ``` r
+
 model_rf <-rand_forest(
   trees = 100,
   mode = "classification",
@@ -97,6 +101,7 @@ For logistic regression, there are no parameters to tune, so set
 `racing = FALSE`.
 
 ``` r
+
 #random forest
 yhats_rf <- mrIMLpredicts(
   X = X,
@@ -130,6 +135,7 @@ random forest approach. Interpretation would be easier overall if
 logistic regression gave similar predictive performance.
 
 ``` r
+
 ModelPerf_rf <- mrIMLperformance(yhats_rf)
 
 ModelPerf_rf[[1]] #across all parasites
@@ -169,6 +175,7 @@ plots[[2]]
 ![](Graphical%20network%20model%20(GNM)_files/figure-html/perf-1.png)
 
 ``` r
+
 plots[[3]]
 #> # A tibble: 4 × 6
 #>   response  metric_metric_model1…¹ metric_metric_model2…² outlier_outlier_mode…³
@@ -199,6 +206,7 @@ parasites and host relative abundance alone is sufficient (i.e.,
 assuming independence between the parasites).
 
 ``` r
+
 yhats_rf_noAssoc <- mrIMLpredicts(
   X = X,
   Y = Y,
@@ -247,6 +255,7 @@ case, we’ll try downsampling to see if correcting class imbalance
 improves model fit.
 
 ``` r
+
 yhats_rf_downSamp <- mrIMLpredicts(
   X = X,
   Y = Y,
@@ -293,6 +302,7 @@ construct marginalized co-occurrence networks. First, let’s perform
 bootstrapping and calculate variable importance.
 
 ``` r
+
 bs_malaria <- mrBootstrap(
   yhats_rf,
   num_bootstrap = 100,
@@ -325,6 +335,7 @@ structure, `mrIML` has a convenient wrapper to plot bootstrapped partial
 dependencies for a taxon of interest.
 
 ``` r
+
 pds <- mrPdPlotBootstrap(
   yhats_rf,
   mrBootstrap_obj=bs_malaria,
@@ -350,6 +361,7 @@ To explore the effect of host abundance overall, we can use the
 function.
 
 ``` r
+
 covar <- mrCovar(
   yhats_rf,
   var = "scale.prop.zos",
@@ -381,6 +393,7 @@ prediction (along the PD curves). Red edges are positive associations
 taxon), and blue edges are negative.
 
 ``` r
+
 assoc_net<- mrCoOccurNet(bs_malaria)
 
 # Based on simulations (not shown here), we use 
@@ -454,6 +467,7 @@ To quantify interaction importance, we use H-statistics from the
 [`hstats`](https://github.com/mayer79/hstats) package.
 
 ``` r
+
 int_ <- mrInteractions(
   yhats_rf,
   num_bootstrap = 100,
@@ -488,6 +502,7 @@ plot how the two-way interaction between host abundance and
 *H.zosteropis* impacts the probability of detecting *Plasmodium*.
 
 ``` r
+
 fl <- mrFlashlight(
   yhats_rf_downSamp,
   response = "single",

@@ -18,3 +18,5 @@
   curation](https://github.com/nickfountainjones/mrIML/articles/Microbiome%20data%20curation.md):
 - [Swine
   biosecurity](https://github.com/nickfountainjones/mrIML/articles/Swine%20biosecurity.md):
+- [Benchmarking and
+  simulation](https://github.com/nickfountainjones/mrIML/articles/Benchmarking%20and%20simulation.md):

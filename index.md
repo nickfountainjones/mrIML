@@ -18,6 +18,7 @@ by SNP loci).
 You can install the development version of `mrIML` using devtools:
 
 ``` r
+
 install.packages("mrIML")
 
 # Install development version
@@ -29,6 +30,7 @@ devtools::install_github('nickfountainjones/mrIML')
 To get started, load mrIML and tidymodels:
 
 ``` r
+
 library(mrIML)
 library(tidymodels)
 #> ── Attaching packages ────────────────────────────────────── tidymodels 1.3.0 ──
@@ -50,6 +52,7 @@ library(tidymodels)
 Many functions in mrIML benefit from parallel processing.
 
 ``` r
+
 future::plan("multisession", workers = 2)
 ```
 
@@ -59,6 +62,7 @@ which is a wrapper around the tidymodels workflow that fits a provided
 model to each response variable in a multi-response data set.
 
 ``` r
+
 # Load example multi-response data
 data <- MRFcov::Bird.parasites
 # Split into response and predictor data

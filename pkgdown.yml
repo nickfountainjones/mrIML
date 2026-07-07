@@ -1,7 +1,8 @@
-pandoc: 3.1.11
+pandoc: 3.8.3
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
+  articles/Benchmarking and simulation: Benchmarking and simulation.html
   articles/Common errors in mrIML: Common errors in mrIML.html
   articles/Graphical network model (GNM): Graphical network model (GNM).html
   articles/Microbiome data curation: Microbiome data curation.html
@@ -9,7 +10,7 @@ articles:
   articles/Multi-response (classification): Multi-response (classification).html
   articles/Multi-response (regression): Multi-response (regression).html
   articles/Swine biosecurity: Swine biosecurity.html
-last_built: 2025-11-14T02:09Z
+last_built: 2026-07-07T05:49Z
 urls:
   reference: https://github.com/nickfountainjones/mrIML/reference
   article: https://github.com/nickfountainjones/mrIML/articles

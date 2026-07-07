@@ -2,6 +2,8 @@
 
 ## mrIML 2.2.0
 
+CRAN release: 2025-11-20
+
 Initial bug fixes after major release of mrIML 2 to CRAN.
 
 - [`mrIMLpredicts()`](https://github.com/nickfountainjones/mrIML/reference/mrIMLpredicts.md)

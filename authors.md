@@ -22,14 +22,14 @@ Source:
 [`DESCRIPTION`](https://github.com/nickfountainjones/mrIML/blob/master/DESCRIPTION)
 
 Fountain-Jones N, Leadbetter R, Machado G, Kozakiewicz C, Clark N
-(2025). *mrIML: Multi-Response (Multivariate) Interpretable Machine
+(2026). *mrIML: Multi-Response (Multivariate) Interpretable Machine
 Learning*. R package version 2.2.0,
 <https://github.com/nickfountainjones/mrIML>.
 
     @Manual{,
       title = {mrIML: Multi-Response (Multivariate) Interpretable Machine Learning},
       author = {Nick Fountain-Jones and Ryan Leadbetter and Gustavo Machado and Chris Kozakiewicz and Nick Clark},
-      year = {2025},
+      year = {2026},
       note = {R package version 2.2.0},
       url = {https://github.com/nickfountainjones/mrIML},
     }
