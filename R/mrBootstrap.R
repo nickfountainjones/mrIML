@@ -173,7 +173,7 @@ mrIML_internal_bootstrap_fun <- function(
           bootstrap = boot_id,
           response = response_name
         ) %>%
-        dplyr::select(-c("value_"))
+        dplyr::select(-dplyr::any_of("value_"))
     }
   )
 
