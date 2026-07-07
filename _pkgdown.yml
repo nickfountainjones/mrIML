@@ -29,6 +29,7 @@ articles:
   - articles/Common errors in mrIML
   - articles/Microbiome data curation
   - articles/Swine biosecurity
+  - articles/Benchmarking and simulation
 
 development:
   mode: auto
