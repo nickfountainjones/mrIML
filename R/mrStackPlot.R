@@ -61,13 +61,37 @@ mrIMLStackPlot <- function(Ob, options = list()){
         } #j
 
       } #k
-      
+    }
+      if (!is.null(Ob$GMAM$LP_S[[1]]$ModelStack)) {
+        plotList <- list()
+        miscList <- list()
+        miny <- 0
+        maxy <- 1
+        for(i in Ob$Methodology$Data$YHeading){
+          for(k in models){
+            for(j in Ob$Methodology$Data$XHeadings){
+              plotName <- paste(i, "-", k) 
+              plotPoint <- paste0(i, "-", k) 
+              alePlot <- ggplot2::ggplot(Ob$GMAM$ALE[[i]][[k]][[j]]$data,
+                                         ggplot2::aes(x = .data[[j]], y = .data$value))+
+                ggplot2::geom_line()+
+                geom_point() +
+                ggtitle(plotName) 
+              plotOb$ALEPlots[[i]][[k]][[j]]<- ggpubr::as_ggplot(
+                ggplot2::ggplotGrob(alePlot))
+              exportOb$ALEPlots[[i]][[k]][[j]]<- ggplot2::ggplotGrob(alePlot)
+              
+            } #i
+            
+          } #j
+          
+        } #k
 
     }
       # plotOb$PDPPlots <- patchwork::wrap_plots(plotList
                                        # , axes = 'collect')& ylim(miny - 0.1, maxy + 0.1)
       # print(plotOb$PDPPlots)      
-          
+        
     
     
   } # End PDP Plots
@@ -260,7 +284,7 @@ mrIMLStackPlot <- function(Ob, options = list()){
       exportOb$Importance$Local <- local_exports
       exportOb$Importance$Global <- ggplot2::ggplotGrob(global_plot)      
       # plotOb$Importance$Overall <- ggpubr::as_ggplot(
-      #   ggplot2::ggplotGrob(gl_VI_Plots))P
+      #   ggplot2::ggplotGrob(gl_VI_Plots))
       
     }  
   
@@ -330,19 +354,29 @@ mrIMLStackPlot <- function(Ob, options = list()){
   
   
   plotOb$SummaryStatistics <- Ob$SummaryStatistics
+  plotOb$Confusion <- Ob$Confusion
   exportOb$SummaryStatistics <- Ob$SummaryStatistics
+  exportOb$Confusion <- Ob$Confusion
   ## This is a section for recording equations. Should probably move somewhere else?
   plotOb$Equations <- list()
   exportOb$Equations <- list()
-
-  for(i in Ob$Methodology$Data$YHeading){
-    plotOb$Equations[[i]] <- Ob$Models[[i]]$ModelStack$equations$class$.pred_class
-    exportOb$Equations[[i]] <- Ob$Models[[i]]$ModelStack$equations$class$.pred_class
+  
+  if(S$Methodology$Stacking$stackMode == "classification"){
+    for(i in Ob$Methodology$Data$YHeading){
+      plotOb$Equations[[i]] <- Ob$Models[[i]]$ModelStack$equations$class$.pred_class
+      exportOb$Equations[[i]] <- Ob$Models[[i]]$ModelStack$equations$class$.pred_class
+    }
+  } else {
+    for(i in Ob$Methodology$Data$YHeading){
+      plotOb$Equations[[i]] <- Ob$Models[[i]]$ModelStack$equations$numeric$.pred
+      exportOb$Equations[[i]] <- Ob$Models[[i]]$ModelStack$equations$numeric$.pred
+    }    
+    
   }
  
   if(options$Export){
     return(exportOb)
   } else {
-    return(plotOb) # do we want to return anything?
+    return(plotOb)
   }
 }

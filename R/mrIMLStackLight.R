@@ -45,6 +45,7 @@ mrIML_StackLight <- function(Ob, response = "single"){
         # for (j in Ob$Methodology$Data$XHeadings){
           for (X1 in c(Ob$Methodology$Data$XHeadings,Ob$Methodology$Data$YHeadings[!Ob$Methodology$Data$YHeadings %in% i])){
             Ob$GMAM$LP_S[[i]][[k]][[X1]] <- light_profile(Ob$GMAM$FL_S[[i]][[k]], data = Ob$Data, v = X1)
+            Ob$GMAM$ALE[[i]][[k]][[X1]] <- light_profile(Ob$GMAM$FL_S[[i]][[k]], data = Ob$Data, v = X1, type = "ale")
           } #X1
           # Ob$GMAM$LP_S[[i]][[k]][[j]] <- light_profile(Ob$GMAM$FL_S[[i]][[k]], data = Ob$Data, v = j)
         # } #j 
@@ -71,7 +72,8 @@ mrIML_StackLight <- function(Ob, response = "single"){
                                                             , data = Ob$Data
                                                             ,predict_function = setup$pred_fun
                                                             , metrics = setup$metrics) #metrics next?
-      Ob$GMAM$LP_M[[j]][[k]] <- flashlight::light_profile(Ob$GMAM$FL_M[[j]][[k]], data = Ob$Data, v = j, type = "ale")
+      Ob$GMAM$LP_M[[j]][[k]] <- flashlight::light_profile(Ob$GMAM$FL_M[[j]][[k]], data = Ob$Data, v = j)
+      # Ob$GMAM$ALE[[j]][[k]] <- flashlight::light_profile(Ob$GMAM$FL_M[[j]][[k]], data = Ob$Data, v = j, type = "ale")
       
       
       #This section is for covariance. Maybe add an option to avoid this?

@@ -118,13 +118,18 @@ mrUpdateSettingsOne <- function(Ob, ...){
     if(i == "bootstrapNumber"){
       Ob$Methodology$Processing$bootstrapNumber  <- bootstrapNumber
     }
-
+    if(i == "timeseries"){
+      Ob$Methodology$Processing$timeseries <- timeseries
+      
+    }
+    
     if(i == "partialDependency"){
       Ob$Methodology$Visualisation$partialDependency <- partialDependency
     } 
     if(i == "partialDNumber"){
       Ob$Methodology$Visualisation$partialDNumber <- partialDNumber
     }
+
   }
   return(Ob)
 }
@@ -170,9 +175,14 @@ mrUpdateSettings <- function(Ob
 
 mrBuildModels <- function(Ob){
   
-
-  dStack_split<- rsample::initial_split(Ob$Data
+  if(("timeseries" %in% attributes(Ob$Methodology$Processing)$name)
+     & Ob$Methodology$Processing$timeseries){
+    dStack_split <- rsample::initial_time_split(Ob$Data
+                                        , prop = Ob$Methodology$Stacking$stackProp)
+  } else {
+    dStack_split<- rsample::initial_split(Ob$Data
                                         , prop = Ob$Methodology$Stacking$stackProp)  
+  }
   Ob$Fits$Data$Config <- list()
   Ob$Fits$Data$Config$Split <- dStack_split
   dStack_train <- rsample::training(dStack_split)
@@ -272,12 +282,22 @@ mrBuildModels <- function(Ob){
       Ob$Methodology$Stacking$positive_only <- TRUE 
     }     
     
-          
+    
+    if(S$Methodology$Stacking$stackMode == "classification"){
+      Ob$Models[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]] ,
+                                                             penalty = Ob$Methodology$Stacking$penalty,
+                                                             non_negative = Ob$Methodology$Stacking$positive_only,
+                                                             metric = metric_set(roc_auc)
+      )   
+      
+      
+    } else {
   Ob$Models[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]] ,
                                                          penalty = Ob$Methodology$Stacking$penalty,
-                                                         non_negative = Ob$Methodology$Stacking$positive_only,
-                                                         metric = metric_set(roc_auc))
-
+                                                         non_negative = Ob$Methodology$Stacking$positive_only
+                                                         # , metric = metric_set(rmse)
+                                                         )
+    }
   
       
     
@@ -290,14 +310,28 @@ mrBuildModels <- function(Ob){
   #     stacks::fit_members()
   Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- stacks::fit_members(Ob$Models[[i]]$ModelStack)
 
-  if(length(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]]$member_fits)<1){
-    Ob$Models[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]] 
-                                                           , penalty = 0.0001
-                                                           , non_negative = FALSE
-                                                           , metric = metric_set(roc_auc))
-    Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- stacks::fit_members(Ob$Models[[i]]$ModelStack)
-  }
   
+  if(S$Methodology$Stacking$stackMode == "classification"){
+    if(length(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]]$member_fits)<1){
+      Ob$Models[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]] 
+                                                             , penalty = 0.0001
+                                                             , non_negative = FALSE
+                                                             , metric = metric_set(roc_auc)
+      )
+      Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- stacks::fit_members(Ob$Models[[i]]$ModelStack)
+    }
+    
+    
+  } else {
+    if(length(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]]$member_fits)<1){
+      Ob$Models[[i]]$ModelStack <- stacks::blend_predictions(modelStack[[i]] 
+                                                             , penalty = 0.0001
+                                                             , non_negative = FALSE
+                                                             # , metric = metric_set(roc_auc)
+                                                             )
+      Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]] <- stacks::fit_members(Ob$Models[[i]]$ModelStack)
+    }
+  }
   Ob$System[[i]]$ModelStack$recipe <- modelStack[[i]]
   #   stacks::fit_members()
     
@@ -442,27 +476,47 @@ mrPredictStack_internal <- function(Ob){
   
   for (i in response){
     #Ob$System[[i]]$ModelStack <- list()
-    if(length(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]]$member_fits)>0){
-      Ob$System[[i]]$ModelStack$last_model_fit <- list()
-      syhatProb <- stats::predict(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]], new_data = data_test, type = "prob")
-      syhatClass <- stats::predict(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]], new_data = data_test, type = "class")
-      Ob$System[[i]]$ModelStack$last_model_fit$.predictions[[1]] <- data.frame(Outcome = Ob$Data[[i]][tempRow]
-                                                                          , .pred_class = syhatClass$.pred_class
-                                                                          , .pred_0 = syhatProb$.pred_0
-                                                                          , .pred_1 = syhatProb$.pred_1
-                                                                          , .row = tempRow)
-      Ob$Fits[[i]]$ModelStack$last_model_fit$.predictions[[1]] <- data.frame(Outcome = Ob$Data[[i]][tempRow]
-                                                                               , .pred_class = syhatClass$.pred_class
-                                                                               , .pred_0 = syhatProb$.pred_0
-                                                                               , .pred_1 = syhatProb$.pred_1
+    if(Ob$Methodology$Stacking$stackMode == "classification"){
+      if(length(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]]$member_fits)>0){
+        Ob$System[[i]]$ModelStack$last_model_fit <- list()
+        syhatProb <- stats::predict(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]], new_data = data_test, type = "prob")
+        syhatClass <- stats::predict(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]], new_data = data_test, type = "class")
+        Ob$System[[i]]$ModelStack$last_model_fit$.predictions[[1]] <- data.frame(Outcome = Ob$Data[[i]][tempRow]
+                                                                            , .pred_class = syhatClass$.pred_class
+                                                                            , .pred_0 = syhatProb$.pred_0
+                                                                            , .pred_1 = syhatProb$.pred_1
+                                                                            , .row = tempRow)
+        Ob$Fits[[i]]$ModelStack$last_model_fit$.predictions[[1]] <- data.frame(Outcome = Ob$Data[[i]][tempRow]
+                                                                                 , .pred_class = syhatClass$.pred_class
+                                                                                 , .pred_0 = syhatProb$.pred_0
+                                                                                 , .pred_1 = syhatProb$.pred_1
+                                                                                 , .row = tempRow)
+        colnames(Ob$System[[i]]$ModelStack$last_model_fit$.predictions[[1]])[1] <- i
+        colnames(Ob$Fits[[i]]$ModelStack$last_model_fit$.predictions[[1]])[1] <- i
+      } else {
+        
+        
+      }
+    }  else {
+      # this is for regression
+      if(length(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]]$member_fits)>0){
+        Ob$System[[i]]$ModelStack$last_model_fit <- list()
+        syhatProb <- stats::predict(Ob$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]], new_data = data_test)
+        Ob$System[[i]]$ModelStack$last_model_fit$.predictions[[1]] <- data.frame(Outcome = Ob$Data[[i]][tempRow]
+                                                                                 , .pred = syhatProb$.pred
+                                                                                 , .row = tempRow)
+        Ob$Fits[[i]]$ModelStack$last_model_fit$.predictions[[1]] <- data.frame(Outcome = Ob$Data[[i]][tempRow]
+                                                                               , .pred = syhatProb$.pred
                                                                                , .row = tempRow)
-      colnames(Ob$System[[i]]$ModelStack$last_model_fit$.predictions[[1]])[1] <- i
-      colnames(Ob$Fits[[i]]$ModelStack$last_model_fit$.predictions[[1]])[1] <- i
-    } else {
+        colnames(Ob$System[[i]]$ModelStack$last_model_fit$.predictions[[1]])[1] <- i
+        colnames(Ob$Fits[[i]]$ModelStack$last_model_fit$.predictions[[1]])[1] <- i
+        # Ob$Fits[[i]]$ModelStack$last_model_fit$.metrics[[1]]$.estimate <- S$Fits[[i]]$ModelStack$last_model_fit$.workflow[[1]]$metrics$mean
       
+      
+      
+      }      
       
     }
-      
   }
   return(Ob)
 }
